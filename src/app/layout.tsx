@@ -1,0 +1,83 @@
+import type { Metadata, Viewport } from 'next';
+import './globals.css';
+import { ThemeProvider } from '@/components/ThemeProvider';
+import Header from '@/components/layout/Header';
+import MetricsBar from '@/components/layout/MetricsBar';
+
+
+export const metadata: Metadata = {
+  title: 'Charges & Encaissements',
+  description: 'Application de gestion financière — suivez vos encaissements et décaissements par mois',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'C&E Finance',
+  },
+  icons: {
+    apple: '/icons/icon-192x192.png',
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: dark)', color: '#09090b' },
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+  ],
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="fr" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('ce-theme') || 'dark';
+                  document.documentElement.classList.toggle('dark', theme === 'dark');
+                } catch(e) {
+                  document.documentElement.classList.add('dark');
+                }
+              })();
+            `,
+          }}
+        />
+      </head>
+      <body className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100">
+        <ThemeProvider>
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-1 pb-safe">
+              <div className="max-w-6xl mx-auto px-4 py-6 animate-fade-in">
+                {children}
+              </div>
+            </main>
+            <MetricsBar />
+          </div>
+        </ThemeProvider>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').catch(function(err) {
+                    console.log('SW registration failed:', err);
+                  });
+                });
+              }
+            `,
+          }}
+        />
+      </body>
+    </html>
+  );
+}

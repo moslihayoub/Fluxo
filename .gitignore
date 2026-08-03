@@ -1,0 +1,10 @@
+# Charges & Encaissements — .gitignore
+node_modules/
+.next/
+out/
+.DS_Store
+*.log
+.env.local
+.env*.local
+dist/
+.vercel/
