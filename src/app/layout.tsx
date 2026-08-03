@@ -4,18 +4,18 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 import Header from '@/components/layout/Header';
 import MetricsBar from '@/components/layout/MetricsBar';
 
-
 export const metadata: Metadata = {
-  title: 'Charges & Encaissements',
-  description: 'Application de gestion financière — suivez vos encaissements et décaissements par mois',
+  title: 'Fluxo — Vos flux financiers en toute simplicité',
+  description: 'Application de gestion financière & trésorerie intelligente — suivez vos encaissements et décaissements en dirhams marocains (MAD)',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'C&E Finance',
+    title: 'Fluxo',
   },
   icons: {
     apple: '/icons/icon-192x192.png',
+    icon: '/favicon.ico',
   },
 };
 

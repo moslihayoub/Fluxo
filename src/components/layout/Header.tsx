@@ -21,13 +21,18 @@ export default function Header() {
     <header className="sticky top-0 z-40 w-full border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/90 backdrop-blur-md">
       <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-14">
         {/* Logo */}
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <div className="w-8 h-8 rounded-lg bg-zinc-900 dark:bg-white flex items-center justify-center">
-            <span className="text-white dark:text-zinc-900 text-xs font-bold">C&E</span>
+        <div className="flex items-center gap-2 flex-shrink-0 cursor-pointer" onClick={() => setActiveView('months')}>
+          <div className="w-8 h-8 rounded-lg bg-zinc-900 dark:bg-white flex items-center justify-center shadow-sm">
+            <span className="text-white dark:text-zinc-900 text-xs font-black tracking-tighter font-mono">FX</span>
           </div>
-          <span className="font-semibold text-sm text-zinc-900 dark:text-white hidden lg:block">
-            Charges & Encaissements
-          </span>
+          <div className="flex flex-col">
+            <span className="font-extrabold text-base tracking-tight text-zinc-900 dark:text-white leading-none">
+              Fluxo
+            </span>
+            <span className="text-[9px] text-zinc-400 font-medium tracking-wider uppercase leading-none mt-0.5 hidden sm:block">
+              Gestion & Trésorerie
+            </span>
+          </div>
         </div>
 
         {/* Navigation */}
@@ -39,7 +44,7 @@ export default function Header() {
               className={`
                 flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-150
                 ${activeView === id
-                  ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900'
+                  ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-sm'
                   : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800'
                 }
               `}

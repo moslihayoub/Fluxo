@@ -1,7 +1,7 @@
 {
-  "name": "Charges & Encaissements",
-  "short_name": "C&E Finance",
-  "description": "Application de gestion financière — suivez encaissements et décaissements",
+  "name": "Fluxo — Gestion Financière",
+  "short_name": "Fluxo",
+  "description": "Vos flux financiers en toute simplicité — suivez encaissements et décaissements en MAD avec assistant IA",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
@@ -22,8 +22,5 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ],
-  "screenshots": [],
-  "related_applications": [],
-  "prefer_related_applications": false
+  ]
 }
