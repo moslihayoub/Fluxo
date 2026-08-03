@@ -14,6 +14,18 @@ interface AgentDialogProps {
 type Tab = 'text' | 'file';
 type Step = 'input' | 'preview' | 'done';
 
+const SYSTEM_PROMPT = `Tu es un expert comptable et analyste financier. Tu vas analyser un relevé bancaire, un export CSV ou du texte brut de transactions et extraire les opérations financières.
+
+RÈGLES STRICTES :
+- Ignore les lignes de solde initial, solde final, et totaux récapitulatifs
+- Ignore les en-têtes de colonnes et titres
+- Interprète correctement débit/crédit : débit = décaissement, crédit = encaissement
+- Les montants négatifs = décaissement, positifs = encaissement
+- Normalise les dates au format YYYY-MM-DD
+- Si la date est absente, utilise null
+- Propose des catégories simples et pertinentes pour operationTypeSuggestion
+- Réponds UNIQUEMENT en JSON valide, sans texte, sans markdown, sans balises`;
+
 export default function AgentDialog({ defaultMonthId, onClose }: AgentDialogProps) {
   const { months, operationTypes, addOperations } = useStore();
   const activeMonths = months.filter((m) => m.status === 'active');
@@ -49,23 +61,68 @@ export default function AgentDialog({ defaultMonthId, onClose }: AgentDialogProp
     setLoading(true);
     setError('');
     try {
+      let data;
+      // Try API route first
       const res = await fetch('/api/finance-agent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          inputType: tab,
-          content,
-          operationTypes,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) { setError(data.error ?? 'Erreur de l\'agent AI'); return; }
+        body: JSON.stringify({ inputType: tab, content, operationTypes }),
+      }).catch(() => null);
+
+      if (res && res.ok) {
+        data = await res.json();
+      } else {
+        // Fallback for static GitHub Pages export: call Gemini directly
+        const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
+        const existingTypes = operationTypes.map((ot) => ot.label).join(', ');
+        const typeContext = existingTypes ? `\nTypes d'opérations existants : ${existingTypes}` : '';
+        const userMessage = `Voici un relevé bancaire à analyser :${typeContext}\n---\n${content}\n---`;
+
+        const geminiRes = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+              contents: [{ role: 'user', parts: [{ text: userMessage }] }],
+              generationConfig: { temperature: 0.1, responseMimeType: 'application/json' },
+            }),
+          }
+        );
+
+        if (!geminiRes.ok) {
+          throw new Error('Erreur de connexion à Gemini');
+        }
+
+        const geminiData = await geminiRes.json();
+        const rawText = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+        const clean = rawText.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
+        const parsed = JSON.parse(clean);
+
+        const ops = (parsed.operations ?? []).map((op: any) => ({
+          label: String(op.label ?? 'Opération'),
+          amount: Math.abs(parseFloat(String(op.amount ?? 0))),
+          kind: op.kind === 'encaissement' || op.kind === 'decaissement' ? op.kind : 'decaissement',
+          operationTypeSuggestion: String(op.operationTypeSuggestion ?? 'Frais divers'),
+          selected: true,
+        }));
+
+        data = {
+          operations: ops,
+          summary: {
+            totalEncaissement: ops.filter((o: any) => o.kind === 'encaissement').reduce((s: number, o: any) => s + o.amount, 0),
+            totalDecaissement: ops.filter((o: any) => o.kind === 'decaissement').reduce((s: number, o: any) => s + o.amount, 0),
+            count: ops.length,
+          },
+        };
+      }
 
       setExtractedOps(data.operations.map((op: ExtractedOperation) => ({ ...op, selected: true })));
       setSummary(data.summary);
       setStep('preview');
-    } catch {
-      setError('Erreur réseau, veuillez réessayer.');
+    } catch (err: any) {
+      setError(err.message || 'Erreur lors de l\'analyse par l\'agent AI.');
     } finally {
       setLoading(false);
     }
@@ -95,7 +152,7 @@ export default function AgentDialog({ defaultMonthId, onClose }: AgentDialogProp
     addOperations(
       selected.map((op) => ({
         monthId: targetMonthId,
-        label: op.label,
+        label: op.operationTypeSuggestion,
         operationTypeLabel: op.operationTypeSuggestion,
         kind: op.kind,
         amount: op.amount,
