@@ -36,6 +36,13 @@ export default function OperationDialog({ operation, monthId, onClose }: Operati
       setIsNewType(false);
       setOperationTypeId(found?.id ?? '');
       setOperationTypeLabel(found?.label ?? '');
+      
+      if (found?.defaultAmount !== undefined) {
+        setAmount(found.defaultAmount.toString());
+      }
+      if (found?.kind !== undefined) {
+        setKind(found.kind);
+      }
     }
   };
 
@@ -55,7 +62,7 @@ export default function OperationDialog({ operation, monthId, onClose }: Operati
       if (!newTypeLabel.trim()) { setError('Saisissez un libellé de catégorie.'); return; }
       finalTypeLabel = newTypeLabel.trim();
       if (addToList) {
-        const created = addOperationType(finalTypeLabel);
+        const created = addOperationType(finalTypeLabel, undefined, kind);
         finalTypeId = created.id;
       }
     }

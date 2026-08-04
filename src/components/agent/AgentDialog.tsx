@@ -71,9 +71,15 @@ export default function AgentDialog({ defaultMonthId, onClose }: AgentDialogProp
 
       if (res && res.ok) {
         data = await res.json();
+      } else if (res && res.status !== 404) {
+        // The server route exists but returned an error (e.g., 500, 502, 429)
+        const errData = await res.json().catch(() => null);
+        throw new Error(errData?.error || `Erreur serveur: ${res.status}`);
       } else {
-        // Fallback for static GitHub Pages export: call Gemini directly
+        // Fallback for static GitHub Pages export (404 Not Found): call Gemini directly
         const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
+        if (!apiKey) throw new Error("Clé API Gemini client manquante (NEXT_PUBLIC_GEMINI_API_KEY).");
+        
         const existingTypes = operationTypes.map((ot) => ot.label).join(', ');
         const typeContext = existingTypes ? `\nTypes d'opérations existants : ${existingTypes}` : '';
         const userMessage = `Voici un relevé bancaire à analyser :${typeContext}\n---\n${content}\n---`;
@@ -92,7 +98,8 @@ export default function AgentDialog({ defaultMonthId, onClose }: AgentDialogProp
         );
 
         if (!geminiRes.ok) {
-          throw new Error('Erreur de connexion à Gemini');
+          const errData = await geminiRes.json().catch(() => null);
+          throw new Error(errData?.error?.message || 'Erreur de connexion à Gemini (Client)');
         }
 
         const geminiData = await geminiRes.json();

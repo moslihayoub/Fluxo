@@ -29,9 +29,12 @@ function OperationsTable({
 }) {
   if (operations.length === 0) {
     return (
-      <div className="text-center py-12 text-zinc-400 dark:text-zinc-600">
-        <p className="text-sm">Aucune opération pour ce mois</p>
-        <p className="text-xs mt-1">Ajoutez une opération ou importez un relevé</p>
+      <div className="flex flex-col items-center justify-center text-center py-20 px-4 text-zinc-400 dark:text-zinc-500 bg-zinc-50/50 dark:bg-zinc-900/50 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800 m-4">
+        <div className="w-12 h-12 mb-3 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+          <TrendingUp className="w-6 h-6 text-zinc-300 dark:text-zinc-600" />
+        </div>
+        <p className="text-sm font-semibold text-zinc-900 dark:text-white">Aucune opération pour ce mois</p>
+        <p className="text-xs mt-1 max-w-[200px]">Commencez par ajouter une nouvelle opération ou importez votre relevé bancaire.</p>
       </div>
     );
   }
@@ -304,11 +307,11 @@ export default function OperationsView() {
                       Tout
                     </button>
                     <button
-                      onClick={() => setShowAgent(true)}
-                      title="Agent AI"
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-xs font-medium hover:from-violet-700 hover:to-indigo-700 transition-all shadow-sm"
+                      disabled
+                      title="Fonctionnalité d'intelligence artificielle disponible prochainement !"
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-200 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 text-xs font-medium cursor-not-allowed transition-all"
                     >
-                      <Bot className="w-3.5 h-3.5" />
+                      <Bot className="w-3.5 h-3.5 opacity-50" />
                       Agent
                     </button>
                     <button

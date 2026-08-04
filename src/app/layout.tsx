@@ -2,7 +2,12 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import Header from '@/components/layout/Header';
+import MobileNav from '@/components/layout/MobileNav';
 import MetricsBar from '@/components/layout/MetricsBar';
+
+import { AuthProvider } from '@/components/auth/AuthProvider';
+import AuthWrapper from '@/components/auth/AuthWrapper';
+import { Toaster } from 'react-hot-toast';
 
 export const metadata: Metadata = {
   title: 'Fluxo — Vos flux financiers en toute simplicité',
@@ -54,15 +59,21 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100">
         <ThemeProvider>
-          <div className="flex flex-col min-h-screen">
-            <Header />
-            <main className="flex-1 pb-safe">
-              <div className="max-w-6xl mx-auto px-4 py-6 animate-fade-in">
-                {children}
+          <AuthProvider>
+            <AuthWrapper>
+              <div className="flex flex-col min-h-screen pb-14 sm:pb-0">
+                <Header />
+                <MobileNav />
+                <main className="flex-1 pb-safe">
+                  <div className="max-w-6xl mx-auto px-4 py-6 animate-fade-in">
+                    {children}
+                  </div>
+                </main>
+                <MetricsBar />
               </div>
-            </main>
-            <MetricsBar />
-          </div>
+              <Toaster position="bottom-center" />
+            </AuthWrapper>
+          </AuthProvider>
         </ThemeProvider>
         <script
           dangerouslySetInnerHTML={{

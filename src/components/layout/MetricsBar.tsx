@@ -15,7 +15,7 @@ export default function MetricsBar() {
   const label = activeMonth ? getMonthLabel(activeMonth) : 'Aucun mois sélectionné';
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md">
+    <div className="fixed bottom-14 sm:bottom-0 left-0 right-0 z-40 border-t border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md">
       <div className="max-w-6xl mx-auto px-4 py-2">
         <div className="flex items-center justify-between">
           {/* Month label */}

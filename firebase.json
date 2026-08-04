@@ -1,0 +1,24 @@
+{
+  "auth": {
+    "authorizedDomains": [
+      "localhost",
+      "fluxofinance.vercel.app",
+      "fluxo-12969.firebaseapp.com",
+      "fluxo-12969.web.app"
+    ],
+    "providers": {
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "Fluxo",
+        "supportEmail": "f.rahali@gmail.com",
+        "authorizedRedirectUris": [
+          "http://localhost",
+          "https://fluxofinance.vercel.app"
+        ]
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  }
+}

@@ -31,11 +31,19 @@ function CategoryDialog({
 }) {
   const { operationTypes, addOperationType } = useStore();
   const [label, setLabel] = useState(category?.label ?? '');
+  const [defaultAmount, setDefaultAmount] = useState<string>(category?.defaultAmount?.toString() ?? '');
+  const [kind, setKind] = useState<'encaissement' | 'decaissement' | undefined>(category?.kind);
   const [error, setError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!label.trim()) { setError('Le nom est requis.'); return; }
+    
+    const parsedAmount = defaultAmount ? parseFloat(defaultAmount) : undefined;
+    if (defaultAmount && isNaN(parsedAmount!)) {
+      setError('Montant par défaut invalide.');
+      return;
+    }
 
     if (!category) {
       // New category
@@ -43,12 +51,12 @@ function CategoryDialog({
         (ot) => ot.label.toLowerCase() === label.trim().toLowerCase()
       );
       if (exists) { setError('Cette catégorie existe déjà.'); return; }
-      addOperationType(label.trim());
+      addOperationType(label.trim(), parsedAmount, kind);
     } else {
       // Edit: rename the type in the store + update all linked operations
       useStore.setState((state) => ({
         operationTypes: state.operationTypes.map((ot) =>
-          ot.id === category.id ? { ...ot, label: label.trim() } : ot
+          ot.id === category.id ? { ...ot, label: label.trim(), defaultAmount: parsedAmount, kind } : ot
         ),
         operations: state.operations.map((op) =>
           op.operationTypeId === category.id || op.operationTypeLabel === category.label
@@ -85,6 +93,53 @@ function CategoryDialog({
               onChange={(e) => { setLabel(e.target.value); setError(''); }}
               placeholder="Ex: Encaissement client"
               className="w-full px-3 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white text-sm placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white transition-shadow"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">
+              Type (Optionnel)
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setKind(kind === 'encaissement' ? undefined : 'encaissement')}
+                className={`flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all border ${
+                  kind === 'encaissement'
+                    ? 'bg-emerald-600 border-emerald-600 text-white shadow-sm'
+                    : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-emerald-300 hover:text-emerald-600'
+                }`}
+              >
+                <TrendingUp className="w-4 h-4" />
+                Encaissement
+              </button>
+              <button
+                type="button"
+                onClick={() => setKind(kind === 'decaissement' ? undefined : 'decaissement')}
+                className={`flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all border ${
+                  kind === 'decaissement'
+                    ? 'bg-rose-600 border-rose-600 text-white shadow-sm'
+                    : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-rose-300 hover:text-rose-600'
+                }`}
+              >
+                <TrendingDown className="w-4 h-4" />
+                Décaissement
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
+              Montant par défaut (Optionnel)
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={defaultAmount}
+              onChange={(e) => { setDefaultAmount(e.target.value); setError(''); }}
+              placeholder="Ex: 3400.00"
+              className="w-full px-3 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white text-sm placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white transition-shadow font-mono"
             />
           </div>
           {error && (
@@ -412,10 +467,11 @@ export default function CategoriesView() {
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden">
           {/* Table header */}
           <div className="grid grid-cols-12 gap-2 px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-100 dark:border-zinc-800">
-            <div className="col-span-4 text-xs font-semibold text-zinc-400 uppercase tracking-wider">Catégorie</div>
-            <div className="col-span-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider text-center">Opérations</div>
-            <div className="col-span-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider text-right">Entrées</div>
-            <div className="col-span-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider text-right">Sorties</div>
+            <div className="col-span-3 text-xs font-semibold text-zinc-400 uppercase tracking-wider">Catégorie</div>
+            <div className="col-span-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">Type</div>
+            <div className="col-span-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider text-right">Défaut</div>
+            <div className="col-span-1 text-xs font-semibold text-zinc-400 uppercase tracking-wider text-center">Ops</div>
+            <div className="col-span-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider text-right">Total</div>
             <div className="col-span-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider text-right">Actions</div>
           </div>
 
@@ -426,39 +482,62 @@ export default function CategoriesView() {
                 className="group grid grid-cols-12 gap-2 px-4 py-3.5 items-center hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors"
               >
                 {/* Name */}
-                <div className="col-span-4 flex items-center gap-2.5">
+                <div className="col-span-3 flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0 group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700 transition-colors">
                     <Tag className="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400" />
                   </div>
-                  <span className="text-sm font-medium text-zinc-900 dark:text-white truncate">
-                    {cat.label}
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-sm font-medium text-zinc-900 dark:text-white truncate">
+                      {cat.label}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Type */}
+                <div className="col-span-2 flex items-center">
+                  {cat.kind ? (
+                    <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${
+                      cat.kind === 'encaissement' 
+                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' 
+                        : 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'
+                    }`}>
+                      {cat.kind === 'encaissement' ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                      <span className="truncate max-w-[80px]">{cat.kind === 'encaissement' ? 'Entrée' : 'Sortie'}</span>
+                    </span>
+                  ) : (
+                    <span className="text-xs text-zinc-400">—</span>
+                  )}
+                </div>
+
+                {/* Défaut */}
+                <div className="col-span-2 text-right">
+                  <span className="text-xs font-mono tabular-nums text-zinc-600 dark:text-zinc-300">
+                    {cat.defaultAmount !== undefined ? formatCurrency(cat.defaultAmount) : '—'}
                   </span>
                 </div>
 
                 {/* Count badge */}
-                <div className="col-span-2 flex justify-center">
-                  <span className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-semibold ${
+                <div className="col-span-1 flex justify-center">
+                  <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full font-semibold ${
                     cat.count > 0
                       ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900'
                       : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400'
                   }`}>
-                    <BarChart3 className="w-3 h-3" />
                     {cat.count}
                   </span>
                 </div>
 
-                {/* Encaissements */}
+                {/* Total (Solde) */}
                 <div className="col-span-2 text-right">
-                  <span className="text-xs font-mono tabular-nums text-emerald-600 dark:text-emerald-400 font-medium">
-                    {cat.totalEnc > 0 ? formatCurrency(cat.totalEnc) : '—'}
-                  </span>
-                </div>
-
-                {/* Décaissements */}
-                <div className="col-span-2 text-right">
-                  <span className="text-xs font-mono tabular-nums text-rose-600 dark:text-rose-400 font-medium">
-                    {cat.totalDec > 0 ? formatCurrency(cat.totalDec) : '—'}
-                  </span>
+                  {cat.solde !== 0 ? (
+                    <span className={`text-xs font-mono tabular-nums font-medium ${
+                      cat.solde > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+                    }`}>
+                      {cat.solde > 0 ? '+' : ''}{formatCurrency(cat.solde)}
+                    </span>
+                  ) : (
+                    <span className="text-xs font-mono text-zinc-400">—</span>
+                  )}
                 </div>
 
                 {/* Actions */}

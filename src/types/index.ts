@@ -10,6 +10,8 @@ export interface OperationType {
   id: string;
   label: string;
   createdAt: string; // ISO date string
+  defaultAmount?: number; // Optional default amount for this category
+  kind?: Kind; // Encaissement or decaissement
 }
 
 export interface Operation {
@@ -77,7 +79,9 @@ export interface AppState {
   addOperations: (ops: Omit<Operation, 'id' | 'createdAt'>[]) => void;
 
   // OperationType actions
-  addOperationType: (label: string) => OperationType;
+  addOperationType: (label: string, defaultAmount?: number) => OperationType;
+  updateOperationType: (id: string, updates: Partial<OperationType>) => void;
+  deleteOperationType: (id: string) => void;
 
   // UI actions
   setActiveView: (view: ActiveView) => void;
