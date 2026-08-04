@@ -58,6 +58,8 @@ export interface AgentResponse {
 export interface AppState {
   // Data
   userUid?: string | null;
+  language: 'fr' | 'en';
+  setLanguage: (lang: 'fr' | 'en') => void;
   months: Month[];
   operations: Operation[];
   operationTypes: OperationType[];
@@ -80,7 +82,7 @@ export interface AppState {
   addOperations: (ops: Omit<Operation, 'id' | 'createdAt'>[]) => void;
 
   // OperationType actions
-  addOperationType: (label: string, defaultAmount?: number) => OperationType;
+  addOperationType: (label: string, defaultAmount?: number, kind?: Kind) => OperationType;
   updateOperationType: (id: string, updates: Partial<OperationType>) => void;
   deleteOperationType: (id: string) => void;
 
