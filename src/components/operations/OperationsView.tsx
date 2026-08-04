@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Pencil, Trash2, Upload, Download, Bot, Filter } from 'lucide-react';
+import { Plus, Pencil, Trash2, Upload, Download, Bot, Filter, TrendingUp } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import {
   formatCurrency,

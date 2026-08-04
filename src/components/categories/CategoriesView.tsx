@@ -467,12 +467,12 @@ export default function CategoriesView() {
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden">
           {/* Table header */}
           <div className="grid grid-cols-12 gap-2 px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-100 dark:border-zinc-800">
-            <div className="col-span-3 text-xs font-semibold text-zinc-400 uppercase tracking-wider">Catégorie</div>
-            <div className="col-span-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">Type</div>
-            <div className="col-span-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider text-right">Défaut</div>
-            <div className="col-span-1 text-xs font-semibold text-zinc-400 uppercase tracking-wider text-center">Ops</div>
-            <div className="col-span-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider text-right">Total</div>
-            <div className="col-span-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider text-right">Actions</div>
+            <div className="col-span-5 sm:col-span-3 text-xs font-semibold text-zinc-400 uppercase tracking-wider">Catégorie</div>
+            <div className="col-span-2 hidden sm:block text-xs font-semibold text-zinc-400 uppercase tracking-wider">Type</div>
+            <div className="col-span-2 hidden sm:block text-xs font-semibold text-zinc-400 uppercase tracking-wider text-right">Défaut</div>
+            <div className="col-span-2 sm:col-span-1 text-xs font-semibold text-zinc-400 uppercase tracking-wider text-center">Ops</div>
+            <div className="col-span-3 sm:col-span-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider text-right">Total</div>
+            <div className="col-span-2 sm:col-span-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider text-right">Actions</div>
           </div>
 
           <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
@@ -482,7 +482,7 @@ export default function CategoriesView() {
                 className="group grid grid-cols-12 gap-2 px-4 py-3.5 items-center hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors"
               >
                 {/* Name */}
-                <div className="col-span-3 flex items-center gap-2.5">
+                <div className="col-span-5 sm:col-span-3 flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0 group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700 transition-colors">
                     <Tag className="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400" />
                   </div>
@@ -494,7 +494,7 @@ export default function CategoriesView() {
                 </div>
 
                 {/* Type */}
-                <div className="col-span-2 flex items-center">
+                <div className="col-span-2 hidden sm:flex items-center">
                   {cat.kind ? (
                     <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${
                       cat.kind === 'encaissement' 
@@ -510,14 +510,14 @@ export default function CategoriesView() {
                 </div>
 
                 {/* Défaut */}
-                <div className="col-span-2 text-right">
+                <div className="col-span-2 hidden sm:block text-right">
                   <span className="text-xs font-mono tabular-nums text-zinc-600 dark:text-zinc-300">
                     {cat.defaultAmount !== undefined ? formatCurrency(cat.defaultAmount) : '—'}
                   </span>
                 </div>
 
                 {/* Count badge */}
-                <div className="col-span-1 flex justify-center">
+                <div className="col-span-2 sm:col-span-1 flex justify-center">
                   <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full font-semibold ${
                     cat.count > 0
                       ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900'
@@ -528,7 +528,7 @@ export default function CategoriesView() {
                 </div>
 
                 {/* Total (Solde) */}
-                <div className="col-span-2 text-right">
+                <div className="col-span-3 sm:col-span-2 text-right">
                   {cat.solde !== 0 ? (
                     <span className={`text-xs font-mono tabular-nums font-medium ${
                       cat.solde > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'

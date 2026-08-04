@@ -61,7 +61,7 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <AuthWrapper>
-              <div className="flex flex-col min-h-screen pb-14 sm:pb-0">
+              <div className="flex flex-col min-h-screen pb-14 sm:pb-0 pt-[52px] sm:pt-0">
                 <Header />
                 <MobileNav />
                 <main className="flex-1 pb-safe">
