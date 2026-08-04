@@ -24,48 +24,41 @@ export default function MetricsBar() {
           </p>
 
           {/* Metrics */}
-          <div className="flex items-center gap-2 sm:gap-4 flex-1 sm:flex-none justify-around sm:justify-end">
-            {/* Encaissements */}
-            <div className="flex items-center gap-1.5">
-              <TrendingUp className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
-              <div>
-                <p className="text-[10px] text-zinc-400 dark:text-zinc-500 leading-none">Encaissements</p>
-                <p className="text-sm font-mono font-semibold text-emerald-600 dark:text-emerald-400 leading-tight tabular-nums">
-                  {formatCurrency(metrics.totalEncaissement)}
-                </p>
-              </div>
+          <div className="flex gap-4 sm:gap-6 overflow-x-auto no-scrollbar pb-1 sm:pb-0 -mb-1 sm:mb-0">
+            <div className="flex flex-col min-w-max">
+              <span className="text-[10px] sm:text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-0.5 sm:mb-1">
+                Encaissements
+              </span>
+              <span className="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
+                +{formatCurrency(metrics.totalEncaissement)}
+              </span>
             </div>
 
-            <div className="w-px h-6 bg-zinc-200 dark:bg-zinc-800" />
+            <div className="w-px h-6 sm:h-8 bg-zinc-200 dark:bg-zinc-800 self-center shrink-0" />
 
-            {/* Décaissements */}
-            <div className="flex items-center gap-1.5">
-              <TrendingDown className="w-3.5 h-3.5 text-rose-500 flex-shrink-0" />
-              <div>
-                <p className="text-[10px] text-zinc-400 dark:text-zinc-500 leading-none">Décaissements</p>
-                <p className="text-sm font-mono font-semibold text-rose-600 dark:text-rose-400 leading-tight tabular-nums">
-                  {formatCurrency(metrics.totalDecaissement)}
-                </p>
-              </div>
+            <div className="flex flex-col min-w-max">
+              <span className="text-[10px] sm:text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-0.5 sm:mb-1">
+                Décaissements
+              </span>
+              <span className="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm font-mono font-bold text-rose-600 dark:text-rose-500">
+                <TrendingDown className="w-3 h-3 sm:w-4 sm:h-4" />
+                −{formatCurrency(metrics.totalDecaissement)}
+              </span>
             </div>
 
-            <div className="w-px h-6 bg-zinc-200 dark:bg-zinc-800" />
+            <div className="w-px h-6 sm:h-8 bg-zinc-200 dark:bg-zinc-800 self-center shrink-0" />
 
-            {/* Solde */}
-            <div className="flex items-center gap-1.5">
-              <Wallet className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />
-              <div>
-                <p className="text-[10px] text-zinc-400 dark:text-zinc-500 leading-none">Solde</p>
-                <p
-                  className={`text-sm font-mono font-bold leading-tight tabular-nums ${
-                    metrics.solde >= 0
-                      ? 'text-zinc-900 dark:text-white'
-                      : 'text-rose-600 dark:text-rose-400'
-                  }`}
-                >
-                  {formatCurrency(metrics.solde, true)}
-                </p>
-              </div>
+            <div className="flex flex-col min-w-max">
+              <span className="text-[10px] sm:text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider flex items-center gap-1 mb-0.5 sm:mb-1">
+                <Wallet className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                Solde Net
+              </span>
+              <span className={`text-xs sm:text-sm font-mono font-bold ${
+                metrics.solde >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-500'
+              }`}>
+                {metrics.solde >= 0 ? '+' : '−'}{formatCurrency(Math.abs(metrics.solde))}
+              </span>
             </div>
           </div>
         </div>

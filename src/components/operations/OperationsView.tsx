@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Pencil, Trash2, Upload, Download, Bot, Filter, TrendingUp } from 'lucide-react';
+import { Plus, Pencil, Trash2, Upload, Download, Bot, Filter, TrendingUp, TrendingDown, MoreHorizontal } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import {
   formatCurrency,
@@ -27,6 +27,8 @@ function OperationsTable({
   onEdit: (op: Operation) => void;
   onDelete: (id: string) => void;
 }) {
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+
   if (operations.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center text-center py-20 px-4 text-zinc-400 dark:text-zinc-500 bg-zinc-50/50 dark:bg-zinc-900/50 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800 m-4">
@@ -118,9 +120,35 @@ function OperationsTable({
                 <p className="font-semibold text-zinc-900 dark:text-white text-sm truncate">{op.label}</p>
                 {op.notes && <p className="text-xs text-zinc-400 truncate mt-0.5">{op.notes}</p>}
               </div>
-              <div className="flex items-center gap-1">
-                <button onClick={() => onEdit(op)} className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-900 transition-colors bg-zinc-50 dark:bg-zinc-800"><Pencil className="w-3.5 h-3.5" /></button>
-                <button onClick={() => onDelete(op.id)} className="p-1.5 rounded-md text-zinc-400 hover:text-rose-600 transition-colors bg-zinc-50 dark:bg-zinc-800"><Trash2 className="w-3.5 h-3.5" /></button>
+              <div className="relative">
+                <button
+                  onClick={() => setOpenDropdownId(openDropdownId === op.id ? null : op.id)}
+                  className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors bg-zinc-50 dark:bg-zinc-800"
+                >
+                  <MoreHorizontal className="w-4 h-4" />
+                </button>
+
+                {openDropdownId === op.id && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setOpenDropdownId(null)} />
+                    <div className="absolute right-0 top-full mt-2 w-40 bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 rounded-lg shadow-xl z-50 overflow-hidden py-1 animate-in fade-in zoom-in-95 duration-100">
+                      <button
+                        onClick={() => { onEdit(op); setOpenDropdownId(null); }}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700 hover:text-zinc-900 dark:hover:text-white transition-colors"
+                      >
+                        <Pencil className="w-4 h-4" />
+                        Modifier
+                      </button>
+                      <button
+                        onClick={() => { onDelete(op.id); setOpenDropdownId(null); }}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Supprimer
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
             
@@ -283,14 +311,32 @@ export default function OperationsView() {
             <>
               {/* Toolbar */}
               <div className="p-4 border-b border-zinc-100 dark:border-zinc-800">
-                <div className="flex flex-wrap items-center gap-2">
-                  {/* Month title */}
-                  <div className="flex-1 min-w-0">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-2">
+                  {/* Mobile Layout: Title -> Filters -> Info */}
+                  <div className="flex-1 min-w-0 flex flex-col gap-2 sm:gap-0">
                     <h2 className="text-sm font-semibold text-zinc-900 dark:text-white truncate">
                       {currentMonth ? getMonthLabel(currentMonth) : ''}
                     </h2>
+                    
+                    {/* Filter (Mobile) */}
+                    <div className="flex sm:hidden rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-700 text-xs w-fit">
+                      {(['all', 'encaissement', 'decaissement'] as const).map((f) => (
+                        <button
+                          key={`mobile-${f}`}
+                          onClick={() => setFilter(f)}
+                          className={`px-2.5 py-1.5 font-medium transition-colors flex-1 ${
+                            filter === f
+                              ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900'
+                              : 'bg-white dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-700'
+                          }`}
+                        >
+                          {f === 'all' ? 'Tout' : f === 'encaissement' ? 'Entrées' : 'Sorties'}
+                        </button>
+                      ))}
+                    </div>
+
                     {metrics && (
-                      <p className="text-xs text-zinc-400 mt-0.5">
+                      <p className="text-xs text-zinc-400 sm:mt-0.5">
                         {metrics.count} opération{metrics.count > 1 ? 's' : ''} ·{' '}
                         Solde&nbsp;
                         <span className={`font-mono ${metrics.solde >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500'}`}>
@@ -300,11 +346,11 @@ export default function OperationsView() {
                     )}
                   </div>
 
-                  {/* Filter */}
-                  <div className="flex rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-700 text-xs">
+                  {/* Filter (Desktop) */}
+                  <div className="hidden sm:flex rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-700 text-xs">
                     {(['all', 'encaissement', 'decaissement'] as const).map((f) => (
                       <button
-                        key={f}
+                        key={`desktop-${f}`}
                         onClick={() => setFilter(f)}
                         className={`px-2.5 py-1.5 font-medium transition-colors ${
                           filter === f
