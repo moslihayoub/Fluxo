@@ -574,16 +574,16 @@ export default function CategoriesView() {
                     </button>
                     <button
                       onClick={() => setSelectedCat(cat)}
-                      className="hidden xl:flex items-center gap-1 ml-1 text-xs text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
+                      className="hidden xl:flex items-center gap-1 ml-1 text-xs text-zinc-400 hover:text-zinc-900 dark:hover:white transition-colors"
                     >
                       Détail <ChevronRight className="w-3 h-3" />
                     </button>
                   </div>
                 </div>
 
-                {/* ── MOBILE CARD ── */}
-                <div className="sm:hidden flex flex-col gap-3 p-4 mb-3 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl shadow-sm hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors active:scale-[0.98]">
-                  <div className="flex items-center justify-between">
+                {/* ── MOBILE LIST ── */}
+                <div className="sm:hidden flex flex-col divide-y divide-zinc-100 dark:divide-zinc-800/50">
+                  <div className="flex items-center justify-between p-4 transition-colors active:bg-zinc-50 dark:active:bg-zinc-800/50">
                     <div className="flex items-center gap-2.5">
                       <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
                         <Tag className="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400" />
@@ -593,10 +593,10 @@ export default function CategoriesView() {
                       </span>
                     </div>
                     {/* Actions */}
-                    <div className="relative">
+                    <div className="relative ml-2">
                       <button
                         onClick={() => setOpenDropdownId(openDropdownId === cat.id ? null : cat.id)}
-                        className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors bg-zinc-50 dark:bg-zinc-800"
+                        className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors bg-zinc-50 dark:bg-zinc-800/50"
                       >
                         <MoreHorizontal className="w-4 h-4" />
                       </button>
@@ -633,7 +633,7 @@ export default function CategoriesView() {
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between mt-1">
+                  <div className="flex items-center justify-between px-4 pb-3 pt-1">
                     <div className="flex items-center gap-2">
                       <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md uppercase tracking-wider ${cat.kind === 'encaissement' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : cat.kind === 'decaissement' ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400' : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400'}`}>
                         {cat.kind === 'encaissement' ? <TrendingUp className="w-3 h-3" /> : cat.kind === 'decaissement' ? <TrendingDown className="w-3 h-3" /> : null}

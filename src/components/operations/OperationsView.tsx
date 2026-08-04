@@ -111,19 +111,19 @@ function OperationsTable({
         </table>
       </div>
 
-      {/* ── MOBILE CARDS ── */}
-      <div className="sm:hidden flex flex-col gap-3 p-4">
+      {/* ── MOBILE LIST ── */}
+      <div className="sm:hidden flex flex-col divide-y divide-zinc-100 dark:divide-zinc-800/50">
         {operations.map((op) => (
-          <div key={op.id} className="p-4 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl shadow-sm hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors active:scale-[0.98]">
+          <div key={op.id} className="p-4 transition-colors active:bg-zinc-50 dark:active:bg-zinc-800/50">
             <div className="flex items-center justify-between mb-2">
               <div className="flex flex-col min-w-0">
                 <p className="font-semibold text-zinc-900 dark:text-white text-sm truncate">{op.label}</p>
                 {op.notes && <p className="text-xs text-zinc-400 truncate mt-0.5">{op.notes}</p>}
               </div>
-              <div className="relative">
+              <div className="relative ml-2">
                 <button
                   onClick={() => setOpenDropdownId(openDropdownId === op.id ? null : op.id)}
-                  className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors bg-zinc-50 dark:bg-zinc-800"
+                  className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors bg-zinc-50 dark:bg-zinc-800/50"
                 >
                   <MoreHorizontal className="w-4 h-4" />
                 </button>
@@ -161,7 +161,7 @@ function OperationsTable({
             </div>
             
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded-md uppercase tracking-wider truncate max-w-[120px]">
+              <span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800/50 px-2 py-1 rounded-md uppercase tracking-wider truncate max-w-[120px]">
                 {op.operationTypeLabel}
               </span>
               

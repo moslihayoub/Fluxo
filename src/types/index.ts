@@ -57,6 +57,7 @@ export interface AgentResponse {
 // Zustand store shape
 export interface AppState {
   // Data
+  userUid?: string | null;
   months: Month[];
   operations: Operation[];
   operationTypes: OperationType[];
