@@ -603,27 +603,28 @@ export default function CategoriesView() {
 
                       {openDropdownId === cat.id && (
                         <>
-                          <div className="fixed inset-0 z-40" onClick={() => setOpenDropdownId(null)} />
-                          <div className="absolute right-0 top-full mt-2 w-40 bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 rounded-lg shadow-xl z-50 overflow-hidden py-1 animate-in fade-in zoom-in-95 duration-100">
+                          <div className="fixed inset-0 z-40 bg-black/20 dark:bg-black/50 backdrop-blur-sm sm:bg-transparent sm:backdrop-blur-none" onClick={() => setOpenDropdownId(null)} />
+                          <div className="fixed sm:absolute bottom-0 sm:bottom-auto left-0 sm:left-auto right-0 sm:top-full w-full sm:w-40 bg-white dark:bg-zinc-800 sm:border border-zinc-100 dark:border-zinc-700 rounded-t-2xl sm:rounded-lg shadow-[0_-8px_30px_rgba(0,0,0,0.12)] sm:shadow-xl z-50 overflow-hidden pb-safe sm:py-1 animate-in slide-in-from-bottom-full sm:slide-in-from-top-2 sm:fade-in zoom-in-95 duration-200">
+                            <div className="w-10 h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded-full mx-auto my-3 sm:hidden" />
                             <button
                               onClick={() => { setSelectedCat(cat); setOpenDropdownId(null); }}
-                              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700 hover:text-zinc-900 dark:hover:text-white transition-colors"
+                              className="w-full flex items-center gap-3 sm:gap-2 px-5 sm:px-3 py-4 sm:py-2 text-base sm:text-sm text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700 hover:text-zinc-900 dark:hover:text-white transition-colors"
                             >
-                              <Eye className="w-4 h-4" />
+                              <Eye className="w-5 h-5 sm:w-4 sm:h-4" />
                               Détails
                             </button>
                             <button
                               onClick={() => { setEditingCat(cat); setShowDialog(true); setOpenDropdownId(null); }}
-                              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700 hover:text-zinc-900 dark:hover:text-white transition-colors"
+                              className="w-full flex items-center gap-3 sm:gap-2 px-5 sm:px-3 py-4 sm:py-2 text-base sm:text-sm text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700 hover:text-zinc-900 dark:hover:text-white transition-colors"
                             >
-                              <Pencil className="w-4 h-4" />
+                              <Pencil className="w-5 h-5 sm:w-4 sm:h-4" />
                               Modifier
                             </button>
                             <button
                               onClick={() => { setDeletingCat(cat); setOpenDropdownId(null); }}
-                              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
+                              className="w-full flex items-center gap-3 sm:gap-2 px-5 sm:px-3 py-4 sm:py-2 text-base sm:text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-5 h-5 sm:w-4 sm:h-4" />
                               Supprimer
                             </button>
                           </div>
