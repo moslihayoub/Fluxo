@@ -40,71 +40,106 @@ function OperationsTable({
   }
 
   return (
-    <div className="overflow-x-auto -mx-1">
-      <table className="w-full text-sm min-w-[500px]">
-        <thead>
-          <tr className="border-b border-zinc-100 dark:border-zinc-800">
-            <th className="text-left px-2 py-2.5 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Libellé</th>
-            <th className="text-left px-2 py-2.5 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider hidden sm:table-cell">Catégorie</th>
-            <th className="text-left px-2 py-2.5 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Type</th>
-            <th className="text-right px-2 py-2.5 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Montant</th>
-            <th className="text-right px-2 py-2.5 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider w-16">Actions</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/50">
-          {operations.map((op) => (
-            <tr key={op.id} className="group hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors">
-              <td className="px-2 py-3">
-                <p className="font-medium text-zinc-900 dark:text-white text-sm truncate max-w-[160px]" title={op.label}>
-                  {op.label}
-                </p>
-                {op.notes && <p className="text-xs text-zinc-400 truncate max-w-[160px]">{op.notes}</p>}
-              </td>
-              <td className="px-2 py-3 hidden sm:table-cell">
-                <span className="text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full">
-                  {op.operationTypeLabel}
-                </span>
-              </td>
-              <td className="px-2 py-3">
-                <span className={`inline-flex items-center text-xs px-2 py-0.5 rounded-full font-medium ${
-                  op.kind === 'encaissement'
-                    ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
-                    : 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400'
-                }`}>
-                  {op.kind === 'encaissement' ? '+' : '−'}
-                </span>
-              </td>
-              <td className="px-2 py-3 text-right">
-                <span className={`font-mono tabular-nums font-semibold text-sm ${
-                  op.kind === 'encaissement'
-                    ? 'text-emerald-600 dark:text-emerald-400'
-                    : 'text-rose-600 dark:text-rose-400'
-                }`}>
-                  {op.kind === 'encaissement' ? '+' : '−'}{formatCurrency(op.amount)}
-                </span>
-              </td>
-              <td className="px-2 py-3 text-right">
-                <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={() => onEdit(op)}
-                    className="p-1 rounded text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                    title="Modifier"
-                  >
-                    <Pencil className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={() => onDelete(op.id)}
-                    className="p-1 rounded text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
-                    title="Supprimer"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </td>
+    <div className="-mx-1 sm:mx-0">
+      {/* ── DESKTOP TABLE ── */}
+      <div className="hidden sm:block overflow-x-auto">
+        <table className="w-full text-sm min-w-[500px]">
+          <thead>
+            <tr className="border-b border-zinc-100 dark:border-zinc-800">
+              <th className="text-left px-2 py-2.5 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Libellé</th>
+              <th className="text-left px-2 py-2.5 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Catégorie</th>
+              <th className="text-left px-2 py-2.5 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Type</th>
+              <th className="text-right px-2 py-2.5 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Montant</th>
+              <th className="text-right px-2 py-2.5 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider w-16">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/50">
+            {operations.map((op) => (
+              <tr key={op.id} className="group hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors">
+                <td className="px-2 py-3">
+                  <p className="font-medium text-zinc-900 dark:text-white text-sm truncate max-w-[160px]" title={op.label}>
+                    {op.label}
+                  </p>
+                  {op.notes && <p className="text-xs text-zinc-400 truncate max-w-[160px]">{op.notes}</p>}
+                </td>
+                <td className="px-2 py-3">
+                  <span className="text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full">
+                    {op.operationTypeLabel}
+                  </span>
+                </td>
+                <td className="px-2 py-3">
+                  <span className={`inline-flex items-center text-xs px-2 py-0.5 rounded-full font-medium ${
+                    op.kind === 'encaissement'
+                      ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
+                      : 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400'
+                  }`}>
+                    {op.kind === 'encaissement' ? '+' : '−'}
+                  </span>
+                </td>
+                <td className="px-2 py-3 text-right">
+                  <span className={`font-mono tabular-nums font-semibold text-sm ${
+                    op.kind === 'encaissement'
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-rose-600 dark:text-rose-400'
+                  }`}>
+                    {op.kind === 'encaissement' ? '+' : '−'}{formatCurrency(op.amount)}
+                  </span>
+                </td>
+                <td className="px-2 py-3 text-right">
+                  <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => onEdit(op)}
+                      className="p-1 rounded text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                      title="Modifier"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => onDelete(op.id)}
+                      className="p-1 rounded text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
+                      title="Supprimer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* ── MOBILE CARDS ── */}
+      <div className="sm:hidden flex flex-col gap-3 p-4">
+        {operations.map((op) => (
+          <div key={op.id} className="p-4 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl shadow-sm hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors active:scale-[0.98]">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex flex-col min-w-0">
+                <p className="font-semibold text-zinc-900 dark:text-white text-sm truncate">{op.label}</p>
+                {op.notes && <p className="text-xs text-zinc-400 truncate mt-0.5">{op.notes}</p>}
+              </div>
+              <div className="flex items-center gap-1">
+                <button onClick={() => onEdit(op)} className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-900 transition-colors bg-zinc-50 dark:bg-zinc-800"><Pencil className="w-3.5 h-3.5" /></button>
+                <button onClick={() => onDelete(op.id)} className="p-1.5 rounded-md text-zinc-400 hover:text-rose-600 transition-colors bg-zinc-50 dark:bg-zinc-800"><Trash2 className="w-3.5 h-3.5" /></button>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded-md uppercase tracking-wider truncate max-w-[120px]">
+                {op.operationTypeLabel}
+              </span>
+              
+              <span className={`font-mono tabular-nums font-bold text-sm ${
+                op.kind === 'encaissement'
+                  ? 'text-emerald-600 dark:text-emerald-400'
+                  : 'text-rose-600 dark:text-rose-400'
+              }`}>
+                {op.kind === 'encaissement' ? '+' : '−'}{formatCurrency(op.amount)}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -287,14 +322,14 @@ export default function OperationsView() {
                     <button
                       onClick={() => setShowImport(true)}
                       title="Importer CSV"
-                      className="p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white transition-colors"
+                      className="hidden sm:flex p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white transition-colors"
                     >
                       <Upload className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={handleExportMonth}
                       title="Exporter ce mois (CSV)"
-                      className="p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white transition-colors"
+                      className="hidden sm:flex p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white transition-colors"
                     >
                       <Download className="w-3.5 h-3.5" />
                     </button>
@@ -309,14 +344,14 @@ export default function OperationsView() {
                     <button
                       disabled
                       title="Fonctionnalité d'intelligence artificielle disponible prochainement !"
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-200 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 text-xs font-medium cursor-not-allowed transition-all"
+                      className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-200 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 text-xs font-medium cursor-not-allowed transition-all"
                     >
                       <Bot className="w-3.5 h-3.5 opacity-50" />
                       Agent
                     </button>
                     <button
                       onClick={() => setShowOpDialog(true)}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-xs font-medium hover:bg-zinc-700 dark:hover:bg-zinc-100 transition-colors"
+                      className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-xs font-medium hover:bg-zinc-700 dark:hover:bg-zinc-100 transition-colors"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       Ajouter
@@ -338,6 +373,14 @@ export default function OperationsView() {
           )}
         </div>
       </div>
+
+      {/* FAB for Mobile */}
+      <button
+        onClick={() => setShowOpDialog(true)}
+        className="sm:hidden fixed bottom-20 right-4 z-40 w-14 h-14 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
+      >
+        <Plus className="w-6 h-6" />
+      </button>
 
       {/* Dialogs */}
       {showOpDialog && activeMonthId && (

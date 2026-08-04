@@ -418,12 +418,20 @@ export default function CategoriesView() {
         </div>
         <button
           onClick={() => { setEditingCat(undefined); setShowDialog(true); }}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-sm font-medium hover:bg-zinc-700 dark:hover:bg-zinc-100 transition-colors shadow-sm"
+          className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-sm font-medium hover:bg-zinc-700 dark:hover:bg-zinc-100 transition-colors shadow-sm"
         >
           <Plus className="w-4 h-4" />
           Nouvelle catégorie
         </button>
       </div>
+
+      {/* FAB for Mobile */}
+      <button
+        onClick={() => { setEditingCat(undefined); setShowDialog(true); }}
+        className="sm:hidden fixed bottom-20 right-4 z-40 w-14 h-14 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
+      >
+        <Plus className="w-6 h-6" />
+      </button>
 
       {/* Search */}
       <div className="relative">
@@ -475,100 +483,138 @@ export default function CategoriesView() {
             <div className="col-span-2 sm:col-span-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider text-right">Actions</div>
           </div>
 
-          <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+          <div className="divide-y-0 sm:divide-y divide-zinc-100 dark:divide-zinc-800 p-3 sm:p-0">
             {filtered.map((cat) => (
-              <div
-                key={cat.id}
-                className="group grid grid-cols-12 gap-2 px-4 py-3.5 items-center hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors"
-              >
-                {/* Name */}
-                <div className="col-span-5 sm:col-span-3 flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0 group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700 transition-colors">
-                    <Tag className="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400" />
+              <div key={cat.id}>
+                {/* ── DESKTOP ROW ── */}
+                <div className="hidden sm:grid group grid-cols-12 gap-2 px-4 py-3.5 items-center hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors">
+                  {/* Name */}
+                  <div className="col-span-3 flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0 group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700 transition-colors">
+                      <Tag className="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400" />
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-sm font-medium text-zinc-900 dark:text-white truncate">
+                        {cat.label}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-sm font-medium text-zinc-900 dark:text-white truncate">
-                      {cat.label}
+
+                  {/* Type */}
+                  <div className="col-span-2 flex items-center">
+                    {cat.kind ? (
+                      <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${
+                        cat.kind === 'encaissement' 
+                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' 
+                          : 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'
+                      }`}>
+                        {cat.kind === 'encaissement' ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                        <span className="truncate max-w-[80px]">{cat.kind === 'encaissement' ? 'Entrée' : 'Sortie'}</span>
+                      </span>
+                    ) : (
+                      <span className="text-xs text-zinc-400">—</span>
+                    )}
+                  </div>
+
+                  {/* Défaut */}
+                  <div className="col-span-2 text-right">
+                    <span className="text-xs font-mono tabular-nums text-zinc-600 dark:text-zinc-300">
+                      {cat.defaultAmount !== undefined ? formatCurrency(cat.defaultAmount) : '—'}
                     </span>
+                  </div>
+
+                  {/* Count badge */}
+                  <div className="col-span-1 flex justify-center">
+                    <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full font-semibold ${
+                      cat.count > 0
+                        ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900'
+                        : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400'
+                    }`}>
+                      {cat.count}
+                    </span>
+                  </div>
+
+                  {/* Total (Solde) */}
+                  <div className="col-span-2 text-right">
+                    {cat.solde !== 0 ? (
+                      <span className={`text-xs font-mono tabular-nums font-medium ${
+                        cat.solde > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+                      }`}>
+                        {cat.solde > 0 ? '+' : ''}{formatCurrency(cat.solde)}
+                      </span>
+                    ) : (
+                      <span className="text-xs font-mono text-zinc-400">—</span>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="col-span-2 flex items-center justify-end gap-1">
+                    <button
+                      onClick={() => setSelectedCat(cat)}
+                      title="Voir le détail"
+                      className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => { setEditingCat(cat); setShowDialog(true); }}
+                      title="Modifier"
+                      className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => setDeletingCat(cat)}
+                      title="Supprimer"
+                      className="p-1.5 rounded-md text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => setSelectedCat(cat)}
+                      className="hidden xl:flex items-center gap-1 ml-1 text-xs text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
+                    >
+                      Détail <ChevronRight className="w-3 h-3" />
+                    </button>
                   </div>
                 </div>
 
-                {/* Type */}
-                <div className="col-span-2 hidden sm:flex items-center">
-                  {cat.kind ? (
-                    <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${
-                      cat.kind === 'encaissement' 
-                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' 
-                        : 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'
-                    }`}>
-                      {cat.kind === 'encaissement' ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                      <span className="truncate max-w-[80px]">{cat.kind === 'encaissement' ? 'Entrée' : 'Sortie'}</span>
-                    </span>
-                  ) : (
-                    <span className="text-xs text-zinc-400">—</span>
-                  )}
-                </div>
-
-                {/* Défaut */}
-                <div className="col-span-2 hidden sm:block text-right">
-                  <span className="text-xs font-mono tabular-nums text-zinc-600 dark:text-zinc-300">
-                    {cat.defaultAmount !== undefined ? formatCurrency(cat.defaultAmount) : '—'}
-                  </span>
-                </div>
-
-                {/* Count badge */}
-                <div className="col-span-2 sm:col-span-1 flex justify-center">
-                  <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full font-semibold ${
-                    cat.count > 0
-                      ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900'
-                      : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400'
-                  }`}>
-                    {cat.count}
-                  </span>
-                </div>
-
-                {/* Total (Solde) */}
-                <div className="col-span-3 sm:col-span-2 text-right">
-                  {cat.solde !== 0 ? (
-                    <span className={`text-xs font-mono tabular-nums font-medium ${
-                      cat.solde > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
-                    }`}>
-                      {cat.solde > 0 ? '+' : ''}{formatCurrency(cat.solde)}
-                    </span>
-                  ) : (
-                    <span className="text-xs font-mono text-zinc-400">—</span>
-                  )}
-                </div>
-
-                {/* Actions */}
-                <div className="col-span-2 flex items-center justify-end gap-1">
-                  <button
-                    onClick={() => setSelectedCat(cat)}
-                    title="Voir le détail"
-                    className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                  >
-                    <Eye className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={() => { setEditingCat(cat); setShowDialog(true); }}
-                    title="Modifier"
-                    className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                  >
-                    <Pencil className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={() => setDeletingCat(cat)}
-                    title="Supprimer"
-                    className="p-1.5 rounded-md text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={() => setSelectedCat(cat)}
-                    className="hidden sm:flex items-center gap-1 ml-1 text-xs text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
-                  >
-                    Détail <ChevronRight className="w-3 h-3" />
-                  </button>
+                {/* ── MOBILE CARD ── */}
+                <div className="sm:hidden flex flex-col gap-3 p-4 mb-3 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl shadow-sm hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors active:scale-[0.98]">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                        <Tag className="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400" />
+                      </div>
+                      <span className="text-sm font-semibold text-zinc-900 dark:text-white truncate">
+                        {cat.label}
+                      </span>
+                    </div>
+                    {/* Actions */}
+                    <div className="flex items-center gap-1">
+                      <button onClick={() => setSelectedCat(cat)} className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors bg-zinc-50 dark:bg-zinc-800"><Eye className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => { setEditingCat(cat); setShowDialog(true); }} className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors bg-zinc-50 dark:bg-zinc-800"><Pencil className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => setDeletingCat(cat)} className="p-1.5 rounded-md text-zinc-400 hover:text-rose-600 transition-colors bg-zinc-50 dark:bg-zinc-800"><Trash2 className="w-3.5 h-3.5" /></button>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between mt-1">
+                    <div className="flex items-center gap-2">
+                      <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md uppercase tracking-wider ${cat.kind === 'encaissement' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : cat.kind === 'decaissement' ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400' : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400'}`}>
+                        {cat.kind === 'encaissement' ? <TrendingUp className="w-3 h-3" /> : cat.kind === 'decaissement' ? <TrendingDown className="w-3 h-3" /> : null}
+                        {cat.kind === 'encaissement' ? 'Entrée' : cat.kind === 'decaissement' ? 'Sortie' : 'Non défini'}
+                      </span>
+                      <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                        {cat.count} op{cat.count > 1 ? 's' : ''}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-end">
+                      <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold">Total</span>
+                      <span className={`text-sm font-mono font-bold ${cat.solde > 0 ? 'text-emerald-600 dark:text-emerald-400' : cat.solde < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-zinc-500'}`}>
+                        {cat.solde > 0 ? '+' : ''}{cat.solde !== 0 ? formatCurrency(cat.solde) : '—'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}

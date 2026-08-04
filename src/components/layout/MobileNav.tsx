@@ -54,7 +54,7 @@ export default function MobileNav() {
   return (
     <>
       {/* Bottom Fixed Bar (Mobile Only) */}
-      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 h-14 border-t border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md flex items-center justify-between px-4 pb-safe">
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md flex items-center justify-between px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
         {/* Logo */}
         <div className="flex items-center gap-2" onClick={() => handleNavClick('months')}>
           <div className="w-8 h-8 rounded-lg bg-zinc-900 dark:bg-white flex items-center justify-center shadow-sm">
