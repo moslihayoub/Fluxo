@@ -174,19 +174,32 @@ export default function DashboardView() {
           </p>
         </div>
         
-        {/* Desktop Custom Select / Mobile Drawer Trigger */}
+        {/* Desktop Native Select */}
+        <select
+          value={timeRange}
+          onChange={(e) => setTimeRange(e.target.value as any)}
+          className="hidden sm:block bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-sm rounded-lg px-3 py-2 text-zinc-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+        >
+          <option value="1m">{t('dash.filter1m')}</option>
+          <option value="3m">{t('dash.filter3m')}</option>
+          <option value="6m">{t('dash.filter6m')}</option>
+          <option value="12m">{t('dash.filter12m')}</option>
+          <option value="all">{t('dash.allPeriods')}</option>
+        </select>
+
+        {/* Mobile Drawer Trigger */}
         <button
           onClick={() => setIsFilterDrawerOpen(true)}
-          className="flex items-center gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-sm rounded-lg px-4 py-2.5 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors w-full sm:w-auto justify-between sm:justify-start"
+          className="flex sm:hidden items-center gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-sm rounded-lg px-4 py-2.5 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors w-full justify-between"
         >
           <span className="font-medium">{currentRangeLabel}</span>
           <ChevronDown className="w-4 h-4 text-zinc-400" />
         </button>
       </div>
 
-      {/* Filter Drawer / Modal */}
+      {/* Filter Drawer / Modal (Mobile Only) */}
       {isFilterDrawerOpen && (
-        <div className="fixed inset-0 z-50 flex sm:items-center justify-center p-0 sm:p-4 bg-zinc-900/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex sm:hidden items-center justify-center p-0 bg-zinc-900/60 backdrop-blur-sm">
           {/* Mobile Overlay to close */}
           <div className="absolute inset-0" onClick={() => setIsFilterDrawerOpen(false)} />
           
