@@ -11,7 +11,10 @@ export default function Home() {
 
   return (
     <>
-      <div key={activeView} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div 
+        key={activeView} 
+        className={`animate-in fade-in slide-in-from-bottom-4 duration-500 ${activeView !== 'dashboard' ? 'pt-[52px] sm:pt-0' : ''}`}
+      >
         {activeView === 'months' && <MonthsView />}
         {activeView === 'operations' && <OperationsView />}
         {activeView === 'categories' && <CategoriesView />}
