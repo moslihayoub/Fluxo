@@ -24,6 +24,10 @@ export const metadata: Metadata = {
     description: 'Application de gestion financière & trésorerie intelligente',
     images: ['/icon-512x512.png'],
     type: 'website',
+  },
+  icons: {
+    icon: '/favicon.png',
+    apple: '/apple-touch-icon.png',
   }
 };
 
