@@ -14,6 +14,8 @@ import type { Operation } from '@/types';
 import OperationDialog from './OperationDialog';
 import ImportDialog from './ImportDialog';
 import AgentDialog from '@/components/agent/AgentDialog';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import { getTranslation } from '@/lib/i18n';
 
 // ── Operations Table ──────────────────────────────────────────
 function OperationsTable({
@@ -27,7 +29,10 @@ function OperationsTable({
   onEdit: (op: Operation) => void;
   onDelete: (id: string) => void;
 }) {
+  const language = useStore((s) => s.language);
+  const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(language, key);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const [opToDelete, setOpToDelete] = useState<string | null>(null);
 
   if (operations.length === 0) {
     return (
@@ -35,8 +40,8 @@ function OperationsTable({
         <div className="w-12 h-12 mb-3 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
           <TrendingUp className="w-6 h-6 text-zinc-300 dark:text-zinc-600" />
         </div>
-        <p className="text-sm font-semibold text-zinc-900 dark:text-white">Aucune opération pour ce mois</p>
-        <p className="text-xs mt-1 max-w-[200px]">Commencez par ajouter une nouvelle opération ou importez votre relevé bancaire.</p>
+        <p className="text-sm font-semibold text-zinc-900 dark:text-white">{t('ops.emptyMonth')}</p>
+        <p className="text-xs mt-1 max-w-[200px]">{t('ops.emptyMonthSub')}</p>
       </div>
     );
   }
@@ -48,11 +53,11 @@ function OperationsTable({
         <table className="w-full text-sm min-w-[500px]">
           <thead>
             <tr className="border-b border-zinc-100 dark:border-zinc-800">
-              <th className="text-left px-2 py-2.5 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Libellé</th>
-              <th className="text-left px-2 py-2.5 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Catégorie</th>
-              <th className="text-left px-2 py-2.5 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Type</th>
-              <th className="text-right px-2 py-2.5 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Montant</th>
-              <th className="text-right px-2 py-2.5 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider w-16">Actions</th>
+              <th className="text-left px-2 py-2.5 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">{t('ops.label')}</th>
+              <th className="text-left px-2 py-2.5 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">{t('common.category')}</th>
+              <th className="text-left px-2 py-2.5 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">{t('common.type')}</th>
+              <th className="text-right px-2 py-2.5 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">{t('common.amount')}</th>
+              <th className="text-right px-2 py-2.5 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider w-16">{t('common.actions')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/50">
@@ -97,9 +102,9 @@ function OperationsTable({
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
                     <button
-                      onClick={() => onDelete(op.id)}
+                      onClick={() => setOpToDelete(op.id)}
                       className="p-1 rounded text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
-                      title="Supprimer"
+                      title={t('common.delete')}
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -138,21 +143,24 @@ function OperationsTable({
                         className="w-full flex items-center gap-3 sm:gap-2 px-5 sm:px-3 py-4 sm:py-2 text-base sm:text-sm text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700 hover:text-zinc-900 dark:hover:text-white transition-colors"
                       >
                         <Eye className="w-5 h-5 sm:w-4 sm:h-4" />
-                        Détails
+                        {t('common.details')}
                       </button>
                       <button
                         onClick={() => { onEdit(op); setOpenDropdownId(null); }}
                         className="w-full flex items-center gap-3 sm:gap-2 px-5 sm:px-3 py-4 sm:py-2 text-base sm:text-sm text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700 hover:text-zinc-900 dark:hover:text-white transition-colors"
                       >
                         <Pencil className="w-5 h-5 sm:w-4 sm:h-4" />
-                        Modifier
+                        {t('common.edit')}
                       </button>
                       <button
-                        onClick={() => { onDelete(op.id); setOpenDropdownId(null); }}
+                        onClick={() => {
+                          setOpToDelete(op.id);
+                          setOpenDropdownId(null);
+                        }}
                         className="w-full flex items-center gap-3 sm:gap-2 px-5 sm:px-3 py-4 sm:py-2 text-base sm:text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
                       >
                         <Trash2 className="w-5 h-5 sm:w-4 sm:h-4" />
-                        Supprimer
+                        {t('common.delete')}
                       </button>
                     </div>
                   </>
@@ -176,6 +184,18 @@ function OperationsTable({
           </div>
         ))}
       </div>
+
+      <ConfirmDialog
+        isOpen={!!opToDelete}
+        title={t('common.delete')}
+        description={t('ops.confirmDelete')}
+        onConfirm={() => {
+          if (opToDelete) onDelete(opToDelete);
+        }}
+        onCancel={() => setOpToDelete(null)}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
+      />
     </div>
   );
 }
@@ -188,14 +208,18 @@ export default function OperationsView() {
     activeMonthId,
     setActiveMonth,
     deleteOperation,
+    deleteMonth,
     filter,
     setFilter,
+    language,
   } = useStore();
+  const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(language, key);
 
   const [showOpDialog, setShowOpDialog] = useState(false);
   const [editingOp, setEditingOp] = useState<Operation | undefined>();
-  const [showImport, setShowImport] = useState(false);
-  const [showAgent, setShowAgent] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
+  const [isAgentOpen, setIsAgentOpen] = useState(false);
+  const [monthToDelete, setMonthToDelete] = useState<string | null>(null);
 
   const activeMonths = months
     .filter((m) => m.status === 'active')
@@ -229,17 +253,15 @@ export default function OperationsView() {
     exportCSV(ops, months, `encaissements-${monthLabel}.csv`);
   };
 
-  const handleExportAll = () => {
-    exportCSV(operations, months, 'encaissements-tous-les-mois.csv');
-  };
+  const [showMobileActions, setShowMobileActions] = useState(false);
 
   return (
     <div className="h-full">
       {/* Title */}
       <div className="mb-4">
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Opérations</h1>
+        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">{t('ops.title')}</h1>
         <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-          Sélectionnez un mois pour gérer ses opérations
+          {t('ops.subtitle')}
         </p>
       </div>
 
@@ -248,13 +270,13 @@ export default function OperationsView() {
         <div className="w-full md:w-56 flex-shrink-0">
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden">
             {months.length === 0 ? (
-              <p className="text-sm text-zinc-400 p-4 text-center">Aucun mois disponible</p>
+              <p className="text-sm text-zinc-400 p-4 text-center">{t('ops.noMonths')}</p>
             ) : (
               <>
                 {activeMonths.length > 0 && (
                   <div>
                     <p className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider px-3 pt-3 pb-1">
-                      Actifs
+                      {t('periods.active')}
                     </p>
                     {activeMonths.map((m) => {
                       const t = computeMonthTotals(operations, m.id);
@@ -268,12 +290,12 @@ export default function OperationsView() {
                               : ''
                           }`}
                         >
-                          <span className={`text-sm font-medium truncate ${
+                          <span className={`text-base sm:text-sm font-medium truncate ${
                             activeMonthId === m.id ? 'text-zinc-900 dark:text-white' : 'text-zinc-600 dark:text-zinc-400'
                           }`}>
                             {getMonthLabel(m)}
                           </span>
-                          <span className={`text-[10px] font-mono tabular-nums ml-1 ${
+                          <span className={`text-xs sm:text-[10px] font-mono tabular-nums ml-1 ${
                             t.solde >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500'
                           }`}>
                             {t.solde >= 0 ? '+' : ''}{(t.solde / 1000).toFixed(1)}k
@@ -286,7 +308,7 @@ export default function OperationsView() {
                 {archivedMonths.length > 0 && (
                   <div className="border-t border-zinc-100 dark:border-zinc-800">
                     <p className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider px-3 pt-3 pb-1">
-                      Archivés
+                      {t('periods.archived')}
                     </p>
                     {archivedMonths.map((m) => (
                       <button
@@ -296,7 +318,7 @@ export default function OperationsView() {
                           activeMonthId === m.id ? 'bg-zinc-100 dark:bg-zinc-800 border-l-2 border-zinc-400' : ''
                         }`}
                       >
-                        <span className="text-sm text-zinc-500 dark:text-zinc-500 truncate block">
+                        <span className="text-base sm:text-sm text-zinc-500 dark:text-zinc-500 truncate block">
                           {getMonthLabel(m)}
                         </span>
                       </button>
@@ -312,8 +334,8 @@ export default function OperationsView() {
         <div className="flex-1 min-w-0 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl">
           {!activeMonthId ? (
             <div className="flex flex-col items-center justify-center py-20 text-zinc-400 dark:text-zinc-600">
-              <p className="text-sm font-medium">Sélectionnez un mois</p>
-              <p className="text-xs mt-1">dans la liste à gauche</p>
+              <p className="text-sm font-medium">{t('ops.selectMonth')}</p>
+              <p className="text-xs mt-1">{t('ops.selectMonthSub')}</p>
             </div>
           ) : (
             <>
@@ -326,21 +348,29 @@ export default function OperationsView() {
                       {currentMonth ? getMonthLabel(currentMonth) : ''}
                     </h2>
                     
-                    {/* Filter (Mobile) */}
-                    <div className="flex sm:hidden rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-700 text-xs w-fit">
-                      {(['all', 'encaissement', 'decaissement'] as const).map((f) => (
-                        <button
-                          key={`mobile-${f}`}
-                          onClick={() => setFilter(f)}
-                          className={`px-2.5 py-1.5 font-medium transition-colors flex-1 ${
-                            filter === f
-                              ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900'
-                              : 'bg-white dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-700'
-                          }`}
-                        >
-                          {f === 'all' ? 'Tout' : f === 'encaissement' ? 'Entrées' : 'Sorties'}
-                        </button>
-                      ))}
+                    {/* Filter (Mobile) with action button */}
+                    <div className="flex sm:hidden gap-2 w-full">
+                      <div className="flex flex-1 rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-700 text-xs">
+                        {(['all', 'encaissement', 'decaissement'] as const).map((f) => (
+                          <button
+                            key={`mobile-${f}`}
+                            onClick={() => setFilter(f)}
+                            className={`px-2 py-2 font-medium transition-colors flex-1 text-center ${
+                              filter === f
+                                ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900'
+                                : 'bg-white dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-700'
+                            }`}
+                          >
+                            {f === 'all' ? t('common.all') : f === 'encaissement' ? t('common.incomes') : t('common.expenses')}
+                          </button>
+                        ))}
+                      </div>
+                      <button
+                        onClick={() => setShowMobileActions(true)}
+                        className="p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors flex-shrink-0"
+                      >
+                        <MoreHorizontal className="w-5 h-5" />
+                      </button>
                     </div>
 
                     {metrics && (
@@ -366,7 +396,7 @@ export default function OperationsView() {
                             : 'bg-white dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-700'
                         }`}
                       >
-                        {f === 'all' ? 'Tout' : f === 'encaissement' ? 'Entrées' : 'Sorties'}
+                        {f === 'all' ? t('common.all') : f === 'encaissement' ? t('common.incomes') : t('common.expenses')}
                       </button>
                     ))}
                   </div>
@@ -374,26 +404,32 @@ export default function OperationsView() {
                   {/* Action buttons */}
                   <div className="flex items-center gap-1.5">
                     <button
-                      onClick={() => setShowImport(true)}
-                      title="Importer CSV"
+                      onClick={() => setIsImportOpen(true)}
+                      title={t('common.import')}
                       className="hidden sm:flex p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white transition-colors"
                     >
                       <Upload className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={handleExportMonth}
-                      title="Exporter ce mois (CSV)"
-                      className="hidden sm:flex p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white transition-colors"
+                      title={t('ops.exportMonth')}
+                      className="hidden sm:flex p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white transition-colors text-xs items-center gap-1"
                     >
                       <Download className="w-3.5 h-3.5" />
                     </button>
                     <button
-                      onClick={handleExportAll}
-                      title="Exporter tout (CSV)"
-                      className="hidden sm:flex p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white transition-colors text-xs items-center gap-1"
+                      onClick={() => {
+                        const ops = operations.filter(op => op.monthId === activeMonthId);
+                        if (ops.length === 0) {
+                          deleteMonth(activeMonthId!);
+                        } else {
+                          setMonthToDelete(activeMonthId);
+                        }
+                      }}
+                      title={t('common.delete')}
+                      className="hidden sm:flex p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-rose-500 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors text-xs items-center gap-1"
                     >
-                      <Download className="w-3.5 h-3.5" />
-                      Tout
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                     <button
                       disabled
@@ -408,7 +444,7 @@ export default function OperationsView() {
                       className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-xs font-medium hover:bg-zinc-700 dark:hover:bg-zinc-100 transition-colors"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      Ajouter
+                      {t('common.add')}
                     </button>
                   </div>
                 </div>
@@ -436,6 +472,48 @@ export default function OperationsView() {
         <Plus className="w-6 h-6" />
       </button>
 
+      {/* Mobile Actions Drawer */}
+      {showMobileActions && (
+        <>
+          <div className="fixed inset-0 z-40 bg-black/20 dark:bg-black/50 backdrop-blur-sm sm:hidden" onClick={() => setShowMobileActions(false)} />
+          <div className="fixed bottom-0 left-0 right-0 w-full bg-white dark:bg-zinc-800 rounded-t-2xl shadow-[0_-8px_30px_rgba(0,0,0,0.12)] z-50 overflow-hidden pb-safe animate-in slide-in-from-bottom-full duration-200 sm:hidden">
+            <div className="w-10 h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded-full mx-auto my-3" />
+            <div className="px-4 pb-2 text-sm font-semibold text-zinc-400">{t('common.actions')}</div>
+            <button
+              onClick={() => { setIsImportOpen(true); setShowMobileActions(false); }}
+              className="w-full flex items-center gap-3 px-5 py-4 text-base text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
+            >
+              <Upload className="w-5 h-5" />
+              Importer CSV
+            </button>
+            <button
+              onClick={() => { handleExportMonth(); setShowMobileActions(false); }}
+              className="w-full flex items-center gap-3 px-5 py-4 text-base text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
+            >
+              <Download className="w-5 h-5" />
+              {t('ops.exportMonth')}
+            </button>
+            <button
+              onClick={() => {
+                if (activeMonthId) {
+                  const ops = operations.filter(op => op.monthId === activeMonthId);
+                  if (ops.length === 0) {
+                    deleteMonth(activeMonthId);
+                  } else {
+                    setMonthToDelete(activeMonthId);
+                  }
+                }
+                setShowMobileActions(false);
+              }}
+              className="w-full flex items-center gap-3 px-5 py-4 text-base text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
+            >
+              <Trash2 className="w-5 h-5" />
+              {t('common.delete')}
+            </button>
+          </div>
+        </>
+      )}
+
       {/* Dialogs */}
       {showOpDialog && activeMonthId && (
         <OperationDialog
@@ -444,12 +522,27 @@ export default function OperationsView() {
           onClose={handleCloseOpDialog}
         />
       )}
-      {showImport && activeMonthId && (
-        <ImportDialog monthId={activeMonthId} onClose={() => setShowImport(false)} />
+      {isImportOpen && activeMonthId && (
+        <ImportDialog monthId={activeMonthId} onClose={() => setIsImportOpen(false)} />
       )}
-      {showAgent && activeMonthId && (
-        <AgentDialog defaultMonthId={activeMonthId} onClose={() => setShowAgent(false)} />
+      {isAgentOpen && activeMonthId && (
+        <AgentDialog
+          defaultMonthId={activeMonthId}
+          onClose={() => setIsAgentOpen(false)}
+        />
       )}
+
+      <ConfirmDialog
+        isOpen={!!monthToDelete}
+        title={t('common.delete')}
+        description={t('periods.confirmDelete')}
+        onConfirm={() => {
+          if (monthToDelete) deleteMonth(monthToDelete);
+        }}
+        onCancel={() => setMonthToDelete(null)}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
+      />
     </div>
   );
 }

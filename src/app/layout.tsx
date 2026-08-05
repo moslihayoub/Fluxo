@@ -7,6 +7,7 @@ import MetricsBar from '@/components/layout/MetricsBar';
 
 import { AuthProvider } from '@/components/auth/AuthProvider';
 import AuthWrapper from '@/components/auth/AuthWrapper';
+import PwaInstallPrompt from '@/components/ui/PwaInstallPrompt';
 import { Toaster } from 'react-hot-toast';
 
 export const metadata: Metadata = {
@@ -18,10 +19,12 @@ export const metadata: Metadata = {
     statusBarStyle: 'black-translucent',
     title: 'Fluxo',
   },
-  icons: {
-    apple: '/icons/icon-192x192.png',
-    icon: '/favicon.ico',
-  },
+  openGraph: {
+    title: 'Fluxo — Vos flux financiers en toute simplicité',
+    description: 'Application de gestion financière & trésorerie intelligente',
+    images: ['/icon-512x512.png'],
+    type: 'website',
+  }
 };
 
 export const viewport: Viewport = {
@@ -72,6 +75,7 @@ export default function RootLayout({
                 <MetricsBar />
               </div>
               <Toaster position="bottom-center" />
+              <PwaInstallPrompt />
             </AuthWrapper>
           </AuthProvider>
         </ThemeProvider>

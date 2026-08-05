@@ -23,6 +23,13 @@ const DEFAULT_OPERATION_TYPES: OperationType[] = [
 // Helper to get user uid
 const getUid = () => auth.currentUser?.uid;
 
+// Helper to remove undefined values for Firebase
+const cleanForFirebase = (obj: any) => {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([_, v]) => v !== undefined)
+  );
+};
+
 // ── Store implementation ──────────────────────────────────────
 const storeCreator = (set: any, get: any): AppState & { language: 'fr' | 'en'; setLanguage: (lang: 'fr' | 'en') => void } => ({
   // ── State ──────────────────────────────────────────────
@@ -80,6 +87,31 @@ const storeCreator = (set: any, get: any): AppState & { language: 'fr' | 'en'; s
     }
   },
 
+  deleteMonth: (id: string) => {
+    set((state: AppState) => ({
+      months: state.months.filter((m) => m.id !== id),
+      operations: state.operations.filter((o) => o.monthId !== id),
+      activeMonthId: state.activeMonthId === id ? null : state.activeMonthId,
+    }));
+
+    const uid = getUid();
+    if (uid) {
+      // Create a batch to delete the month and all its operations
+      const batch = writeBatch(db);
+      
+      // Delete the month document
+      batch.delete(doc(db, 'users', uid, 'months', id));
+      
+      // Delete all operations for this month
+      const opsToDelete = get().operations.filter((o: Operation) => o.monthId === id);
+      opsToDelete.forEach((op: Operation) => {
+        batch.delete(doc(db, 'users', uid, 'operations', op.id));
+      });
+      
+      batch.commit().catch(console.error);
+    }
+  },
+
   restoreMonth: (id: string) => {
     set((state: AppState) => ({
       months: state.months.map((m) =>
@@ -109,7 +141,7 @@ const storeCreator = (set: any, get: any): AppState & { language: 'fr' | 'en'; s
 
     const uid = getUid();
     if (uid) {
-      setDoc(doc(db, 'users', uid, 'operations', newOp.id), newOp).catch(console.error);
+      setDoc(doc(db, 'users', uid, 'operations', newOp.id), cleanForFirebase(newOp)).catch(console.error);
     } else {
       toast('Attention: Vos données ne sont sauvegardées que sur ce navigateur. Connectez-vous via le menu pour ne pas les perdre !', {
         icon: '⚠️',
@@ -132,7 +164,7 @@ const storeCreator = (set: any, get: any): AppState & { language: 'fr' | 'en'; s
 
     const uid = getUid();
     if (uid) {
-      setDoc(doc(db, 'users', uid, 'operations', id), op, { merge: true }).catch(console.error);
+      setDoc(doc(db, 'users', uid, 'operations', id), cleanForFirebase(op), { merge: true }).catch(console.error);
     }
   },
 
@@ -161,7 +193,7 @@ const storeCreator = (set: any, get: any): AppState & { language: 'fr' | 'en'; s
       const batch = writeBatch(db);
       newOps.forEach(op => {
         const ref = doc(db, 'users', uid, 'operations', op.id);
-        batch.set(ref, op);
+        batch.set(ref, cleanForFirebase(op));
       });
       batch.commit().catch(console.error);
     }

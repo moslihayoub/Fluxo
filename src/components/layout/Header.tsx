@@ -9,6 +9,7 @@ import { auth, googleProvider } from '@/lib/firebase';
 import { signInWithPopup, signOut } from 'firebase/auth';
 import toast from 'react-hot-toast';
 import { useState } from 'react';
+import { getTranslation } from '@/lib/i18n';
 
 export default function Header() {
   const { theme, setTheme } = useTheme();
@@ -19,17 +20,19 @@ export default function Header() {
   const { user } = useAuth();
   const [isThemeOpen, setIsThemeOpen] = useState(false);
 
-  const navItems: { id: ActiveView; label: { fr: string, en: string }; icon: React.ElementType }[] = [
-    { id: 'months', label: { fr: 'Mois', en: 'Months' }, icon: Calendar },
-    { id: 'operations', label: { fr: 'Opérations', en: 'Operations' }, icon: BarChart2 },
-    { id: 'categories', label: { fr: 'Catégories', en: 'Categories' }, icon: Tag },
-    { id: 'dashboard', label: { fr: 'Dashboard', en: 'Dashboard' }, icon: TrendingUp },
+  const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(language, key);
+
+  const navItems: { id: ActiveView; label: string; icon: React.ElementType }[] = [
+    { id: 'dashboard', label: t('nav.dashboard'), icon: TrendingUp },
+    { id: 'months', label: t('nav.periods'), icon: Calendar },
+    { id: 'operations', label: t('nav.operations'), icon: BarChart2 },
+    { id: 'categories', label: t('nav.categories'), icon: Tag },
   ];
 
   const handleLogin = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
-      toast.success(language === 'fr' ? 'Connexion réussie !' : 'Successfully logged in!');
+      toast.success(t('nav.loginSuccess'));
     } catch (err: any) {
       console.error('Erreur Firebase Auth détaillée:', err);
       if (err.code !== 'auth/popup-closed-by-user') {
@@ -41,7 +44,7 @@ export default function Header() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      toast.success(language === 'fr' ? 'Déconnecté avec succès' : 'Logged out successfully');
+      toast.success(t('nav.signOut'));
     } catch (err) {
       console.error(err);
     }
@@ -80,7 +83,7 @@ export default function Header() {
               `}
             >
               <Icon className="w-3.5 h-3.5 flex-shrink-0" />
-              <span className="hidden sm:block">{label[language]}</span>
+              <span className="hidden sm:block">{label}</span>
             </button>
           ))}
         </nav>
@@ -89,7 +92,10 @@ export default function Header() {
         <div className="flex items-center gap-2">
           {/* Language toggle */}
           <button
-            onClick={() => setLanguage(language === 'fr' ? 'en' : 'fr')}
+            onClick={() => {
+              setLanguage(language === 'fr' ? 'en' : 'fr');
+              localStorage.setItem('language_set', 'true');
+            }}
             className="flex items-center gap-1 p-2 rounded-md text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-xs font-bold uppercase"
             aria-label="Toggle language"
           >
@@ -112,19 +118,19 @@ export default function Header() {
                   onClick={() => { setTheme('light'); setIsThemeOpen(false); }}
                   className="w-full text-left px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center gap-2"
                 >
-                  <Sun className="w-4 h-4" /> Clair
+                  <Sun className="w-4 h-4" /> {t('nav.theme.light')}
                 </button>
                 <button
                   onClick={() => { setTheme('dark'); setIsThemeOpen(false); }}
                   className="w-full text-left px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center gap-2"
                 >
-                  <Moon className="w-4 h-4" /> Sombre
+                  <Moon className="w-4 h-4" /> {t('nav.theme.dark')}
                 </button>
                 <button
                   onClick={() => { setTheme('system'); setIsThemeOpen(false); }}
                   className="w-full text-left px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center gap-2"
                 >
-                  <Monitor className="w-4 h-4" /> Système
+                  <Monitor className="w-4 h-4" /> {t('nav.theme.system')}
                 </button>
               </div>
             )}
@@ -154,7 +160,7 @@ export default function Header() {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-sm font-medium hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-colors shadow-sm"
             >
               <LogIn className="w-4 h-4" />
-              <span className="hidden sm:block">{language === 'fr' ? 'Se connecter' : 'Sign In'}</span>
+              <span className="hidden sm:block">{t('nav.signIn')}</span>
             </button>
           )}
         </div>

@@ -32,12 +32,17 @@ export const MONTH_NAMES = [
   'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre',
 ];
 
-export function formatMonth(month: number, year: number): string {
-  return `${MONTH_NAMES[month - 1]} ${year}`;
+export function formatMonth(month: number, year: number, language: string = 'fr'): string {
+  const date = new Date(year, month - 1, 1);
+  const lang = language === 'en' ? 'en-US' : 'fr-FR';
+  const monthName = new Intl.DateTimeFormat(lang, { month: 'long' }).format(date);
+  // Capitalize first letter of month
+  const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+  return `${capitalizedMonth} ${year}`;
 }
 
-export function getMonthLabel(m: Month): string {
-  return formatMonth(m.month, m.year);
+export function getMonthLabel(m: Month, language: string = 'fr'): string {
+  return formatMonth(m.month, m.year, language);
 }
 
 // ── CSV Export ────────────────────────────────────────────────

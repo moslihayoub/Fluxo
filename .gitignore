@@ -8,3 +8,7 @@ out/
 .env*.local
 dist/
 .vercel/
+
+tsconfig.tsbuildinfo
+.agents/
+generate-icons.js

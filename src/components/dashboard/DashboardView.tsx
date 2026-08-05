@@ -18,6 +18,7 @@ import { useStore } from '@/store/useStore';
 import { computeMonthTotals, formatCurrency, getMonthLabel, MONTH_NAMES } from '@/lib/utils';
 import { TrendingUp, TrendingDown, Wallet, Activity } from 'lucide-react';
 import type { MonthMetrics, TypeMetrics } from '@/types';
+import { getTranslation } from '@/lib/i18n';
 
 // Custom tooltip for dark mode
 const CustomTooltip = ({
@@ -52,12 +53,14 @@ function KPICard({
   sub,
   icon: Icon,
   color,
+  valueColor,
 }: {
   title: string;
   value: string;
   sub?: string;
   icon: React.ElementType;
   color: string;
+  valueColor?: string;
 }) {
   return (
     <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 hover:border-zinc-400 dark:hover:border-zinc-600 transition-all">
@@ -67,14 +70,15 @@ function KPICard({
           <Icon className="w-4 h-4" />
         </div>
       </div>
-      <p className="text-2xl font-bold font-mono tabular-nums text-zinc-900 dark:text-white">{value}</p>
+      <p className={`text-2xl font-bold font-mono tabular-nums ${valueColor || 'text-zinc-900 dark:text-white'}`}>{value}</p>
       {sub && <p className="text-xs text-zinc-400 mt-1">{sub}</p>}
     </div>
   );
 }
 
 export default function DashboardView() {
-  const { months, operations, operationTypes } = useStore();
+  const { months, operations, operationTypes, language } = useStore();
+  const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(language, key);
 
   // Global metrics
   const globalMetrics = useMemo(() => {
@@ -128,26 +132,26 @@ export default function DashboardView() {
   }, [operations]);
 
   const CHART_COLORS = [
-    '#71717a', '#a1a1aa', '#d4d4d8', '#e4e4e7',
-    '#52525b', '#3f3f46', '#27272a', '#18181b',
+    '#3b82f6', '#10b981', '#f59e0b', '#ef4444',
+    '#8b5cf6', '#ec4899', '#14b8a6', '#f97316',
   ];
 
   return (
     <div className="space-y-6">
       {/* Title */}
       <div>
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Dashboard</h1>
+        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">{t('dash.title')}</h1>
         <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-          Vue globale de votre activité financière
+          {t('dash.subtitle')}
         </p>
       </div>
 
       {/* KPI cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard
-          title="Solde global"
+          title={t('dash.balance')}
           value={formatCurrency(globalMetrics.soldeGlobal, true)}
-          sub={`${months.length} mois`}
+          sub={`${months.length} ${t('dash.months')}`}
           icon={Wallet}
           color={globalMetrics.soldeGlobal >= 0
             ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300'
@@ -155,36 +159,39 @@ export default function DashboardView() {
           }
         />
         <KPICard
-          title="Total encaissements"
+          title={t('dash.totalIncomes')}
           value={formatCurrency(globalMetrics.totalEncaissement)}
-          sub="Toutes périodes"
+          sub={t('dash.allPeriods')}
           icon={TrendingUp}
           color="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"
+          valueColor="text-emerald-600 dark:text-emerald-400"
         />
         <KPICard
-          title="Total décaissements"
+          title={t('dash.totalExpenses')}
           value={formatCurrency(globalMetrics.totalDecaissement)}
-          sub="Toutes périodes"
+          sub={t('dash.allPeriods')}
           icon={TrendingDown}
           color="bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400"
+          valueColor="text-rose-600 dark:text-rose-400"
         />
         <KPICard
-          title="Opérations"
+          title={t('dash.opsCount')}
           value={globalMetrics.totalOps.toString()}
-          sub={`${operationTypes.length} catégories`}
+          sub={`${operationTypes.length} ${t('dash.categories')}`}
           icon={Activity}
-          color="bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
+          color="bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400"
+          valueColor="text-sky-600 dark:text-sky-400"
         />
       </div>
 
       {/* Line chart */}
       {monthChartData.length > 0 ? (
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 sm:p-6">
           <h2 className="text-sm font-semibold text-zinc-900 dark:text-white mb-4">
-            Encaissements vs Décaissements par mois
+            {t('dash.chartTitle')}
           </h2>
           <ResponsiveContainer width="100%" height={240}>
-            <LineChart data={monthChartData} margin={{ top: 4, right: 4, left: 4, bottom: 4 }}>
+            <LineChart data={monthChartData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis dataKey="monthLabel" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
               <YAxis
@@ -200,7 +207,7 @@ export default function DashboardView() {
               <Line
                 type="monotone"
                 dataKey="totalEncaissement"
-                name="Encaissements"
+                name={t('common.incomes')}
                 stroke="#10b981"
                 strokeWidth={2}
                 dot={{ r: 4, fill: '#10b981' }}
@@ -209,7 +216,7 @@ export default function DashboardView() {
               <Line
                 type="monotone"
                 dataKey="totalDecaissement"
-                name="Décaissements"
+                name={t('common.expenses')}
                 stroke="#f43f5e"
                 strokeWidth={2}
                 dot={{ r: 4, fill: '#f43f5e' }}
@@ -220,18 +227,18 @@ export default function DashboardView() {
         </div>
       ) : (
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-8 text-center text-zinc-400">
-          <p className="text-sm">Ajoutez des opérations pour voir les graphiques</p>
+          <p className="text-sm">{t('dash.chartEmpty')}</p>
         </div>
       )}
 
       {/* Bar chart */}
       {typeChartData.length > 0 && (
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 sm:p-6">
           <h2 className="text-sm font-semibold text-zinc-900 dark:text-white mb-4">
-            Montants par catégorie d&apos;opération
+            {t('dash.catChartTitle')}
           </h2>
           <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={typeChartData} margin={{ top: 4, right: 4, left: 4, bottom: 4 }}>
+            <BarChart data={typeChartData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis
                 dataKey="label"
@@ -246,7 +253,7 @@ export default function DashboardView() {
                 tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="totalAmount" name="Montant total" radius={[4, 4, 0, 0]}>
+              <Bar dataKey="totalAmount" name={t('common.total')} radius={[4, 4, 0, 0]}>
                 {typeChartData.map((_, i) => (
                   <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
                 ))}
@@ -260,16 +267,16 @@ export default function DashboardView() {
       {monthChartData.length > 0 && (
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden">
           <div className="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
-            <h2 className="text-sm font-semibold text-zinc-900 dark:text-white">Récapitulatif par mois</h2>
+            <h2 className="text-sm font-semibold text-zinc-900 dark:text-white">{t('dash.recapTitle')}</h2>
           </div>
-          <div className="overflow-x-auto">
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-zinc-100 dark:border-zinc-800">
-                  <th className="text-left px-5 py-3 text-xs font-medium text-zinc-400 uppercase tracking-wider">Mois</th>
-                  <th className="text-right px-5 py-3 text-xs font-medium text-zinc-400 uppercase tracking-wider">Encaissements</th>
-                  <th className="text-right px-5 py-3 text-xs font-medium text-zinc-400 uppercase tracking-wider">Décaissements</th>
-                  <th className="text-right px-5 py-3 text-xs font-medium text-zinc-400 uppercase tracking-wider">Solde</th>
+                  <th className="text-left px-5 py-3 text-xs font-medium text-zinc-400 uppercase tracking-wider">{t('periods.selectMonth')}</th>
+                  <th className="text-right px-5 py-3 text-xs font-medium text-zinc-400 uppercase tracking-wider">{t('common.incomes')}</th>
+                  <th className="text-right px-5 py-3 text-xs font-medium text-zinc-400 uppercase tracking-wider">{t('common.expenses')}</th>
+                  <th className="text-right px-5 py-3 text-xs font-medium text-zinc-400 uppercase tracking-wider">{t('common.total')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
@@ -291,6 +298,40 @@ export default function DashboardView() {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile List */}
+          <div className="sm:hidden divide-y divide-zinc-100 dark:divide-zinc-800">
+            {[...monthChartData].reverse().map((m) => (
+              <div key={m.monthId} className="p-4 space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium text-zinc-900 dark:text-white">{m.monthLabel}</span>
+                  <span className={`font-mono tabular-nums font-bold ${
+                    m.solde >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+                  }`}>
+                    {formatCurrency(m.solde, true)}
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                  <div className="bg-emerald-50 dark:bg-emerald-900/20 p-2.5 rounded-lg border border-emerald-100 dark:border-emerald-900/30">
+                    <div className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1 mb-1">
+                      <TrendingUp className="w-3.5 h-3.5" /> {t('common.incomes')}
+                    </div>
+                    <div className="font-mono tabular-nums font-semibold text-emerald-700 dark:text-emerald-300">
+                      {formatCurrency(m.totalEncaissement)}
+                    </div>
+                  </div>
+                  <div className="bg-rose-50 dark:bg-rose-900/20 p-2.5 rounded-lg border border-rose-100 dark:border-rose-900/30">
+                    <div className="text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1 mb-1">
+                      <TrendingDown className="w-3.5 h-3.5" /> {t('common.expenses')}
+                    </div>
+                    <div className="font-mono tabular-nums font-semibold text-rose-700 dark:text-rose-300">
+                      {formatCurrency(m.totalDecaissement)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}

@@ -11,10 +11,12 @@ export default function Home() {
 
   return (
     <>
-      {activeView === 'months' && <MonthsView />}
-      {activeView === 'operations' && <OperationsView />}
-      {activeView === 'categories' && <CategoriesView />}
-      {activeView === 'dashboard' && <DashboardView />}
+      <div key={activeView} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+        {activeView === 'months' && <MonthsView />}
+        {activeView === 'operations' && <OperationsView />}
+        {activeView === 'categories' && <CategoriesView />}
+        {activeView === 'dashboard' && <DashboardView />}
+      </div>
     </>
   );
 }

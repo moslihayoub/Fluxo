@@ -9,6 +9,7 @@ import { auth, googleProvider } from '@/lib/firebase';
 import { signInWithPopup, signOut } from 'firebase/auth';
 import toast from 'react-hot-toast';
 import type { ActiveView } from '@/types';
+import { getTranslation } from '@/lib/i18n';
 
 export default function MobileNav() {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,17 +20,19 @@ export default function MobileNav() {
   const { theme, setTheme } = useTheme();
   const { user } = useAuth();
 
-  const navItems: { id: ActiveView; label: { fr: string, en: string }; icon: React.ElementType }[] = [
-    { id: 'months', label: { fr: 'Mois', en: 'Months' }, icon: Calendar },
-    { id: 'operations', label: { fr: 'Opérations', en: 'Operations' }, icon: BarChart2 },
-    { id: 'categories', label: { fr: 'Catégories', en: 'Categories' }, icon: Tag },
-    { id: 'dashboard', label: { fr: 'Dashboard', en: 'Dashboard' }, icon: TrendingUp },
+  const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(language, key);
+
+  const navItems: { id: ActiveView; label: string; icon: React.ElementType }[] = [
+    { id: 'dashboard', label: t('nav.dashboard'), icon: TrendingUp },
+    { id: 'months', label: t('nav.periods'), icon: Calendar },
+    { id: 'operations', label: t('nav.operations'), icon: BarChart2 },
+    { id: 'categories', label: t('nav.categories'), icon: Tag },
   ];
 
   const handleLogin = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
-      toast.success(language === 'fr' ? 'Connexion réussie !' : 'Successfully logged in!');
+      toast.success(t('nav.loginSuccess'));
     } catch (err: any) {
       if (err.code !== 'auth/popup-closed-by-user') {
         toast.error(`Erreur: ${err.message || err.code}`);
@@ -40,7 +43,7 @@ export default function MobileNav() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      toast.success(language === 'fr' ? 'Déconnecté avec succès' : 'Logged out successfully');
+      toast.success(t('nav.signOut'));
     } catch (err) {
       console.error(err);
     }
@@ -110,7 +113,7 @@ export default function MobileNav() {
                   }`}
                 >
                   <Icon className="w-5 h-5" />
-                  {label[language]}
+                  {label}
                 </button>
               ))}
             </div>
@@ -209,7 +212,7 @@ export default function MobileNav() {
                   className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-medium"
                 >
                   <LogIn className="w-4 h-4" />
-                  {language === 'fr' ? 'Se connecter avec Google' : 'Sign in with Google'}
+                  {t('nav.signIn')}
                 </button>
               )}
             </div>

@@ -1,9 +1,9 @@
-# 📊 STATUT & HISTORIQUE DU PROJET — Charges & Encaissements
+# 📊 STATUT & HISTORIQUE DU PROJET — Fluxo (Charges & Encaissements)
 
-**Date & Heure :** 3 Août 2026  
-**Application :** Charges & Encaissements (C&E Finance)  
-**URL Locale :** `http://localhost:3000`  
-**Environnement :** Next.js 14 (App Router), TypeScript, Tailwind CSS, Zustand, Recharts, Gemini 2.0 Flash, PWA.
+**Date & Heure :** 5 Août 2026  
+**Application :** Fluxo (Charges & Encaissements)  
+**URL Live :** `https://fluxofinance.vercel.app/`  
+**Environnement :** Next.js 14 (App Router), TypeScript, Tailwind CSS, Zustand, Firebase (Auth/Firestore), Recharts, Gemini 2.0 Flash, PWA.
 
 ---
 
@@ -11,47 +11,49 @@
 
 ### Phase 1 : Scaffolding & Initialisation
 - Scaffolding d'un projet Next.js 14 avec App Router et TypeScript dans `/Users/fahdrahali/Downloads/Operation`.
-- Mise en place de Zustand pour la gestion d'état globale avec persistance `localStorage`.
+- Mise en place de Zustand pour la gestion d'état globale avec persistance `localStorage` (Guest mode).
 - Configuration de la palette noir & blanc SaaS (dark/light mode).
-- Définition du Service Worker `sw.js` et du `manifest.json` pour la PWA avec icônes 192x192 et 512x512.
+- Définition du Service Worker `sw.js` et du `manifest.json` pour la PWA.
 
 ### Phase 2 : Fonctionnalités de base
-- **Gestion des mois :** Création, archivage, restauration, validation contre les doublons ("Ce mois existe déjà, choisissez une autre combinaison.").
-- **Vue Opérations :** Layout 2 colonnes (liste mois à gauche, panneau d'opérations à droite), filtres (Tout / Encaissements / Décaissements), export CSV (mois ou global), import CSV client.
+- **Gestion des mois :** Création, archivage, restauration, validation contre les doublons.
+- **Vue Opérations :** Filtres (Tout / Encaissements / Décaissements), export CSV (mois ou global), import CSV client.
 - **MetricsBar :** Barre fixe en bas de l'écran avec 3 métriques (Total encaissements, Total décaissements, Solde).
-- **Dashboard :** 4 cartes KPIs + graphiques interactifs Recharts (LineChart & BarChart par catégorie) + tableau récapitulatif.
-- **Agent AI :** API `/api/finance-agent` connectée à Google Gemini (model `gemini-2.0-flash`), acceptant texte brut ou fichier CSV/TXT/PDF et extrayant automatiquement les opérations formatées en JSON structuré.
+- **Dashboard :** 4 cartes KPIs + graphiques interactifs Recharts + tableau récapitulatif.
+- **Agent AI :** Connexion à Google Gemini (`gemini-2.0-flash`) pour l'extraction intelligente d'opérations via fichiers ou texte brut.
 
-### Phase 3 : Personnalisation Métier (Demandes utilisateur récentes)
-1. **Devise MAD :** Remplacement de l'Euro (`EUR`) par le Dirham marocain (`MAD` / `DH`) avec formatage `fr-MA`.
-2. **Ordre & Simplification du Dialog Opération :**
-   - Suppression du champ libellé explicite (le libellé est auto-rempli avec le nom de la catégorie).
-   - Ordre strict : **Type** (Encaissement/Décaissement) → **Catégorie** → **Montant (MAD)** → **Notes**.
-3. **Gestionnaire de Catégories (Nouvel Onglet "Catégories") :**
-   - Liste des catégories avec nombre d'affectations (badge), total des entrées MAD, total des sorties MAD.
-   - Recherche en temps réel.
-   - Modale d'édition (renommage rétroactif de toutes les opérations liées).
-   - Modale de suppression avec avertissement du nombre d'opérations impactées.
-   - Vue détail ("Détail" / icône œil) montrant l'historique complet des opérations associées à cette catégorie.
-4. **Icônes :** 100% des icônes de l'interface proviennent de `lucide-react`.
+### Phase 3 : Personnalisation Métier & Catégories
+1. **Devise MAD :** Utilisation du Dirham marocain (`MAD`) avec formatage `fr-MA`.
+2. **Gestionnaire de Catégories :** Liste des catégories, recherche, édition rétroactive, modale de suppression, et vue détaillée de l'historique par catégorie.
+3. **Ordre & Simplification (Dialog Opération) :** Le libellé est auto-rempli. Ordre strict : Type → Catégorie → Montant → Notes.
+
+### Phase 4 : Déploiement, Firebase & Expérience Mobile 📱 (Nouveau)
+1. **Intégration Firebase :**
+   - **Authentification (Google Auth) :** Connexion sécurisée (`signInWithPopup`).
+   - **Firestore (Base de données) :** Sauvegarde cloud automatique des opérations, types et mois synchronisée avec le compte utilisateur (`users/{uid}/...`).
+   - Mode "Invité" maintenu via `localStorage` si l'utilisateur ne souhaite pas se connecter.
+2. **Refonte Mobile UX (Audit UXSpot) :**
+   - Navigation mobile optimisée : Menu burger plein écran, et bottom navigation.
+   - Listes fluides : Remplacement de l'effet "cartes dans une carte" par des listes épurées pour aérer l'interface.
+   - Tiroirs d'actions (Bottom Sheet) : Les menus contextuels (`...`) sur mobile s'ouvrent proprement depuis le bas pour éviter d'être coupés.
+   - Espacements et Typographie ajustés pour éviter tout "étouffement" du contenu.
+   - Intégration de l'action `Détails` dans les listes mobiles.
+3. **CI/CD Vercel :** Déploiement continu configuré via GitHub. Gestion sécurisée des erreurs d'initialisation SSG (`auth/invalid-api-key`) lors de la compilation sur Vercel.
+4. **Multilingue (Préparation) :** Ajout des variables d'état `language` (FR/EN) dans Zustand pour gérer la localisation globale.
 
 ---
 
-## 🧪 2. Rapport de Test Chrome DevTools MCP
+## 🧪 2. Déploiement & Environnement
 
-Un test d'intégration automatisé a été exécuté via le serveur **chrome-devtools-mcp** sur `http://localhost:3000`.
-
-### Résultats du Test :
-- **Navigation & Chargement :** `http://localhost:3000` est accessible (HTTP 200 OK).
-- **Compilation Next.js :** 0 erreur TypeScript, 0 avertissement de build.
-- **Structure DOM Accessibility Tree (Snapshot) :**
-  ```text
-  RootWebArea "Charges & Encaissements" url="http://localhost:3000/"
-    ├── Header (Logo "C&E", Titre, Nav: "Mois", "Opérations", "Catégories", "Dashboard", Toggle Theme)
-    ├── Main Content ("Mes mois", "0 mois actif", Bouton "Nouveau mois", "Aucun mois créé")
-    └── MetricsBar ("Aucun mois sélectionné", Encaissements: 0,00 MAD, Décaissements: 0,00 MAD, Solde: +0,00 MAD)
-  ```
-- **Performance & PWA :** Service Worker `sw.js` enregistré, manifest valide, responsive mobile/desktop vérifié.
+### Variables d'environnement critiques (`.env.local` / Vercel Settings) :
+- `GEMINI_API_KEY`
+- `NEXT_PUBLIC_FIREBASE_API_KEY`
+- `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+- `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+- `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+- `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+- `NEXT_PUBLIC_FIREBASE_APP_ID`
+- `NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID`
 
 ---
 
@@ -59,45 +61,25 @@ Un test d'intégration automatisé a été exécuté via le serveur **chrome-dev
 
 ```text
 /Users/fahdrahali/Downloads/Operation/
-├── .env.local                         # Clé GEMINI_API_KEY
-├── next.config.js                     # Config Next.js + En-têtes PWA
-├── package.json                       # Dépendances nettoyées
+├── .env.local                         # Clés GEMINI et FIREBASE
+├── next.config.js                     # Config Next.js
 ├── STATUT.md                          # Ce document de statut
-├── public/
-│   ├── manifest.json                  # Manifest PWA
-│   ├── sw.js                          # Service Worker
-│   └── icons/                         # Icônes PWA (192x192 & 512x512)
-└── src/
-    ├── app/
-    │   ├── api/finance-agent/route.ts # Route API Gemini 2.0 Flash
-    │   ├── globals.css                # Style noir & blanc + animations
-    │   ├── layout.tsx                 # Root layout + SW
-    │   └── page.tsx                   # Rendu réactif des vues
-    ├── components/
-    │   ├── ThemeProvider.tsx          # Gestionnaire Dark/Light mode
-    │   ├── layout/
-    │   │   ├── Header.tsx             # Barre de navigation + onglet Catégories
-    │   │   └── MetricsBar.tsx         # Barre fixe bas de page
-    │   ├── months/
-    │   │   └── MonthsView.tsx         # Gestion des mois + modale
-    │   ├── operations/
-    │   │   ├── OperationsView.tsx     # Vue 2 colonnes opérations
-    │   │   ├── OperationDialog.tsx    # Modale création/édition (Ordre: Type -> Cat -> Montant -> Notes)
-    │   │   └── ImportDialog.tsx       # Importation CSV client
-    │   ├── categories/
-    │   │   └── CategoriesView.tsx     # Gestion complète des catégories & détail
-    │   ├── agent/
-    │   │   └── AgentDialog.tsx        # Modale de l'agent IA Gemini
-    │   └── dashboard/
-    │       └── DashboardView.tsx      # Dashboard KPIs & Recharts
-    ├── hooks/
-    │   └── useHydration.ts            # Hook d'hydratation SSR/Zustand
-    ├── store/
-    │   └── useStore.ts                # Store Zustand + persistance localStorage + singleton
-    ├── types/
-    │   └── index.ts                   # Types TypeScript
-    └── lib/
-        └── utils.ts                   # Helpers de formatage MAD & CSV
+├── src/
+│   ├── app/
+│   │   ├── api/finance-agent/route.ts # Route API Gemini 2.0 Flash
+│   │   └── page.tsx                   # Page Principale
+│   ├── components/
+│   │   ├── auth/                      # Composants Firebase Auth (AuthWrapper)
+│   │   ├── layout/                    # Header, MetricsBar, Drawer mobile
+│   │   ├── operations/                # OperationsView (Bottom Sheet) & Modales
+│   │   └── categories/                # CategoriesView
+│   ├── store/
+│   │   └── useStore.ts                # Store Zustand + Sync Firestore & LocalStorage
+│   ├── types/
+│   │   └── index.ts                   # Types (AppState, Operation, Month...)
+│   └── lib/
+│       ├── firebase.ts                # Init Firebase Client SDK (graceful SSG fallback)
+│       └── utils.ts                   # Helpers MAD & formatage
 ```
 
 ---
@@ -106,7 +88,9 @@ Un test d'intégration automatisé a été exécuté via le serveur **chrome-dev
 
 | Éléments | Statut |
 |---|---|
-| Build Production (`npm run build`) | ✅ Succès (`exit code 0`) |
-| Dev Server (`npm run dev`) | ✅ En cours (`http://localhost:3000`) |
-| DevTools MCP Audit | ✅ Validé |
-| Persistance des données | ✅ localStorage fonctionnel |
+| Build Production Vercel | ✅ Succès |
+| Authentification Firebase | ✅ Opérationnel (Domaine autorisé) |
+| Sauvegarde Firestore | ✅ Opérationnel |
+| Refonte Mobile | ✅ Terminée (Tiroirs fluides) |
+| Localisation (Langues) | 🔄 En cours / À faire |
+| Mode Système (Dark/Light) | ✅ Terminée |

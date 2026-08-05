@@ -14,6 +14,12 @@ export interface OperationType {
   kind?: Kind; // Encaissement or decaissement
 }
 
+export interface SubAmount {
+  id: string;
+  label: string;
+  value: number;
+}
+
 export interface Operation {
   id: string;
   monthId: string;
@@ -22,6 +28,7 @@ export interface Operation {
   operationTypeLabel: string;
   kind: Kind;
   amount: number; // always positive, kind determines sign
+  subAmounts?: SubAmount[];
   createdAt: string; // ISO date string
   notes?: string;
 }
@@ -72,6 +79,7 @@ export interface AppState {
   // Month actions
   addMonth: (month: number, year: number) => { success: boolean; error?: string };
   archiveMonth: (id: string) => void;
+  deleteMonth: (id: string) => void;
   restoreMonth: (id: string) => void;
   setActiveMonth: (id: string) => void;
 

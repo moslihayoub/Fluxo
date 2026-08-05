@@ -21,6 +21,7 @@ import {
 import { useStore } from '@/store/useStore';
 import { formatCurrency, getMonthLabel, MONTH_NAMES } from '@/lib/utils';
 import type { OperationType, Operation } from '@/types';
+import { getTranslation } from '@/lib/i18n';
 
 // ── Add / Edit Category Dialog ────────────────────────────────
 function CategoryDialog({
@@ -30,7 +31,8 @@ function CategoryDialog({
   category?: OperationType;
   onClose: () => void;
 }) {
-  const { operationTypes, addOperationType } = useStore();
+  const { operationTypes, addOperationType, language } = useStore();
+  const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(language, key);
   const [label, setLabel] = useState(category?.label ?? '');
   const [defaultAmount, setDefaultAmount] = useState<string>(category?.defaultAmount?.toString() ?? '');
   const [kind, setKind] = useState<'encaissement' | 'decaissement' | undefined>(category?.kind);
@@ -70,22 +72,22 @@ function CategoryDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center sm:p-4">
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-sm bg-white dark:bg-zinc-900 rounded-xl shadow-2xl border border-zinc-200 dark:border-zinc-800 animate-scale-in">
-        <div className="flex items-center justify-between p-5 border-b border-zinc-100 dark:border-zinc-800">
+      <div className="relative z-10 w-full h-full sm:h-auto sm:max-w-sm bg-white dark:bg-zinc-900 sm:rounded-xl shadow-2xl border border-zinc-200 dark:border-zinc-800 animate-scale-in flex flex-col">
+        <div className="flex items-center justify-between p-5 border-b border-zinc-100 dark:border-zinc-800 shrink-0">
           <h2 className="text-base font-semibold text-zinc-900 dark:text-white flex items-center gap-2">
             <Tag className="w-4 h-4" />
-            {category ? 'Modifier la catégorie' : 'Nouvelle catégorie'}
+            {category ? t('cat.edit') : t('cat.new')}
           </h2>
           <button onClick={onClose} className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300">
             <X className="w-4 h-4" />
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+        <form onSubmit={handleSubmit} className="p-5 space-y-4 overflow-y-auto flex-1">
           <div>
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
-              Nom de la catégorie *
+              {t('cat.label')} *
             </label>
             <input
               type="text"
@@ -99,7 +101,7 @@ function CategoryDialog({
           
           <div>
             <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">
-              Type (Optionnel)
+              {t('common.type')}
             </label>
             <div className="grid grid-cols-2 gap-2">
               <button
@@ -112,7 +114,7 @@ function CategoryDialog({
                 }`}
               >
                 <TrendingUp className="w-4 h-4" />
-                Encaissement
+                {t('common.incomes')}
               </button>
               <button
                 type="button"
@@ -124,14 +126,14 @@ function CategoryDialog({
                 }`}
               >
                 <TrendingDown className="w-4 h-4" />
-                Décaissement
+                {t('common.expenses')}
               </button>
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
-              Montant par défaut (Optionnel)
+              {t('cat.defaultAmount')}
             </label>
             <input
               type="number"
@@ -149,19 +151,19 @@ function CategoryDialog({
               {error}
             </p>
           )}
-          <div className="flex gap-2 pt-1">
+          <div className="flex gap-2 pt-1 pb-4 sm:pb-1 shrink-0">
             <button
               type="button"
               onClick={onClose}
               className="flex-1 px-4 py-2.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
             >
-              Annuler
+              {t('common.cancel')}
             </button>
             <button
               type="submit"
               className="flex-1 px-4 py-2.5 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-sm font-medium hover:bg-zinc-700 dark:hover:bg-zinc-100 transition-colors"
             >
-              {category ? 'Enregistrer' : 'Créer'}
+              {category ? t('common.save') : t('common.add')}
             </button>
           </div>
         </form>
@@ -182,17 +184,20 @@ function DeleteConfirmDialog({
   onConfirm: () => void;
   onClose: () => void;
 }) {
+  const { language } = useStore();
+  const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(language, key);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-sm bg-white dark:bg-zinc-900 rounded-xl shadow-2xl border border-zinc-200 dark:border-zinc-800 animate-scale-in">
+      <div className="relative z-10 w-full max-w-sm bg-white dark:bg-zinc-900 rounded-2xl sm:rounded-xl shadow-2xl border border-zinc-200 dark:border-zinc-800 animate-scale-in pb-safe">
         <div className="p-5">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center flex-shrink-0">
               <AlertTriangle className="w-5 h-5 text-rose-600 dark:text-rose-400" />
             </div>
             <div>
-              <h3 className="font-semibold text-zinc-900 dark:text-white">Supprimer la catégorie</h3>
+              <h3 className="font-semibold text-zinc-900 dark:text-white">{t('common.delete')} {t('common.category')}</h3>
               <p className="text-sm text-zinc-500 dark:text-zinc-400">&ldquo;{category.label}&rdquo;</p>
             </div>
           </div>
@@ -205,19 +210,19 @@ function DeleteConfirmDialog({
               </p>
             </div>
           )}
-          <div className="flex gap-2">
+          <div className="flex gap-2 pt-2">
             <button
               onClick={onClose}
               className="flex-1 px-4 py-2.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
             >
-              Annuler
+              {t('common.cancel')}
             </button>
             <button
               onClick={onConfirm}
               className="flex-1 px-4 py-2.5 rounded-lg bg-rose-600 text-white text-sm font-medium hover:bg-rose-700 transition-colors flex items-center justify-center gap-1.5"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              Supprimer
+              {t('common.delete')}
             </button>
           </div>
         </div>
@@ -355,7 +360,8 @@ function CategoryDetailPanel({
 
 // ── CategoriesView ────────────────────────────────────────────
 export default function CategoriesView() {
-  const { operationTypes, operations } = useStore();
+  const { operationTypes, operations, language } = useStore();
+  const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(language, key);
   const [search, setSearch] = useState('');
   const [showDialog, setShowDialog] = useState(false);
   const [editingCat, setEditingCat] = useState<OperationType | undefined>();
@@ -407,7 +413,7 @@ export default function CategoriesView() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="sticky top-0 z-30 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md pt-4 sm:pt-6 pb-4 flex items-center justify-between -mx-4 px-4 sm:mx-0 sm:px-0">
         <div>
           <h1 className="text-2xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
             <Tag className="w-6 h-6" />
@@ -423,17 +429,20 @@ export default function CategoriesView() {
           className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-sm font-medium hover:bg-zinc-700 dark:hover:bg-zinc-100 transition-colors shadow-sm"
         >
           <Plus className="w-4 h-4" />
-          Nouvelle catégorie
+          {t('cat.new')}
         </button>
       </div>
 
-      {/* FAB for Mobile */}
-      <button
-        onClick={() => { setEditingCat(undefined); setShowDialog(true); }}
-        className="sm:hidden fixed bottom-20 right-4 z-40 w-14 h-14 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
-      >
-        <Plus className="w-6 h-6" />
-      </button>
+      {/* FAB for Mobile - Positioned slightly higher and styled clearly */}
+      <div className="sm:hidden fixed bottom-[calc(env(safe-area-inset-bottom)+5rem)] right-4 z-40">
+        <button
+          onClick={() => { setEditingCat(undefined); setShowDialog(true); }}
+          className="px-5 h-14 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-xl flex items-center justify-center gap-2.5 hover:scale-105 active:scale-95 transition-transform border border-zinc-800 dark:border-zinc-200"
+        >
+          <Plus className="w-5 h-5" />
+          <span className="font-semibold text-sm tracking-wide">{t('cat.new')}</span>
+        </button>
+      </div>
 
       {/* Search */}
       <div className="relative">
