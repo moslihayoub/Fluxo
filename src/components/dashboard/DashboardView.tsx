@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   LineChart,
   Line,
@@ -79,27 +79,43 @@ function KPICard({
 export default function DashboardView() {
   const { months, operations, operationTypes, language } = useStore();
   const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(language, key);
+  
+  const [timeRange, setTimeRange] = useState<'1m'|'3m'|'6m'|'12m'|'all'>('1m');
+
+  const filteredMonths = useMemo(() => {
+    const sorted = months.slice().sort((a, b) => b.year - a.year || b.month - a.month);
+    if (timeRange === '1m') return sorted.slice(0, 1);
+    if (timeRange === '3m') return sorted.slice(0, 3);
+    if (timeRange === '6m') return sorted.slice(0, 6);
+    if (timeRange === '12m') return sorted.slice(0, 12);
+    return sorted;
+  }, [months, timeRange]);
+
+  const filteredMonthIds = useMemo(() => new Set(filteredMonths.map(m => m.id)), [filteredMonths]);
+
+  const filteredOperations = useMemo(() => {
+    return operations.filter(op => filteredMonthIds.has(op.monthId));
+  }, [operations, filteredMonthIds]);
 
   // Global metrics
   const globalMetrics = useMemo(() => {
-    const allOps = operations;
-    const totalEncaissement = allOps
+    const totalEncaissement = filteredOperations
       .filter((op) => op.kind === 'encaissement')
       .reduce((s, op) => s + op.amount, 0);
-    const totalDecaissement = allOps
+    const totalDecaissement = filteredOperations
       .filter((op) => op.kind === 'decaissement')
       .reduce((s, op) => s + op.amount, 0);
     return {
       soldeGlobal: totalEncaissement - totalDecaissement,
       totalEncaissement,
       totalDecaissement,
-      totalOps: allOps.length,
+      totalOps: filteredOperations.length,
     };
-  }, [operations]);
+  }, [filteredOperations]);
 
   // Per-month data for line chart (active months, sorted by date)
   const monthChartData = useMemo<MonthMetrics[]>(() => {
-    return months
+    return filteredMonths
       .slice()
       .sort((a, b) => a.year - b.year || a.month - b.month)
       .map((m) => {
@@ -112,12 +128,12 @@ export default function DashboardView() {
           solde: t.solde,
         };
       });
-  }, [months, operations]);
+  }, [filteredMonths, operations]);
 
   // Per-type data for bar chart
   const typeChartData = useMemo<TypeMetrics[]>(() => {
     const map = new Map<string, TypeMetrics>();
-    for (const op of operations) {
+    for (const op of filteredOperations) {
       const key = op.operationTypeLabel;
       if (!map.has(key)) {
         map.set(key, { label: key, totalAmount: 0, count: 0 });
@@ -129,7 +145,7 @@ export default function DashboardView() {
     return Array.from(map.values())
       .sort((a, b) => b.totalAmount - a.totalAmount)
       .slice(0, 8);
-  }, [operations]);
+  }, [filteredOperations]);
 
   const CHART_COLORS = [
     '#3b82f6', '#10b981', '#f59e0b', '#ef4444',
@@ -138,12 +154,25 @@ export default function DashboardView() {
 
   return (
     <div className="space-y-6">
-      {/* Title */}
-      <div>
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">{t('dash.title')}</h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-          {t('dash.subtitle')}
-        </p>
+      {/* Title & Filter */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">{t('dash.title')}</h1>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
+            {t('dash.subtitle')}
+          </p>
+        </div>
+        <select
+          value={timeRange}
+          onChange={(e) => setTimeRange(e.target.value as any)}
+          className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-sm rounded-lg px-3 py-2 text-zinc-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+        >
+          <option value="1m">{t('dash.filter1m')}</option>
+          <option value="3m">{t('dash.filter3m')}</option>
+          <option value="6m">{t('dash.filter6m')}</option>
+          <option value="12m">{t('dash.filter12m')}</option>
+          <option value="all">{t('dash.allPeriods')}</option>
+        </select>
       </div>
 
       {/* KPI cards */}
@@ -151,7 +180,7 @@ export default function DashboardView() {
         <KPICard
           title={t('dash.balance')}
           value={formatCurrency(globalMetrics.soldeGlobal, true)}
-          sub={`${months.length} ${t('dash.months')}`}
+          sub={timeRange === 'all' ? `${filteredMonths.length} ${t('dash.months')}` : (timeRange === '1m' ? t('dash.filter1m') : t(`dash.filter${timeRange}` as Parameters<typeof getTranslation>[1]))}
           icon={Wallet}
           color={globalMetrics.soldeGlobal >= 0
             ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300'
@@ -161,7 +190,7 @@ export default function DashboardView() {
         <KPICard
           title={t('dash.totalIncomes')}
           value={formatCurrency(globalMetrics.totalEncaissement)}
-          sub={t('dash.allPeriods')}
+          sub={timeRange === 'all' ? t('dash.allPeriods') : (timeRange === '1m' ? t('dash.filter1m') : t(`dash.filter${timeRange}` as Parameters<typeof getTranslation>[1]))}
           icon={TrendingUp}
           color="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"
           valueColor="text-emerald-600 dark:text-emerald-400"
@@ -169,15 +198,15 @@ export default function DashboardView() {
         <KPICard
           title={t('dash.totalExpenses')}
           value={formatCurrency(globalMetrics.totalDecaissement)}
-          sub={t('dash.allPeriods')}
+          sub={timeRange === 'all' ? t('dash.allPeriods') : (timeRange === '1m' ? t('dash.filter1m') : t(`dash.filter${timeRange}` as Parameters<typeof getTranslation>[1]))}
           icon={TrendingDown}
           color="bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400"
-          valueColor="text-rose-600 dark:text-rose-400"
+          valueColor="text-rose-600 dark:text-rose-500"
         />
         <KPICard
           title={t('dash.opsCount')}
           value={globalMetrics.totalOps.toString()}
-          sub={`${operationTypes.length} ${t('dash.categories')}`}
+          sub={`${operationTypes.length} catégories`}
           icon={Activity}
           color="bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400"
           valueColor="text-sky-600 dark:text-sky-400"

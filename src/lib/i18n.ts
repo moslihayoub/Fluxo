@@ -55,6 +55,10 @@ export const translations = {
     'dash.recapTitle': 'Récapitulatif par mois',
     'dash.months': 'mois',
     'dash.categories': 'catégories',
+    'dash.filter1m': 'Dernier mois',
+    'dash.filter3m': '3 derniers mois',
+    'dash.filter6m': '6 derniers mois',
+    'dash.filter12m': '12 derniers mois',
 
     // Periods (Mois)
     'periods.title': 'Périodes',
@@ -163,6 +167,10 @@ export const translations = {
     'dash.recapTitle': 'Monthly summary',
     'dash.months': 'months',
     'dash.categories': 'categories',
+    'dash.filter1m': 'Last month',
+    'dash.filter3m': 'Last 3 months',
+    'dash.filter6m': 'Last 6 months',
+    'dash.filter12m': 'Last 12 months',
 
     // Periods (Mois)
     'periods.title': 'Periods',
