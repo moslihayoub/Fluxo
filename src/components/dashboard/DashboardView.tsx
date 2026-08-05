@@ -16,7 +16,7 @@ import {
 } from 'recharts';
 import { useStore } from '@/store/useStore';
 import { computeMonthTotals, formatCurrency, getMonthLabel, MONTH_NAMES } from '@/lib/utils';
-import { TrendingUp, TrendingDown, Wallet, Activity } from 'lucide-react';
+import { TrendingUp, TrendingDown, Wallet, Activity, ChevronDown, Check, X } from 'lucide-react';
 import type { MonthMetrics, TypeMetrics } from '@/types';
 import { getTranslation } from '@/lib/i18n';
 
@@ -81,6 +81,17 @@ export default function DashboardView() {
   const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(language, key);
   
   const [timeRange, setTimeRange] = useState<'1m'|'3m'|'6m'|'12m'|'all'>('1m');
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+
+  const timeRangeOptions = [
+    { value: '1m', label: t('dash.filter1m') },
+    { value: '3m', label: t('dash.filter3m') },
+    { value: '6m', label: t('dash.filter6m') },
+    { value: '12m', label: t('dash.filter12m') },
+    { value: 'all', label: t('dash.allPeriods') },
+  ] as const;
+
+  const currentRangeLabel = timeRangeOptions.find(o => o.value === timeRange)?.label;
 
   const filteredMonths = useMemo(() => {
     const sorted = months.slice().sort((a, b) => b.year - a.year || b.month - a.month);
@@ -162,18 +173,66 @@ export default function DashboardView() {
             {t('dash.subtitle')}
           </p>
         </div>
-        <select
-          value={timeRange}
-          onChange={(e) => setTimeRange(e.target.value as any)}
-          className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-sm rounded-lg px-3 py-2 text-zinc-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+        
+        {/* Desktop Custom Select / Mobile Drawer Trigger */}
+        <button
+          onClick={() => setIsFilterDrawerOpen(true)}
+          className="flex items-center gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-sm rounded-lg px-4 py-2.5 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors w-full sm:w-auto justify-between sm:justify-start"
         >
-          <option value="1m">{t('dash.filter1m')}</option>
-          <option value="3m">{t('dash.filter3m')}</option>
-          <option value="6m">{t('dash.filter6m')}</option>
-          <option value="12m">{t('dash.filter12m')}</option>
-          <option value="all">{t('dash.allPeriods')}</option>
-        </select>
+          <span className="font-medium">{currentRangeLabel}</span>
+          <ChevronDown className="w-4 h-4 text-zinc-400" />
+        </button>
       </div>
+
+      {/* Filter Drawer / Modal */}
+      {isFilterDrawerOpen && (
+        <div className="fixed inset-0 z-50 flex sm:items-center justify-center p-0 sm:p-4 bg-zinc-900/60 backdrop-blur-sm">
+          {/* Mobile Overlay to close */}
+          <div className="absolute inset-0" onClick={() => setIsFilterDrawerOpen(false)} />
+          
+          <div className="relative bg-white dark:bg-zinc-900 w-full max-w-md sm:rounded-2xl rounded-t-2xl mt-auto sm:mt-0 max-h-[90vh] flex flex-col slide-in-from-bottom animate-in duration-300">
+            {/* Handle for mobile */}
+            <div className="w-12 h-1.5 bg-zinc-200 dark:bg-zinc-800 rounded-full mx-auto my-3 sm:hidden" />
+            
+            <div className="px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-zinc-900 dark:text-white">Sélectionner la période</h2>
+              <button 
+                onClick={() => setIsFilterDrawerOpen(false)}
+                className="p-2 -mr-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors hidden sm:block"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-2">
+              {timeRangeOptions.map((option) => {
+                const isActive = timeRange === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    onClick={() => {
+                      setTimeRange(option.value as any);
+                      setIsFilterDrawerOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-left transition-colors ${
+                      isActive 
+                        ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400' 
+                        : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
+                    }`}
+                  >
+                    <span className={`text-base sm:text-sm ${isActive ? 'font-semibold' : 'font-medium'}`}>
+                      {option.label}
+                    </span>
+                    {isActive && <Check className="w-5 h-5" />}
+                  </button>
+                );
+              })}
+            </div>
+            {/* Safe area padding for mobile */}
+            <div className="h-6 sm:hidden" />
+          </div>
+        </div>
+      )}
 
       {/* KPI cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -7,8 +7,10 @@ import { TrendingUp, TrendingDown, Wallet } from 'lucide-react';
 import { getTranslation } from '@/lib/i18n';
 
 export default function MetricsBar() {
-  const { operations, months, activeMonthId, language } = useStore();
+  const { operations, months, activeMonthId, language, activeView } = useStore();
   const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(language, key);
+
+  if (activeView === 'dashboard') return null;
 
   const activeMonth = months.find((m) => m.id === activeMonthId);
   const metrics = activeMonthId
@@ -29,6 +31,18 @@ export default function MetricsBar() {
           {/* Metrics */}
           <div className="flex gap-4 sm:gap-6 overflow-x-auto no-scrollbar pb-1 sm:pb-0 -mb-1 sm:mb-0">
             <div className="flex flex-col min-w-max">
+              <span className="text-xs sm:text-sm font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider flex items-center gap-1 mb-0.5 sm:mb-1">
+                <Wallet className="w-4 h-4" />
+                {t('common.netBalance')}
+              </span>
+              <span className="text-sm sm:text-base font-mono font-bold text-zinc-900 dark:text-white">
+                {metrics.solde >= 0 ? '+' : '−'}{formatCurrency(Math.abs(metrics.solde))}
+              </span>
+            </div>
+
+            <div className="w-px h-6 sm:h-8 bg-zinc-200 dark:bg-zinc-800 self-center shrink-0" />
+
+            <div className="flex flex-col min-w-max">
               <span className="text-xs sm:text-sm font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-0.5 sm:mb-1">
                 {t('common.incomes')}
               </span>
@@ -47,20 +61,6 @@ export default function MetricsBar() {
               <span className="flex items-center gap-1 sm:gap-1.5 text-sm sm:text-base font-mono font-bold text-rose-600 dark:text-rose-500">
                 <TrendingDown className="w-4 h-4" />
                 −{formatCurrency(metrics.totalDecaissement)}
-              </span>
-            </div>
-
-            <div className="w-px h-6 sm:h-8 bg-zinc-200 dark:bg-zinc-800 self-center shrink-0" />
-
-            <div className="flex flex-col min-w-max">
-              <span className="text-xs sm:text-sm font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider flex items-center gap-1 mb-0.5 sm:mb-1">
-                <Wallet className="w-4 h-4" />
-                {t('common.netBalance')}
-              </span>
-              <span className={`text-sm sm:text-base font-mono font-bold ${
-                metrics.solde >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-500'
-              }`}>
-                {metrics.solde >= 0 ? '+' : '−'}{formatCurrency(Math.abs(metrics.solde))}
               </span>
             </div>
           </div>
