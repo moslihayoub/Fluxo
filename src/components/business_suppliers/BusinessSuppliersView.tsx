@@ -145,9 +145,13 @@ export default function BusinessSuppliersView() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 flex items-center justify-center text-sm font-bold">
-                            <Building2 className="w-4 h-4" />
-                          </div>
+                          {supplier.avatarUrl ? (
+                            <img src={supplier.avatarUrl} alt={supplier.brandName} className="w-8 h-8 rounded-lg object-cover border border-zinc-200 dark:border-zinc-700" />
+                          ) : (
+                            <div className="w-8 h-8 rounded-lg bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 flex items-center justify-center text-sm font-bold">
+                              <Building2 className="w-4 h-4" />
+                            </div>
+                          )}
                           <div>
                             <h3 className="font-bold text-zinc-900 dark:text-white text-sm">
                               {supplier.brandName}
@@ -229,9 +233,13 @@ export default function BusinessSuppliersView() {
                   <CardContent className="p-4 flex flex-col gap-3">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 flex items-center justify-center text-lg font-bold">
-                          <Building2 className="w-5 h-5" />
-                        </div>
+                        {supplier.avatarUrl ? (
+                          <img src={supplier.avatarUrl} alt={supplier.brandName} className="w-10 h-10 rounded-xl object-cover border border-zinc-200 dark:border-zinc-700" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 flex items-center justify-center text-lg font-bold">
+                            <Building2 className="w-5 h-5" />
+                          </div>
+                        )}
                         <div>
                           <h3 className="font-bold text-zinc-900 dark:text-white flex items-center gap-1.5 text-base">
                             {supplier.brandName}

@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { Input } from '@/components/ui/Input';
 import { PhoneInput } from '@/components/ui/PhoneInput';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/Select';
-import { Camera } from 'lucide-react';
+import { AvatarUpload } from '@/components/ui/AvatarUpload';
 
 interface SupplierDialogProps {
   isOpen: boolean;
@@ -21,7 +21,8 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
   const [formData, setFormData] = useState({
     brandName: '',
     avatarUrl: '',
-    contactName: '',
+    contactFirstName: '',
+    contactLastName: '',
     phone: '',
     whatsapp: '',
     city: '',
@@ -39,10 +40,18 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
   useEffect(() => {
     if (isOpen) {
       if (supplier) {
+        let fName = supplier.contactFirstName || '';
+        let lName = supplier.contactLastName || '';
+        if (!fName && supplier.contactName) {
+          const parts = supplier.contactName.trim().split(' ');
+          fName = parts[0] || '';
+          lName = parts.slice(1).join(' ') || '';
+        }
         setFormData({
           brandName: supplier.brandName || '',
           avatarUrl: supplier.avatarUrl || '',
-          contactName: supplier.contactName || '',
+          contactFirstName: fName,
+          contactLastName: lName,
           phone: supplier.phone || '',
           whatsapp: supplier.whatsapp || '',
           city: supplier.city || '',
@@ -60,7 +69,8 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
         setFormData({
           brandName: '',
           avatarUrl: '',
-          contactName: '',
+          contactFirstName: '',
+          contactLastName: '',
           phone: '',
           whatsapp: '',
           city: '',
@@ -82,15 +92,21 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.brandName) {
+    if (!formData.brandName.trim()) {
       toast.error('La marque du fournisseur est obligatoire');
       return;
     }
 
+    const fullContactName = formData.contactFirstName.trim() || formData.contactLastName.trim()
+      ? `${formData.contactFirstName.trim()} ${formData.contactLastName.trim()}`.trim()
+      : undefined;
+
     const payload = {
-      brandName: formData.brandName,
+      brandName: formData.brandName.trim(),
       avatarUrl: formData.avatarUrl || undefined,
-      contactName: formData.contactName || undefined,
+      contactName: fullContactName,
+      contactFirstName: formData.contactFirstName.trim() || undefined,
+      contactLastName: formData.contactLastName.trim() || undefined,
       phone: formData.phone || '',
       whatsapp: formData.isWhatsappSameAsPhone ? formData.phone : (formData.whatsapp || undefined),
       city: formData.city || undefined,
@@ -135,24 +151,13 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
         <div className="flex-1 overflow-y-auto p-5">
           <form id="supplier-form" onSubmit={handleSubmit} className="space-y-6">
             
-            {/* Avatar */}
-            <div className="flex flex-col items-center justify-center mb-6">
-              <div className="relative w-20 h-20 rounded-full bg-zinc-100 dark:bg-zinc-800 border-2 border-dashed border-zinc-300 dark:border-zinc-700 flex items-center justify-center overflow-hidden group">
-                {formData.avatarUrl ? (
-                  <img src={formData.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                ) : (
-                  <Building2 className="w-8 h-8 text-zinc-400" />
-                )}
-                <div className="absolute inset-0 bg-black/50 hidden group-hover:flex items-center justify-center text-white cursor-pointer transition-all">
-                  <Camera className="w-5 h-5" />
-                </div>
-              </div>
-              <input 
-                type="url" 
-                placeholder="URL du logo (optionnel)" 
+            {/* Avatar with Dual Solution: Import or URL */}
+            <div className="mb-4">
+              <AvatarUpload
                 value={formData.avatarUrl}
-                onChange={e => setFormData({...formData, avatarUrl: e.target.value})}
-                className="mt-3 text-xs w-full max-w-[200px] text-center bg-transparent border-b border-zinc-200 dark:border-zinc-800 focus:outline-none focus:border-violet-500 pb-1"
+                onChange={(url) => setFormData({ ...formData, avatarUrl: url })}
+                defaultIcon="building"
+                shape="rounded"
               />
             </div>
 
@@ -205,15 +210,27 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
                 Contact Responsable
               </h3>
               
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase">Nom et Prénom (Optionnel)</label>
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase">Prénom du contact</label>
                   <Input
                     type="text"
-                    value={formData.contactName}
-                    onChange={(e) => setFormData({ ...formData, contactName: e.target.value })}
+                    value={formData.contactFirstName}
+                    onChange={(e) => setFormData({ ...formData, contactFirstName: e.target.value })}
                     className="mt-1"
-                    placeholder="Ex: Amine Benjelloun"
+                    placeholder="Ex: Mehdi"
+                    iconLeft={<User className="w-4 h-4" />}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase">Nom du contact (optionnel)</label>
+                  <Input
+                    type="text"
+                    value={formData.contactLastName}
+                    onChange={(e) => setFormData({ ...formData, contactLastName: e.target.value })}
+                    className="mt-1"
+                    placeholder="Ex: Alaoui"
+                    iconLeft={<User className="w-4 h-4" />}
                   />
                 </div>
               </div>

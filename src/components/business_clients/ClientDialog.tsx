@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { X, User, Phone, Mail, MapPin, Percent, Star, Camera } from 'lucide-react';
+import { X, User, Phone, Mail, MapPin, Percent, Star } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import type { BusinessClient } from '@/types';
 import { Package } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Input } from '@/components/ui/Input';
 import { PhoneInput } from '@/components/ui/PhoneInput';
+import { AvatarUpload } from '@/components/ui/AvatarUpload';
 
 interface ClientDialogProps {
   isOpen: boolean;
@@ -19,7 +20,8 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
   const businessProducts = useStore((s) => s.businessProducts) || [];
   
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     phone: '',
     email: '',
     address: '',
@@ -34,8 +36,16 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
   useEffect(() => {
     if (isOpen) {
       if (client) {
+        let fName = client.firstName || '';
+        let lName = client.lastName || '';
+        if (!fName && client.name) {
+          const parts = client.name.trim().split(' ');
+          fName = parts[0] || '';
+          lName = parts.slice(1).join(' ') || '';
+        }
         setFormData({
-          name: client.name,
+          firstName: fName,
+          lastName: lName,
           phone: client.phone,
           email: client.email || '',
           address: client.address || '',
@@ -47,7 +57,7 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
           city: client.city || ''
         });
       } else {
-        setFormData({ name: '', phone: '', email: '', address: '', isVip: false, defaultDiscountRate: '', avatarUrl: '', freeProductIds: [], clientType: 'perso', city: '' });
+        setFormData({ firstName: '', lastName: '', phone: '', email: '', address: '', isVip: false, defaultDiscountRate: '', avatarUrl: '', freeProductIds: [], clientType: 'perso', city: '' });
       }
     }
   }, [isOpen, client]);
@@ -56,13 +66,19 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.phone) {
-      toast.error('Le nom et le téléphone sont obligatoires');
+    if (!formData.firstName.trim() || !formData.phone) {
+      toast.error('Le prénom et le téléphone sont obligatoires');
       return;
     }
 
+    const fullName = formData.lastName.trim()
+      ? `${formData.firstName.trim()} ${formData.lastName.trim()}`
+      : formData.firstName.trim();
+
     const payload = {
-      name: formData.name,
+      name: fullName,
+      firstName: formData.firstName.trim(),
+      lastName: formData.lastName.trim() || undefined,
       phone: formData.phone,
       email: formData.email || undefined,
       address: formData.address || undefined,
@@ -103,40 +119,46 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
         <div className="flex-1 overflow-y-auto p-5">
           <form id="client-form" onSubmit={handleSubmit} className="space-y-4">
             
-            {/* Avatar (simulated URL input for MVP) */}
-            <div className="flex flex-col items-center justify-center mb-6">
-              <div className="relative w-20 h-20 rounded-full bg-zinc-100 dark:bg-zinc-800 border-2 border-dashed border-zinc-300 dark:border-zinc-700 flex items-center justify-center overflow-hidden group">
-                {formData.avatarUrl ? (
-                  <img src={formData.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                ) : (
-                  <User className="w-8 h-8 text-zinc-400" />
-                )}
-                <div className="absolute inset-0 bg-black/50 hidden group-hover:flex items-center justify-center text-white cursor-pointer transition-all">
-                  <Camera className="w-5 h-5" />
-                </div>
-              </div>
-              <input 
-                type="url" 
-                placeholder="URL de la photo (optionnel)" 
+            {/* Avatar with Dual Solution: Import or URL */}
+            <div className="mb-4">
+              <AvatarUpload
                 value={formData.avatarUrl}
-                onChange={e => setFormData({...formData, avatarUrl: e.target.value})}
-                className="mt-3 text-xs w-full max-w-[200px] text-center bg-transparent border-b border-zinc-200 dark:border-zinc-800 focus:outline-none focus:border-violet-500 pb-1"
+                onChange={(url) => setFormData({ ...formData, avatarUrl: url })}
+                defaultIcon="user"
+                shape="circle"
               />
             </div>
 
             {/* Infos de base */}
             <div className="space-y-4">
-              <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase">Nom Complet *</label>
-                <Input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="mt-1"
-                  placeholder="Ex: Youssef Benjelloun"
-                  iconLeft={<User className="w-4 h-4" />}
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase">
+                    Prénom *
+                  </label>
+                  <Input
+                    type="text"
+                    required
+                    value={formData.firstName}
+                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                    className="mt-1"
+                    placeholder="Ex: Youssef"
+                    iconLeft={<User className="w-4 h-4" />}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase">
+                    Nom (optionnel)
+                  </label>
+                  <Input
+                    type="text"
+                    value={formData.lastName}
+                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                    className="mt-1"
+                    placeholder="Ex: Benjelloun"
+                    iconLeft={<User className="w-4 h-4" />}
+                  />
+                </div>
               </div>
 
               <div>

@@ -106,6 +106,8 @@ export interface BusinessSupplier {
   brandName: string;
   avatarUrl?: string;
   contactName?: string;
+  contactFirstName?: string;
+  contactLastName?: string;
   phone: string;
   whatsapp?: string;
   city?: string;
@@ -143,6 +145,8 @@ export interface BusinessProduct {
 export interface BusinessClient {
   id: string;
   name: string;
+  firstName?: string;
+  lastName?: string;
   phone: string;
   email?: string;
   avatarUrl?: string;

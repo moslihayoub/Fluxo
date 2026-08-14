@@ -69,6 +69,8 @@ export const BusinessSupplierSchema = z.object({
   brandName: z.string().min(1),
   avatarUrl: z.string().optional(),
   contactName: z.string().optional(),
+  contactFirstName: z.string().optional(),
+  contactLastName: z.string().optional(),
   phone: z.string(),
   whatsapp: z.string().optional(),
   city: z.string().optional(),
@@ -106,6 +108,8 @@ export const BusinessProductSchema = z.object({
 export const BusinessClientSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
   phone: z.string(),
   email: z.string().email().optional().or(z.literal('')),
   avatarUrl: z.string().optional(),
