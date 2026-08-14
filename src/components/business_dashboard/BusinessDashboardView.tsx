@@ -10,6 +10,7 @@ import OrderDialog from '@/components/business_orders/OrderDialog';
 import PayPalSupportCard from '@/components/widgets/PayPalSupportCard';
 import GuestWarningBanner from '@/components/widgets/GuestWarningBanner';
 import { ScrollReveal } from '@/components/ui/Animation';
+import { formatCurrency } from '@/lib/utils';
 
 export default function BusinessDashboardView() {
   const orders = useStore((s) => s.businessOrders);
@@ -87,11 +88,6 @@ export default function BusinessDashboardView() {
         ))}
       </div>
     );
-  };
-
-  const formatCurrency = (amount: number) => {
-    const safe = isNaN(amount) ? 0 : amount;
-    return new Intl.NumberFormat('fr-MA', { style: 'currency', currency: 'MAD' }).format(safe);
   };
 
   const exportToCSV = () => {
@@ -191,7 +187,7 @@ export default function BusinessDashboardView() {
             <h3 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">{language === 'fr' ? 'Chiffre d\'Affaires' : 'Revenue'}</h3>
           </div>
           <p className={`text-2xl font-black ${totalCA > 0 ? 'text-blue-600 dark:text-blue-400' : 'text-zinc-900 dark:text-white'}`}>
-            {totalCA} DH
+            {formatCurrency(totalCA, false, 'DH')}
           </p>
         </div>
 
@@ -203,7 +199,9 @@ export default function BusinessDashboardView() {
             </div>
             <h3 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">{language === 'fr' ? 'Bénéfice Net' : 'Net Profit'}</h3>
           </div>
-          <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{totalProfit} DH</p>
+          <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
+            {formatCurrency(totalProfit, false, 'DH')}
+          </p>
         </div>
 
         {/* KPI: Impayés */}
@@ -214,7 +212,9 @@ export default function BusinessDashboardView() {
             </div>
             <h3 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">{language === 'fr' ? 'Reste à recouvrer' : 'Unpaid Balance'}</h3>
           </div>
-          <p className="text-2xl font-black text-rose-600 dark:text-rose-400">{totalPending} DH</p>
+          <p className="text-2xl font-black text-rose-600 dark:text-rose-400">
+            {formatCurrency(totalPending, false, 'DH')}
+          </p>
         </div>
 
         {/* KPI: Ventes */}

@@ -91,9 +91,14 @@ export default function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModal
       { name: 'Paramètres Entreprise Pro', view: 'business_settings' as ActiveView, mode: 'business' as const, icon: <Settings className="w-4 h-4 text-violet-500" /> },
     ];
 
+    if (!query) {
+      return [];
+    }
+
+    // 1. Navigation shortcuts
     navItems.forEach((nav) => {
       const navNorm = nav.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-      if (!query || navNorm.includes(query)) {
+      if (navNorm.includes(query)) {
         results.push({
           id: `nav-${nav.view}-${nav.mode}`,
           title: nav.name,
@@ -265,7 +270,13 @@ export default function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModal
 
         {/* Suggestions / Results list */}
         <div className="flex-1 overflow-y-auto p-2 divide-y divide-zinc-100 dark:divide-zinc-800/40">
-          {searchResults.length === 0 ? (
+          {!globalSearch.trim() ? (
+            <div className="py-12 text-center text-zinc-400">
+              <Search className="w-8 h-8 mx-auto mb-2 text-violet-500/50 animate-pulse" />
+              <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Tapez pour rechercher...</p>
+              <p className="text-xs text-zinc-400 mt-1">Clients, Fournisseurs, Produits, Factures, Pages et Opérations</p>
+            </div>
+          ) : searchResults.length === 0 ? (
             <div className="py-12 text-center text-zinc-400">
               <Search className="w-8 h-8 mx-auto mb-2 opacity-30" />
               <p className="text-sm font-medium">Aucun résultat trouvé pour "{globalSearch}"</p>

@@ -52,13 +52,13 @@ export default function Home() {
           {activeView === 'operations' && <OperationsView />}
           {activeView === 'categories' && <CategoriesView />}
           {activeView === 'dashboard' && workspaceMode === 'personal' && <DashboardView />}
-          {activeView === 'dashboard' && workspaceMode === 'business' && <BusinessDashboardView />}
+          {(activeView === 'dashboard' || activeView === 'business_dashboard') && workspaceMode === 'business' && <BusinessDashboardView />}
           {activeView === 'business_clients' && <BusinessClientsView />}
-          {(activeView as any) === 'business_suppliers' && <BusinessSuppliersView />}
+          {activeView === 'business_suppliers' && <BusinessSuppliersView />}
           {activeView === 'business_products' && <BusinessProductsView />}
           {activeView === 'business_orders' && <BusinessOrdersView />}
           {activeView === 'business_fees' && <BusinessFeesView />}
-          {activeView === 'business_settings' && <BusinessSettingsView />}
+          {(activeView === 'business_settings' || activeView === 'settings') && <BusinessSettingsView />}
           {activeView === 'new_sale' && <NewSalePage />}
         </PageTransition>
       </AnimatePresence>

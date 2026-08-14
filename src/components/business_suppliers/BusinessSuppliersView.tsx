@@ -201,7 +201,7 @@ export default function BusinessSuppliersView() {
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger>
-                            <button className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800 opacity-0 group-hover:opacity-100 focus:opacity-100">
+                            <button className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800 focus:outline-none">
                               <MoreHorizontal className="w-4 h-4" />
                             </button>
                           </DropdownMenuTrigger>

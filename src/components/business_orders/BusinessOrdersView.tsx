@@ -7,6 +7,7 @@ import type { BusinessOrder } from '@/types';
 import OrderDialog from './OrderDialog';
 import InvoiceDialog from './InvoiceDialog';
 import { exportToCSV } from '@/lib/exportUtils';
+import { formatCurrency, fromCents } from '@/lib/utils';
 import {
   Table,
   TableBody,
@@ -73,10 +74,6 @@ export default function BusinessOrdersView() {
     setIsInvoiceOpen(true);
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-MA', { style: 'currency', currency: 'MAD' }).format(amount);
-  };
-
   const handleExport = () => {
     const headers = [
       'Numéro de Commande', 'Date', 'Client', 'Produit', 'Quantité', 
@@ -89,11 +86,11 @@ export default function BusinessOrdersView() {
       o.clientName,
       (o.items && o.items.length > 0) ? o.items.map(i => `${i.productName} (x${i.quantity})`).join(', ') : o.productName,
       (o.items && o.items.length > 0) ? o.items.reduce((acc, i) => acc + i.quantity, 0) : o.quantity,
-      o.amountHT_cents,
-      o.amountTVA_cents,
-      o.amountTTC_cents,
-      o.advancePaid_cents,
-      o.remainingBalance_cents,
+      fromCents(o.amountHT_cents || 0),
+      fromCents(o.amountTVA_cents || 0),
+      fromCents(o.amountTTC_cents || 0),
+      fromCents(o.advancePaid_cents || 0),
+      fromCents(o.remainingBalance_cents || 0),
       o.paymentStatus === 'paid' ? 'Payé' : o.paymentStatus === 'partial' ? 'Partiel' : 'Impayé'
     ]);
     exportToCSV('ventes', headers, data);
@@ -183,11 +180,11 @@ export default function BusinessOrdersView() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="font-black text-sm text-zinc-900 dark:text-white">
-                        {formatCurrency(order.amountTTC_cents)}
+                        {formatCurrency(fromCents(order.amountTTC_cents || (order as any).totalAmount_cents || 0))}
                       </div>
-                      {order.remainingBalance_cents > 0 && (
+                      {Boolean(order.remainingBalance_cents && order.remainingBalance_cents > 0) && (
                         <div className="text-xs font-bold text-rose-500">
-                          Reste: {formatCurrency(order.remainingBalance_cents)}
+                          Reste: {formatCurrency(fromCents(order.remainingBalance_cents))}
                         </div>
                       )}
                     </TableCell>
@@ -196,9 +193,8 @@ export default function BusinessOrdersView() {
                     </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
-                        <DropdownMenuTrigger className="inline-flex items-center justify-center h-8 px-2.5 text-xs font-semibold gap-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
-                          <MoreHorizontal className="w-3.5 h-3.5 text-zinc-500" />
-                          Actions
+                        <DropdownMenuTrigger className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800 focus:outline-none">
+                          <MoreHorizontal className="w-4 h-4" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           {order.paymentStatus !== 'paid' && (
@@ -259,9 +255,8 @@ export default function BusinessOrdersView() {
                     </div>
                     <div className="relative ml-2 shrink-0">
                       <DropdownMenu>
-                        <DropdownMenuTrigger className="inline-flex items-center justify-center h-8 px-2 text-xs font-semibold gap-1 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
-                          <MoreHorizontal className="w-3.5 h-3.5" />
-                          Actions
+                        <DropdownMenuTrigger className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800 focus:outline-none">
+                          <MoreHorizontal className="w-4 h-4" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           {order.paymentStatus !== 'paid' && (
@@ -291,11 +286,11 @@ export default function BusinessOrdersView() {
                   <div className="flex items-center justify-between pt-3 border-t border-zinc-100 dark:border-zinc-800">
                     <div>
                       <div className="font-black text-lg text-zinc-900 dark:text-white">
-                        {formatCurrency(order.amountTTC_cents)}
+                        {formatCurrency(fromCents(order.amountTTC_cents || (order as any).totalAmount_cents || 0))}
                       </div>
-                      {order.remainingBalance_cents > 0 && (
+                      {Boolean(order.remainingBalance_cents && order.remainingBalance_cents > 0) && (
                         <div className="text-xs font-bold text-rose-500">
-                          Reste: {formatCurrency(order.remainingBalance_cents)}
+                          Reste: {formatCurrency(fromCents(order.remainingBalance_cents))}
                         </div>
                       )}
                     </div>

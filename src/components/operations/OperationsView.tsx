@@ -118,26 +118,25 @@ function OperationsTable({
                 <TableCell className="text-right">
                   {!(op as any).isVirtual && (
                     <DropdownMenu>
-                      <DropdownMenuTrigger className="inline-flex items-center justify-center h-8 px-2.5 text-xs font-semibold gap-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
-                      <MoreHorizontal className="w-3.5 h-3.5 text-zinc-500" />
-                      Actions
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onEdit(op)}>
-                        <Eye className="w-4 h-4 mr-2" />
-                        {t('common.details')}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onEdit(op)}>
-                        <Pencil className="w-4 h-4 mr-2" />
-                        {t('common.edit')}
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => setOpToDelete(op.id)} className="text-rose-600 focus:bg-rose-50 focus:text-rose-600 dark:focus:bg-rose-900/20 dark:focus:text-rose-400">
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        {t('common.delete')}
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                      <DropdownMenuTrigger className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800 focus:outline-none">
+                        <MoreHorizontal className="w-4 h-4" />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => onEdit(op)}>
+                          <Eye className="w-4 h-4 mr-2" />
+                          {t('common.details')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onEdit(op)}>
+                          <Pencil className="w-4 h-4 mr-2" />
+                          {t('common.edit')}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => setOpToDelete(op.id)} className="text-rose-600 focus:bg-rose-50 focus:text-rose-600 dark:focus:bg-rose-900/20 dark:focus:text-rose-400">
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          {t('common.delete')}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   )}
                 </TableCell>
               </TableRow>
@@ -159,11 +158,10 @@ function OperationsTable({
                 <div className="relative ml-2 shrink-0">
                   {!(op as any).isVirtual && (
                     <DropdownMenu>
-                      <DropdownMenuTrigger className="inline-flex items-center justify-center h-8 px-2 text-xs font-semibold gap-1 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
-                      <MoreHorizontal className="w-3.5 h-3.5" />
-                      Actions
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
+                      <DropdownMenuTrigger className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800 focus:outline-none">
+                        <MoreHorizontal className="w-4 h-4" />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => onEdit(op)}>
                         <Eye className="w-4 h-4 mr-2" />
                         {t('common.details')}

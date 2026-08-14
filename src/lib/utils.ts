@@ -27,19 +27,21 @@ export function fromCents(cents: number): number {
   return cents / 100;
 }
 
-// ── Currency formatting ───────────────────────────────────────
-export function formatCurrency(amount: number, signed = false): string {
-  const formatted = new Intl.NumberFormat('fr-MA', {
-    style: 'currency',
-    currency: 'MAD',
-    minimumFractionDigits: 2,
+// ── Currency & Number formatting ──────────────────────────────
+export function formatAmount(amount: number): string {
+  const safe = isNaN(amount) ? 0 : amount;
+  const hasDecimals = Math.abs(safe % 1) > 0.001;
+  return new Intl.NumberFormat('fr-FR', {
+    minimumFractionDigits: hasDecimals ? 2 : 0,
     maximumFractionDigits: 2,
-  }).format(Math.abs(amount));
+  }).format(safe).replace(/[\u202f\u00a0]/g, ' ');
+}
 
-  if (signed) {
-    return amount >= 0 ? `+${formatted}` : `-${formatted}`;
-  }
-  return formatted;
+export function formatCurrency(amount: number, signed = false, currency = 'MAD'): string {
+  const safe = isNaN(amount) ? 0 : amount;
+  const absFormatted = formatAmount(Math.abs(safe));
+  const sign = safe < 0 ? '-' : signed ? '+' : '';
+  return `${sign}${absFormatted} ${currency}`.trim();
 }
 
 // ── Month name helpers ────────────────────────────────────────

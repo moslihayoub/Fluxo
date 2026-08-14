@@ -197,9 +197,9 @@ export default function BusinessSettingsView() {
           {/* TAB: PROFILE */}
           {activeTab === 'profile' && (
             <ScrollReveal className="space-y-8">
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <h2 className="text-lg font-semibold text-zinc-900 dark:text-white border-b border-zinc-100 dark:border-zinc-800 pb-2">Identité Visuelle</h2>
-                <div className="flex flex-col sm:flex-row items-center gap-6">
+                <div className="space-y-4">
                   <AvatarUpload
                     value={logoBase64}
                     onChange={setLogoBase64}
@@ -207,17 +207,15 @@ export default function BusinessSettingsView() {
                     shape="rounded"
                     label="Logo Entreprise"
                   />
-                  <div className="flex-1 w-full space-y-4">
-                    <div>
-                      <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Nom de l'entreprise</label>
-                      <Input
-                        type="text"
-                        value={companyName}
-                        onChange={e => setCompanyName(e.target.value)}
-                        placeholder="Fluxo LLC"
-                        enableCopy
-                      />
-                    </div>
+                  <div className="max-w-md">
+                    <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1.5">Nom de l'entreprise</label>
+                    <Input
+                      type="text"
+                      value={companyName}
+                      onChange={e => setCompanyName(e.target.value)}
+                      placeholder="Fluxo LLC"
+                      enableCopy
+                    />
                   </div>
                 </div>
               </div>
