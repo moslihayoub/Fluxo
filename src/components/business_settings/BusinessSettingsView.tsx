@@ -16,9 +16,17 @@ import AdminStackView from '@/components/admin/AdminStackView';
 type Tab = 'profile' | 'localization' | 'fiscality' | 'documents' | 'advanced' | 'logs' | 'stack';
 
 export default function BusinessSettingsView() {
-  const { businessSettings, setBusinessSettings, businessProfileType, linkProGainsToPerso, setLinkProGainsToPerso } = useStore();
+  const { businessSettings, setBusinessSettings, businessProfileType, linkProGainsToPerso, setLinkProGainsToPerso, workspaceMode } = useStore();
+  const isPersonal = workspaceMode === 'personal';
   
-  const [activeTab, setActiveTab] = useState<Tab>('profile');
+  const [activeTab, setActiveTab] = useState<Tab>(isPersonal ? 'localization' : 'profile');
+  
+  // Auto-switch to valid tab if current tab is not available in personal mode
+  useEffect(() => {
+    if (isPersonal && (activeTab === 'profile' || activeTab === 'fiscality' || activeTab === 'documents')) {
+      setActiveTab('localization');
+    }
+  }, [isPersonal, activeTab]);
   
   // Profile
   const [companyName, setCompanyName] = useState(businessSettings.companyName || '');
@@ -130,10 +138,14 @@ export default function BusinessSettingsView() {
   const isAdmin = isDev || user?.email === 'moslihayoub@gmail.com' || (Boolean(user?.email) && user!.email!.includes('moslih'));
 
   const tabs = [
-    { id: 'profile', label: 'Profil & Entreprise', icon: Building2 },
+    ...(!isPersonal ? [
+      { id: 'profile', label: 'Profil & Entreprise', icon: Building2 },
+    ] : []),
     { id: 'localization', label: 'Pays & Devises', icon: Globe },
-    { id: 'fiscality', label: 'Fiscalité & Taxes', icon: Calculator },
-    { id: 'documents', label: 'Documents & Paiements', icon: FileText },
+    ...(!isPersonal ? [
+      { id: 'fiscality', label: 'Fiscalité & Taxes', icon: Calculator },
+      { id: 'documents', label: 'Documents & Paiements', icon: FileText },
+    ] : []),
     ...(isAdmin ? [
       { id: 'logs', label: 'Logs & Audit Système', icon: Terminal },
       { id: 'stack', label: 'Stack & Architecture AI', icon: Layers },
@@ -148,7 +160,9 @@ export default function BusinessSettingsView() {
           <Settings2 className="w-6 h-6" /> Hub de Paramétrage
         </h1>
         <p className="text-sm text-zinc-500 mt-1">
-          Configurez votre environnement de travail (Identité, Localisation, Impôts, Documents).
+          {isPersonal 
+            ? 'Configurez vos préférences régionales et paramètres personnels.' 
+            : 'Configurez votre environnement d\'entreprise (Identité, Fiscalité, Factures, Devises).'}
         </p>
       </div>
 
