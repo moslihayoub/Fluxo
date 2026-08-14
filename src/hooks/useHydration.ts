@@ -7,12 +7,12 @@ export function useHydration() {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    // Sync with Zustand persist state
+    if (useStore.persist.hasHydrated()) {
+      setHydrated(true);
+    }
     const unsubscribe = useStore.persist.onFinishHydration(() => {
       setHydrated(true);
     });
-
-    setHydrated(useStore.persist.hasHydrated());
 
     return () => {
       unsubscribe();

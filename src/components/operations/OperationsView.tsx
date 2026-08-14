@@ -366,7 +366,7 @@ export default function OperationsView() {
                           <span className={`text-xs sm:text-[10px] font-mono tabular-nums ml-1 ${
                             t.solde >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500'
                           }`}>
-                            {t.solde >= 0 ? '+' : ''}{(t.solde / 1000).toFixed(1)}k
+                            {t.solde >= 0 ? '+' : ''}{(fromCents(t.solde) / 1000).toFixed(1)}k
                           </span>
                         </button>
                       );
@@ -448,7 +448,7 @@ export default function OperationsView() {
                         {metrics.count} opération{metrics.count > 1 ? 's' : ''} ·{' '}
                         Solde&nbsp;
                         <span className={`font-mono ${metrics.solde >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500'}`}>
-                          {formatCurrency(metrics.solde, true)}
+                          {formatCurrency(fromCents(metrics.solde), true)}
                         </span>
                       </p>
                     )}

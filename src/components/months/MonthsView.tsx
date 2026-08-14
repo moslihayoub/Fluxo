@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Plus, Archive, RotateCcw, Eye, TrendingUp, TrendingDown, Trash2, Download, CheckSquare, Square } from 'lucide-react';
 import { useStore } from '@/store/useStore';
-import { formatCurrency, computeMonthTotals, getMonthLabel, MONTH_NAMES, exportCSV } from '@/lib/utils';
+import { formatCurrency, computeMonthTotals, getMonthLabel, MONTH_NAMES, exportCSV, fromCents } from '@/lib/utils';
 import type { Month, Operation } from '@/types';
 import { getTranslation } from '@/lib/i18n';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
@@ -224,7 +224,7 @@ function MonthCard({ month, isSelectionMode, isSelected, onSelect, onLongPress }
               ? 'text-red-600 dark:text-red-400'
               : 'text-zinc-900 dark:text-white'
           }`}>
-            {formatCurrency(metrics.solde, true)}
+            {formatCurrency(fromCents(metrics.solde), true)}
           </p>
           <p className="text-xs text-zinc-400">{metrics.count} op{metrics.count > 1 ? 's' : ''}</p>
         </div>
@@ -238,7 +238,7 @@ function MonthCard({ month, isSelectionMode, isSelected, onSelect, onLongPress }
             <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">{t('common.incomes')}</span>
           </div>
           <p className="text-sm font-semibold font-mono tabular-nums text-emerald-700 dark:text-emerald-300">
-            {formatCurrency(metrics.totalEncaissement)}
+            {formatCurrency(fromCents(metrics.totalEncaissement))}
           </p>
         </div>
         <div className="bg-rose-50 dark:bg-rose-900/20 rounded-lg p-2.5">
@@ -247,7 +247,7 @@ function MonthCard({ month, isSelectionMode, isSelected, onSelect, onLongPress }
             <span className="text-xs text-rose-600 dark:text-rose-400 font-medium">{t('common.expenses')}</span>
           </div>
           <p className="text-sm font-semibold font-mono tabular-nums text-rose-700 dark:text-rose-300">
-            {formatCurrency(metrics.totalDecaissement)}
+            {formatCurrency(fromCents(metrics.totalDecaissement))}
           </p>
         </div>
       </div>

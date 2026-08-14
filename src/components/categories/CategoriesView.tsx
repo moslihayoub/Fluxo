@@ -304,13 +304,13 @@ function CategoryDetailPanel({
             <p className="text-xs text-emerald-600 dark:text-emerald-400 mb-1 flex items-center justify-center gap-0.5">
               <TrendingUp className="w-3 h-3" /> Entrées
             </p>
-            <p className="text-xs font-bold font-mono tabular-nums text-emerald-700 dark:text-emerald-300 truncate">{formatCurrency(totalEnc)}</p>
+            <p className="text-xs font-bold font-mono tabular-nums text-emerald-700 dark:text-emerald-300 truncate">{formatCurrency(fromCents(totalEnc))}</p>
           </div>
           <div className="bg-rose-50 dark:bg-rose-900/20 rounded-lg p-3 text-center">
             <p className="text-xs text-rose-600 dark:text-rose-400 mb-1 flex items-center justify-center gap-0.5">
               <TrendingDown className="w-3 h-3" /> Sorties
             </p>
-            <p className="text-xs font-bold font-mono tabular-nums text-rose-700 dark:text-rose-300 truncate">{formatCurrency(totalDec)}</p>
+            <p className="text-xs font-bold font-mono tabular-nums text-rose-700 dark:text-rose-300 truncate">{formatCurrency(fromCents(totalDec))}</p>
           </div>
         </div>
       </div>
@@ -568,7 +568,7 @@ export default function CategoriesView() {
                       <span className={`text-xs font-mono tabular-nums font-medium ${
                         cat.solde > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
                       }`}>
-                        {cat.solde > 0 ? '+' : ''}{formatCurrency(cat.solde)}
+                        {cat.solde > 0 ? '+' : ''}{formatCurrency(fromCents(cat.solde))}
                       </span>
                     ) : (
                       <span className="text-xs font-mono text-zinc-400">—</span>
@@ -672,7 +672,7 @@ export default function CategoriesView() {
                     <div className="flex flex-col items-end">
                       <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold">Total</span>
                       <span className={`text-sm font-mono font-bold ${cat.solde > 0 ? 'text-emerald-600 dark:text-emerald-400' : cat.solde < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-zinc-500'}`}>
-                        {cat.solde > 0 ? '+' : ''}{cat.solde !== 0 ? formatCurrency(cat.solde) : '—'}
+                        {cat.solde > 0 ? '+' : ''}{cat.solde !== 0 ? formatCurrency(fromCents(cat.solde)) : '—'}
                       </span>
                     </div>
                   </div>

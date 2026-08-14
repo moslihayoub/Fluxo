@@ -1,7 +1,7 @@
 'use client';
 
 import { useStore } from '@/store/useStore';
-import { formatCurrency, computeMonthTotals, getMonthLabel } from '@/lib/utils';
+import { formatCurrency, computeMonthTotals, getMonthLabel, fromCents } from '@/lib/utils';
 import { TrendingUp, TrendingDown, Wallet } from 'lucide-react';
 
 import { getTranslation } from '@/lib/i18n';
@@ -39,7 +39,7 @@ export default function MetricsBar() {
                   {t('common.netBalance')}
                 </span>
                 <span className="text-sm sm:text-base font-mono font-bold text-zinc-900 dark:text-white">
-                  {metrics.solde >= 0 ? '+' : '−'}{formatCurrency(Math.abs(metrics.solde))}
+                  {metrics.solde >= 0 ? '+' : '−'}{formatCurrency(fromCents(Math.abs(metrics.solde)))}
                 </span>
               </div>
 
@@ -51,7 +51,7 @@ export default function MetricsBar() {
                 </span>
                 <span className="flex items-center gap-1 sm:gap-1.5 text-sm sm:text-base font-mono font-bold text-emerald-600 dark:text-emerald-400">
                   <TrendingUp className="w-4 h-4" />
-                  +{formatCurrency(metrics.totalEncaissement)}
+                  +{formatCurrency(fromCents(metrics.totalEncaissement))}
                 </span>
               </div>
 
@@ -63,7 +63,7 @@ export default function MetricsBar() {
                 </span>
                 <span className="flex items-center gap-1 sm:gap-1.5 text-sm sm:text-base font-mono font-bold text-rose-600 dark:text-rose-500">
                   <TrendingDown className="w-4 h-4" />
-                  −{formatCurrency(metrics.totalDecaissement)}
+                  −{formatCurrency(fromCents(metrics.totalDecaissement))}
                 </span>
               </div>
             </div>
