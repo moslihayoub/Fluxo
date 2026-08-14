@@ -146,7 +146,7 @@ export default function BusinessDashboard({
       .map(([name, amount_cents]) => ({ name, amount: fromCents(amount_cents) }))
       .sort((a, b) => b.amount - a.amount)
       .slice(0, 5); // Top 5
-  }, [monthOrders, monthFees, businessSuppliers]);
+  }, [monthOrders, monthFees]);
 
   return (
     <div className="space-y-6">

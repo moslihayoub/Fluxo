@@ -8,8 +8,6 @@ import { getTranslation } from '@/lib/i18n';
 
 export default function PwaInstallPrompt() {
   const { language } = useStore();
-  const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(language, key);
-  
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
   useEffect(() => {
@@ -23,6 +21,7 @@ export default function PwaInstallPrompt() {
   }, []);
 
   useEffect(() => {
+    const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(language, key);
     if (deferredPrompt && !sessionStorage.getItem('pwa_prompt_shown')) {
       toast.custom((tItem) => (
         <div className={`${tItem.visible ? 'animate-in fade-in slide-in-from-bottom-5' : 'animate-out fade-out slide-out-to-bottom-5'} max-w-sm w-full bg-white dark:bg-zinc-900 shadow-xl rounded-xl p-4 border border-zinc-200 dark:border-zinc-800 pointer-events-auto`}>
@@ -72,7 +71,7 @@ export default function PwaInstallPrompt() {
         position: 'bottom-center',
       });
     }
-  }, [deferredPrompt, language, t]);
+  }, [deferredPrompt, language]);
 
   return null;
 }
