@@ -167,13 +167,20 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
 
   return (
     <div className="fixed inset-0 z-[110] flex items-center justify-center sm:block p-4 sm:p-0">
-      <div className="absolute sm:fixed inset-0 bg-zinc-950/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={handleClose} />
+      <div 
+        className="absolute sm:fixed inset-0 bg-zinc-950/50 backdrop-blur-sm animate-in fade-in duration-200" 
+        onClick={() => {
+          if (typeof window !== 'undefined' && window.innerWidth < 640) {
+            handleClose();
+          }
+        }} 
+      />
       <div className="relative sm:fixed sm:inset-y-0 sm:right-0 z-10 bg-white dark:bg-zinc-900 w-full max-w-md sm:max-w-none sm:w-[50%] rounded-3xl sm:rounded-none sm:rounded-l-3xl shadow-xl overflow-hidden flex flex-col max-h-[90vh] sm:max-h-none sm:h-full animate-in fade-in sm:slide-in-from-right duration-300">
         
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-zinc-100 dark:border-zinc-800">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white flex items-center justify-center">
               <Building2 className="w-5 h-5" />
             </div>
             <h2 className="text-lg font-bold text-zinc-900 dark:text-white">
@@ -189,20 +196,47 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
         <div className="flex-1 overflow-y-auto p-5">
           <form id="supplier-form" onSubmit={handleSubmit} className="space-y-6">
             
-            {/* Avatar with Dual Solution: Import or URL */}
-            <div className="mb-4">
+            {/* Avatar and Type */}
+            <div className="mb-4 space-y-4">
               <AvatarUpload
                 value={formData.avatarUrl}
                 onChange={(url) => setFormData({ ...formData, avatarUrl: url })}
                 defaultIcon="building"
                 shape="rounded"
               />
+              
+              <div>
+                <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-lg p-1 w-full h-11 items-center">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, merchandiseType: 'physical' })}
+                    className={`flex-1 h-full text-sm font-medium rounded-md transition-all flex items-center justify-center gap-1.5 ${
+                      formData.merchandiseType === 'physical'
+                        ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-sm'
+                        : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+                    }`}
+                  >
+                    📦 Physique
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, merchandiseType: 'digital' })}
+                    className={`flex-1 h-full text-sm font-medium rounded-md transition-all flex items-center justify-center gap-1.5 ${
+                      formData.merchandiseType === 'digital'
+                        ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-sm'
+                        : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+                    }`}
+                  >
+                    ⚡ Digital
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* Brand Info */}
             <div className="space-y-4">
               <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-violet-500" />
+                <Building2 className="w-4 h-4 text-zinc-900 dark:text-white" />
                 Informations Marque
               </h3>
               
@@ -217,42 +251,12 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
                   enableCopy
                 />
               </div>
-
-              <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1.5">
-                  Type de Marchandise
-                </label>
-                <div className="grid grid-cols-2 gap-2 bg-zinc-100 dark:bg-zinc-800/80 p-1 rounded-xl">
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, merchandiseType: 'physical' })}
-                    className={`py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-                      formData.merchandiseType === 'physical'
-                        ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-xs'
-                        : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
-                    }`}
-                  >
-                    📦 Produit Physique
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, merchandiseType: 'digital' })}
-                    className={`py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-                      formData.merchandiseType === 'digital'
-                        ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-xs'
-                        : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
-                    }`}
-                  >
-                    ⚡ Digital / Service
-                  </button>
-                </div>
-              </div>
             </div>
 
             {/* Contact Person */}
             <div className="space-y-4 pt-2 border-t border-zinc-100 dark:border-zinc-800">
               <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
-                <User className="w-4 h-4 text-violet-500" />
+                <User className="w-4 h-4 text-zinc-900 dark:text-white" />
                 Contact Commercial <span className="text-xs font-normal text-zinc-400">(Optionnel)</span>
               </h3>
               
@@ -338,7 +342,7 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
             {/* Localisation */}
             <div className="space-y-4 pt-2 border-t border-zinc-100 dark:border-zinc-800">
               <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-violet-500" />
+                <MapPin className="w-4 h-4 text-zinc-900 dark:text-white" />
                 Localisation
               </h3>
               
@@ -367,7 +371,7 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
             {/* Links & Socials */}
             <div className="space-y-4 pt-2 border-t border-zinc-100 dark:border-zinc-800">
               <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
-                <Globe className="w-4 h-4 text-violet-500" />
+                <Globe className="w-4 h-4 text-zinc-900 dark:text-white" />
                 Liens & Réseaux Sociaux
               </h3>
               

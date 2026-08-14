@@ -272,14 +272,22 @@ export default function OrderDialog({ isOpen, onClose, order }: OrderDialogProps
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center sm:block p-4 sm:p-0">
-      <div className="absolute sm:fixed inset-0 bg-zinc-950/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose} />
+      <div 
+        className="absolute sm:fixed inset-0 bg-zinc-950/60 backdrop-blur-sm animate-in fade-in duration-200" 
+        onClick={() => {
+          if (typeof window !== 'undefined' && window.innerWidth < 640) {
+            onClose();
+          }
+        }} 
+      />
       <div className="relative sm:fixed sm:inset-y-0 sm:right-0 z-10 bg-white dark:bg-zinc-900 w-full max-w-2xl sm:max-w-none sm:w-[50%] rounded-3xl sm:rounded-none sm:rounded-l-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] sm:max-h-none sm:h-full animate-in fade-in sm:slide-in-from-right duration-300">
         
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40">
           <h2 className="text-xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
-            <ShoppingBag className="w-5 h-5 text-violet-500" />
-            {order ? 'Modifier la vente' : 'Nouvelle Vente'}
+            <div className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+              <ShoppingBag className="w-5 h-5 text-zinc-900 dark:text-white" />
+            </div>{order ? 'Modifier la vente' : 'Nouvelle Vente'}
           </h2>
           <button onClick={onClose} className="p-2 bg-zinc-200 dark:bg-zinc-800 rounded-full text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">
             <X className="w-5 h-5" />
@@ -292,8 +300,8 @@ export default function OrderDialog({ isOpen, onClose, order }: OrderDialogProps
             
             {/* Section: Client */}
             <section className="space-y-4">
-              <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2 uppercase tracking-wider">
-                <User className="w-4 h-4 text-violet-500" /> Informations Client
+              <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+                <User className="w-4 h-4 text-zinc-900 dark:text-white" /> Informations Client
               </h3>
               
               <div className="grid md:grid-cols-2 gap-4">
@@ -414,8 +422,8 @@ export default function OrderDialog({ isOpen, onClose, order }: OrderDialogProps
             {/* Section: Produit & Prix */}
             <section className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2 uppercase tracking-wider">
-                  <ShoppingBag className="w-4 h-4 text-violet-500" /> Détails de la commande
+                <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+                  <ShoppingBag className="w-4 h-4 text-zinc-900 dark:text-white" /> Détails de la commande
                 </h3>
                 <button
                   type="button"
@@ -660,8 +668,8 @@ export default function OrderDialog({ isOpen, onClose, order }: OrderDialogProps
 
             {/* Section: Promo & Frais */}
             <section className="space-y-4">
-              <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2 uppercase tracking-wider">
-                <Percent className="w-4 h-4 text-violet-500" /> Promo & Frais annexes
+              <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+                <Percent className="w-4 h-4 text-zinc-900 dark:text-white" /> Promo & Frais annexes
               </h3>
               
               <div className="grid md:grid-cols-2 gap-4">
@@ -708,8 +716,10 @@ export default function OrderDialog({ isOpen, onClose, order }: OrderDialogProps
 
             {/* Section: Paiement */}
             <section className="space-y-4">
-              <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2 uppercase tracking-wider">
-                <DollarSign className="w-4 h-4 text-violet-500" /> Paiement (Total à payer: {formatCurrency(amountTTC)})
+              <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <DollarSign className="w-4 h-4 text-zinc-900 dark:text-white" /> Paiement (Total à payer: {formatCurrency(amountTTC)})
+                </div>
               </h3>
               
               <div className="grid md:grid-cols-2 gap-4">

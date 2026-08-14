@@ -111,6 +111,7 @@ export const BusinessClientSchema = z.object({
   firstName: z.string().optional(),
   lastName: z.string().optional(),
   phone: z.string().optional().default(''),
+  whatsapp: z.string().optional(),
   email: z.string().optional(),
   avatarUrl: z.string().optional(),
   address: z.string().optional(),

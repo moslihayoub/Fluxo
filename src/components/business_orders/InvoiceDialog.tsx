@@ -112,7 +112,14 @@ export default function InvoiceDialog({ isOpen, onClose, order }: InvoiceDialogP
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center sm:block p-4 sm:p-0 print:bg-white print:p-0 print:block">
-      <div className="absolute sm:fixed inset-0 bg-zinc-900/80 backdrop-blur-sm animate-in fade-in duration-200 print:hidden" onClick={onClose} />
+      <div 
+        className="absolute sm:fixed inset-0 bg-zinc-900/80 backdrop-blur-sm animate-in fade-in duration-200 print:hidden" 
+        onClick={() => {
+          if (typeof window !== 'undefined' && window.innerWidth < 640) {
+            onClose();
+          }
+        }} 
+      />
       {/* Container */}
       <div className="relative sm:fixed sm:inset-y-0 sm:right-0 z-10 bg-zinc-100 dark:bg-zinc-900 w-full h-full sm:w-[50%] sm:max-w-none sm:h-full sm:max-h-none sm:rounded-none sm:rounded-l-3xl flex flex-col shadow-2xl overflow-hidden animate-in fade-in sm:slide-in-from-right duration-300 print:shadow-none print:h-auto print:max-w-full">
         
@@ -124,7 +131,7 @@ export default function InvoiceDialog({ isOpen, onClose, order }: InvoiceDialogP
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="text-lg font-semibold text-zinc-900 dark:text-white flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
-              <FileText className="w-5 h-5 text-violet-500" />
+              <FileText className="w-5 h-5 text-zinc-900 dark:text-white" />
               Aperçu : {getDocTitle()}
               <ChevronDown className="w-4 h-4 text-zinc-500" />
             </button>

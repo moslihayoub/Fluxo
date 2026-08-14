@@ -151,6 +151,7 @@ export interface BusinessClient {
   firstName?: string;
   lastName?: string;
   phone: string;
+  whatsapp?: string;
   email?: string;
   avatarUrl?: string;
   address?: string;

@@ -106,17 +106,24 @@ export default function ProductDialog({ product, onClose }: ProductDialogProps) 
   return (
     <>
       <div className="fixed inset-0 z-[100] flex items-center justify-center sm:block p-4 sm:p-0">
-        <div className="absolute sm:fixed inset-0 bg-zinc-950/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose} />
+        <div 
+          className="absolute sm:fixed inset-0 bg-zinc-950/50 backdrop-blur-sm animate-in fade-in duration-200" 
+          onClick={() => {
+            if (typeof window !== 'undefined' && window.innerWidth < 640) {
+              onClose();
+            }
+          }} 
+        />
         <div className="relative sm:fixed sm:inset-y-0 sm:right-0 z-10 bg-white dark:bg-zinc-900 w-full max-w-md sm:max-w-none sm:w-[50%] rounded-3xl sm:rounded-none sm:rounded-l-3xl shadow-xl overflow-hidden flex flex-col max-h-[90vh] sm:max-h-none sm:h-full animate-in fade-in sm:slide-in-from-right duration-300">
           
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-zinc-100 dark:border-zinc-800">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-violet-100 dark:bg-violet-900/30 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-zinc-100 dark:bg-zinc-800 rounded-xl flex items-center justify-center text-zinc-900 dark:text-white">
                 {formData.type === 'service' ? (
-                  <Laptop className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                  <Laptop className="w-5 h-5" />
                 ) : (
-                  <Package className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                  <Package className="w-5 h-5" />
                 )}
               </div>
               <h2 className="text-lg font-bold text-zinc-900 dark:text-white">
@@ -241,7 +248,7 @@ export default function ProductDialog({ product, onClose }: ProductDialogProps) 
                 <div className="p-4 bg-zinc-50 dark:bg-zinc-800/60 rounded-xl border border-zinc-200 dark:border-zinc-700/80 space-y-3">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-1.5">
-                      <Building2 className="w-3.5 h-3.5 text-violet-600 dark:text-violet-400" />
+                      <Building2 className="w-3.5 h-3.5 text-zinc-600 dark:text-zinc-400" />
                       Fournisseur associé (Optionnel)
                     </label>
                     <button

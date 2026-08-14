@@ -29,6 +29,8 @@ const INITIAL_STATE = {
   freeProductIds: [] as string[],
   clientType: 'perso' as 'perso' | 'pro',
   city: '',
+  whatsapp: '',
+  isWhatsappSameAsPhone: false,
 };
 
 export default function ClientDialog({ isOpen, onClose, client }: ClientDialogProps) {
@@ -61,6 +63,8 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
           freeProductIds: client.freeProductIds || [],
           clientType: client.clientType || 'perso',
           city: client.city || '',
+          whatsapp: client.whatsapp || '',
+          isWhatsappSameAsPhone: !client.whatsapp || client.whatsapp === client.phone,
         });
       } else {
         setFormData(INITIAL_STATE);
@@ -105,6 +109,7 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
         freeProductIds: formData.freeProductIds.length > 0 ? formData.freeProductIds : undefined,
         clientType: formData.clientType,
         city: formData.city || undefined,
+        whatsapp: formData.isWhatsappSameAsPhone ? formData.phone : (formData.whatsapp || undefined),
       };
 
       if (client) {
@@ -125,13 +130,20 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center sm:block p-4 sm:p-0">
-      <div className="absolute sm:fixed inset-0 bg-zinc-950/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={handleClose} />
+      <div 
+        className="absolute sm:fixed inset-0 bg-zinc-950/50 backdrop-blur-sm animate-in fade-in duration-200" 
+        onClick={() => {
+          if (typeof window !== 'undefined' && window.innerWidth < 640) {
+            handleClose();
+          }
+        }} 
+      />
       <div className="relative sm:fixed sm:inset-y-0 sm:right-0 z-10 bg-white dark:bg-zinc-900 w-full max-w-md sm:max-w-none sm:w-[50%] rounded-3xl sm:rounded-none sm:rounded-l-3xl shadow-xl overflow-hidden flex flex-col max-h-[90vh] sm:max-h-none sm:h-full animate-in fade-in sm:slide-in-from-right duration-300">
         
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-zinc-100 dark:border-zinc-800">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white flex items-center justify-center">
               <User className="w-5 h-5" />
             </div>
             <h2 className="text-lg font-bold text-zinc-900 dark:text-white">
@@ -148,17 +160,44 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
           <form id="client-form" onSubmit={handleSubmit} className="space-y-6">
             
             {/* Avatar with Dual Solution */}
-            <div className="mb-4">
+            <div className="mb-4 space-y-4">
               <AvatarUpload
                 value={formData.avatarUrl}
                 onChange={(url) => setFormData({ ...formData, avatarUrl: url })}
                 defaultIcon="user"
                 shape="circle"
               />
+              
+              <div>
+                <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-lg p-1 w-full h-11 items-center">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, clientType: 'perso' })}
+                    className={`flex-1 h-full text-sm font-medium rounded-md transition-all flex items-center justify-center ${
+                      formData.clientType === 'perso'
+                        ? 'bg-white dark:bg-zinc-900 shadow-sm text-zinc-900 dark:text-white font-semibold'
+                        : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+                    }`}
+                  >
+                    Perso
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, clientType: 'pro' })}
+                    className={`flex-1 h-full text-sm font-medium rounded-md transition-all flex items-center justify-center ${
+                      formData.clientType === 'pro'
+                        ? 'bg-white dark:bg-zinc-900 shadow-sm text-zinc-900 dark:text-white font-semibold'
+                        : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+                    }`}
+                  >
+                    Pro
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* Client Info */}
-            <div className="space-y-4">
+            <div className="space-y-4 pt-2 border-t border-zinc-100 dark:border-zinc-800">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">
@@ -176,7 +215,7 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">
-                    Nom (optionnel)
+                    Nom <span className="text-zinc-400 font-normal lowercase">(optionnel)</span>
                   </label>
                   <Input
                     type="text"
@@ -190,17 +229,59 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Téléphone *</label>
+                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">
+                  Téléphone *
+                </label>
                 <PhoneInput
                   value={formData.phone}
-                  onChange={(val) => setFormData({ ...formData, phone: val })}
+                  onChange={(val) => {
+                    const updates: any = { phone: val };
+                    if (formData.isWhatsappSameAsPhone) {
+                      updates.whatsapp = val;
+                    }
+                    setFormData({ ...formData, ...updates });
+                  }}
                   placeholder="Ex: 6 12 34 56 78"
                   enableCopy
                 />
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Email</label>
+                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">
+                  WhatsApp <span className="text-zinc-400 font-normal lowercase">(optionnel)</span>
+                </label>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2.5 text-xs text-zinc-600 dark:text-zinc-300 cursor-pointer select-none bg-zinc-50 dark:bg-zinc-800/50 p-2 rounded-xl border border-zinc-200/60 dark:border-zinc-700/60 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={formData.isWhatsappSameAsPhone}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setFormData({
+                          ...formData,
+                          isWhatsappSameAsPhone: checked,
+                          whatsapp: checked ? formData.phone : formData.whatsapp
+                        });
+                      }}
+                      className="w-4 h-4 rounded border-zinc-300 text-violet-600 focus:ring-violet-500"
+                    />
+                    <span className="font-medium">Identique au numéro de téléphone</span>
+                  </label>
+                  {!formData.isWhatsappSameAsPhone && (
+                    <PhoneInput
+                      value={formData.whatsapp}
+                      onChange={(val) => setFormData({ ...formData, whatsapp: val })}
+                      placeholder="Ex: 6 12 34 56 78"
+                      enableCopy
+                    />
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">
+                  Email <span className="text-zinc-400 font-normal lowercase">(optionnel)</span>
+                </label>
                 <Input
                   type="email"
                   value={formData.email}
@@ -212,36 +293,10 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Type de Client</label>
-                  <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-md p-1 w-full h-10 items-center">
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, clientType: 'perso' })}
-                      className={`flex-1 h-full text-xs font-medium rounded transition-colors flex items-center justify-center ${
-                        formData.clientType === 'perso'
-                          ? 'bg-white dark:bg-zinc-900 shadow-xs text-zinc-900 dark:text-white font-semibold'
-                          : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
-                      }`}
-                    >
-                      Perso
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, clientType: 'pro' })}
-                      className={`flex-1 h-full text-xs font-medium rounded transition-colors flex items-center justify-center ${
-                        formData.clientType === 'pro'
-                          ? 'bg-white dark:bg-zinc-900 shadow-xs text-zinc-900 dark:text-white font-semibold'
-                          : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
-                      }`}
-                    >
-                      Pro
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Ville</label>
+                <div className="sm:col-span-2">
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">
+                    Ville <span className="text-zinc-400 font-normal lowercase">(optionnel)</span>
+                  </label>
                   <CityInput
                     value={formData.city}
                     onChange={(city) => setFormData({ ...formData, city })}
@@ -251,7 +306,9 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Adresse</label>
+                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">
+                  Adresse <span className="text-zinc-400 font-normal lowercase">(optionnel)</span>
+                </label>
                 <Input
                   type="text"
                   value={formData.address}
