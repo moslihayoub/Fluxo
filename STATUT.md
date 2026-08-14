@@ -128,7 +128,22 @@
 
 🔄 Mise à jour automatique du statut via protocole de fin de tâche
 
-## 📌 Dernières actions (14 Août 2026 — Bannière au Sommet du Dashboard, Pleine Largeur Catégories, CA Pro en Bleu & Noms Sous-Catégories)
+## 📌 Dernières actions (14 Août 2026 — UI Harmonization, Sidebars & WhatsApp)
+
+### 1. Comportement des sidebars/modales (Desktop) :
+- Les tiroirs latéraux (`ClientDialog`, `SupplierDialog`, `ProductDialog`, `OrderDialog`, `InvoiceDialog`) ne se ferment plus accidentellement lors d'un clic à l'extérieur (backdrop) sur la version Desktop (`sm`). La fermeture nécessite un clic sur la croix (X) ou le bouton Annuler. Sur mobile, le clic à l'extérieur est maintenu pour l'ergonomie.
+
+### 2. Harmonisation Client / Fournisseur / Produit :
+- **Type de Client / Marchandise** : Remontés tout en haut, juste en dessous de l'upload d'Avatar/Logo, avant la section nom/prénom, pour unifier les deux formulaires.
+- **Champ WhatsApp** : Ajout du champ WhatsApp et de son toggle `(Identique au numéro de téléphone)` au formulaire `ClientDialog` exactement comme dans le fournisseur.
+- **Champs Optionnels** : Standardisation de la mention `(optionnel)` en gris et en minuscule sur tous les labels non obligatoires (Nom, Email, Ville, Adresse) dans l'ensemble des formulaires.
+
+### 3. Épuration des Icônes dans les Sidebars :
+- Transformation des icônes d'en-tête et de section de tous les sidebars Pro (`Client`, `Fournisseur`, `Produit`, `Commande`, `Document`). Suppression des couleurs violettes au profit d'un style monochrome (`text-zinc-900 dark:text-white`) avec fond neutre (`bg-zinc-100 dark:bg-zinc-800`), utilisant Lucide Icons.
+
+---
+
+## 📌 Actions Précédentes (14 Août 2026 — Bannière au Sommet du Dashboard, Pleine Largeur Catégories, CA Pro en Bleu & Noms Sous-Catégories)
 
 ### 1. Positionnement de la Bannière Mode Invité ([DashboardView.tsx](file:///Users/fahdrahali/Downloads/Operation/src/components/dashboard/DashboardView.tsx), [BusinessDashboardView.tsx](file:///Users/fahdrahali/Downloads/Operation/src/components/business_dashboard/BusinessDashboardView.tsx)) :
 - La bannière `GuestWarningBanner` est désormais placée **tout en haut de la page, directement sous le menu de navigation**, avant le titre et les boutons d'action du Dashboard.
