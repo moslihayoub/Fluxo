@@ -5,6 +5,12 @@ export const translations = {
     'nav.periods': 'Périodes',
     'nav.operations': 'Opérations',
     'nav.categories': 'Catégories',
+    'nav.sales': 'Ventes',
+    'nav.clients': 'Clients',
+    'nav.products': 'Produits',
+    'nav.fees': 'Frais',
+    'nav.settings': 'Paramètres',
+    'nav.globalSearch': 'Recherche globale',
     'nav.signIn': 'Se connecter',
     'nav.signOut': 'Déconnecté avec succès',
     'nav.loginSuccess': 'Connexion réussie !',
@@ -40,6 +46,33 @@ export const translations = {
     'common.yes': 'Oui, supprimer',
     'common.noPeriodSelected': 'Aucune période sélectionnée',
     'common.netBalance': 'Solde net',
+
+    // Footer
+    'footer.createdBy': 'Cette solution a été créée par',
+    'footer.buyCoffee': 'Offrir un café',
+
+    // Feedback
+    'feedback.title': 'Envoyer un avis ou un bug',
+    'feedback.subtitle': 'Aidez-nous à améliorer Fluxo',
+    'feedback.type': 'Type de retour',
+    'feedback.idea': 'Idée',
+    'feedback.bug': 'Bug',
+    'feedback.other': 'Autre',
+    'feedback.message': 'Votre message',
+    'feedback.email': 'Votre email (Optionnel)',
+    'feedback.placeholderBug': 'Décrivez le problème rencontré...',
+    'feedback.placeholderIdea': 'Exprimez votre remarque ou suggestion...',
+    'feedback.send': 'Envoyer',
+    'feedback.sending': 'Envoi...',
+    'feedback.cancel': 'Annuler',
+    'feedback.successTitle': 'Feedback reçu !',
+    'feedback.successDesc': 'Merci d\'avoir pris le temps de nous écrire. Votre retour est précieux.',
+
+    // PayPal Support
+    'paypal.title': 'Soutenir le projet Fluxo',
+    'paypal.optional': '100% Optionnel',
+    'paypal.desc': 'Fluxo est une application gratuite et indépendante. Si la plateforme vous apporte de la valeur et que vous souhaitez encourager son évolution, vous pouvez m\'offrir un café via PayPal.',
+    'paypal.button': 'Offrir un café',
 
     // Dashboard
     'dash.title': 'Dashboard',
@@ -110,6 +143,34 @@ export const translations = {
     'cat.label': 'Nom de la catégorie',
     'cat.defaultAmount': 'Montant par défaut (optionnel)',
     'cat.confirmDelete': 'Voulez-vous vraiment supprimer cette catégorie ?',
+
+    // Business Pro Sections
+    'biz.orders.title': 'Ventes & Commandes',
+    'biz.orders.new': 'Nouvelle vente',
+    'biz.clients.title': 'Clients',
+    'biz.clients.new': 'Nouveau client',
+    'biz.products.title': 'Catalogue Produits & Services',
+    'biz.products.new': 'Nouveau produit',
+    'biz.products.typePhysical': 'Produit physique',
+    'biz.products.typeDigital': 'Digital / Service',
+    'biz.fees.title': 'Gestion des Frais',
+    'biz.settings.title': 'Paramètres Entreprise',
+
+    // Tech & Error Pages
+    'tech.backHome': 'Retour à l\'accueil',
+    'tech.reload': 'Recharger la page',
+    'tech.retry': 'Réessayer',
+    'tech.offline.title': 'Connexion interrompue',
+    'tech.offline.desc': 'Vous êtes actuellement hors-ligne. Vos données locales restent sécurisées et seront synchronisées dès le retour de la connexion.',
+    'tech.404.badge': 'Erreur 404',
+    'tech.404.title': 'Page introuvable',
+    'tech.404.desc': 'La page demandée n\'existe pas, a été déplacée ou son URL est incorrecte.',
+    'tech.500.badge': 'Erreur 500',
+    'tech.500.title': 'Erreur interne du système',
+    'tech.500.desc': 'Une anomalie inattendue s\'est produite. Nos équipes ont été notifiées et vos données locales sont préservées.',
+    'tech.502.badge': 'Erreur 502 / 503',
+    'tech.502.title': 'Service temporairement indisponible',
+    'tech.502.desc': 'Le serveur met plus de temps que prévu à répondre ou une opération de maintenance est en cours.',
   },
   en: {
     // Navigation
@@ -117,6 +178,12 @@ export const translations = {
     'nav.periods': 'Periods',
     'nav.operations': 'Operations',
     'nav.categories': 'Categories',
+    'nav.sales': 'Sales',
+    'nav.clients': 'Clients',
+    'nav.products': 'Products',
+    'nav.fees': 'Expenses',
+    'nav.settings': 'Settings',
+    'nav.globalSearch': 'Global Search',
     'nav.signIn': 'Sign In',
     'nav.signOut': 'Logged out successfully',
     'nav.loginSuccess': 'Successfully logged in!',
@@ -152,6 +219,33 @@ export const translations = {
     'common.yes': 'Yes, delete',
     'common.noPeriodSelected': 'No period selected',
     'common.netBalance': 'Net balance',
+
+    // Footer
+    'footer.createdBy': 'This solution was created by',
+    'footer.buyCoffee': 'Buy me a coffee',
+
+    // Feedback
+    'feedback.title': 'Send feedback or report a bug',
+    'feedback.subtitle': 'Help us improve Fluxo',
+    'feedback.type': 'Feedback type',
+    'feedback.idea': 'Idea',
+    'feedback.bug': 'Bug',
+    'feedback.other': 'Other',
+    'feedback.message': 'Your message',
+    'feedback.email': 'Your email (Optional)',
+    'feedback.placeholderBug': 'Describe the issue you encountered...',
+    'feedback.placeholderIdea': 'Share your remark or suggestion...',
+    'feedback.send': 'Send',
+    'feedback.sending': 'Sending...',
+    'feedback.cancel': 'Cancel',
+    'feedback.successTitle': 'Feedback received!',
+    'feedback.successDesc': 'Thank you for taking the time to write to us. Your feedback is valuable.',
+
+    // PayPal Support
+    'paypal.title': 'Support Fluxo project',
+    'paypal.optional': '100% Optional',
+    'paypal.desc': 'Fluxo is a free and independent application. If the platform brings you value and you wish to support its development, you can buy me a coffee via PayPal.',
+    'paypal.button': 'Buy me a coffee',
 
     // Dashboard
     'dash.title': 'Dashboard',
@@ -222,6 +316,34 @@ export const translations = {
     'cat.label': 'Category name',
     'cat.defaultAmount': 'Default amount (optional)',
     'cat.confirmDelete': 'Are you sure you want to delete this category?',
+
+    // Business Pro Sections
+    'biz.orders.title': 'Sales & Orders',
+    'biz.orders.new': 'New Sale',
+    'biz.clients.title': 'Clients',
+    'biz.clients.new': 'New Client',
+    'biz.products.title': 'Product & Service Catalog',
+    'biz.products.new': 'New Product',
+    'biz.products.typePhysical': 'Physical Product',
+    'biz.products.typeDigital': 'Digital / Service',
+    'biz.fees.title': 'Expense Management',
+    'biz.settings.title': 'Business Settings',
+
+    // Tech & Error Pages
+    'tech.backHome': 'Back to Dashboard',
+    'tech.reload': 'Reload Page',
+    'tech.retry': 'Try Again',
+    'tech.offline.title': 'Connection Lost',
+    'tech.offline.desc': 'You are currently offline. Your local data remains safe and will sync once reconnected.',
+    'tech.404.badge': '404 Error',
+    'tech.404.title': 'Page Not Found',
+    'tech.404.desc': 'The requested page does not exist, has been moved, or the URL is incorrect.',
+    'tech.500.badge': '500 Error',
+    'tech.500.title': 'Internal System Error',
+    'tech.500.desc': 'An unexpected issue occurred. Our teams have been notified and your local data is preserved.',
+    'tech.502.badge': '502 / 503 Error',
+    'tech.502.title': 'Service Temporarily Unavailable',
+    'tech.502.desc': 'The server is taking longer than expected to respond or maintenance is currently underway.',
   }
 };
 

@@ -11,6 +11,22 @@ export function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
+// ── Firebase helper ───────────────────────────────────────────
+export const cleanForFirebase = (obj: any) => {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([_, v]) => v !== undefined)
+  );
+};
+
+// ── Financial conversion ─────────────────────────────────────
+export function toCents(value: string | number): number {
+  return Math.round(parseFloat(String(value)) * 100);
+}
+
+export function fromCents(cents: number): number {
+  return cents / 100;
+}
+
 // ── Currency formatting ───────────────────────────────────────
 export function formatCurrency(amount: number, signed = false): string {
   const formatted = new Intl.NumberFormat('fr-MA', {
@@ -46,21 +62,21 @@ export function getMonthLabel(m: Month, language: string = 'fr'): string {
 }
 
 // ── CSV Export ────────────────────────────────────────────────
-export function operationsToCSV(operations: Operation[]): string {
-  const headers = ['mois', 'annee', 'label', 'operationTypeLabel', 'kind', 'amount', 'createdAt'];
-  const rows = operations.map((op) => {
-    // We need month data, so caller passes it or we look up monthId
-    return [
-      op.monthId, // will be replaced with proper month label by caller
-      '',          // year placeholder
-      `"${op.label.replace(/"/g, '""')}"`,
-      `"${op.operationTypeLabel.replace(/"/g, '""')}"`,
-      op.kind,
-      op.amount.toFixed(2),
-      op.createdAt,
-    ].join(',');
-  });
-  return [headers.join(','), ...rows].join('\n');
+export function generateClipboardText(
+  operations: Operation[],
+  months: any[]
+): string {
+  if (!operations || operations.length === 0) return '';
+  const header = `Date\tLibellé\tType\tMontant\n`;
+  const rows = operations
+    .map((op) => {
+      const monthObj = months.find((m) => m.id === op.monthId);
+      const dateStr = monthObj ? `${monthObj.month}/${monthObj.year}` : '';
+      const amount = (fromCents(op.amount_cents) || 0).toString().replace('.', ',');
+      return `${dateStr}\t${op.label}\t${op.operationTypeLabel}\t${amount}`;
+    })
+    .join('\n');
+  return header + rows;
 }
 
 export function exportCSV(
@@ -70,7 +86,7 @@ export function exportCSV(
 ): void {
   const monthMap = new Map(months.map((m) => [m.id, m]));
 
-  const headers = ['mois', 'annee', 'label', 'operationTypeLabel', 'kind', 'amount', 'createdAt'];
+  const headers = ['mois', 'annee', 'label', 'operationTypeLabel', 'kind', 'amount_cents', 'createdAt'];
   const rows = operations.map((op) => {
     const m = monthMap.get(op.monthId);
     return [
@@ -79,7 +95,7 @@ export function exportCSV(
       `"${op.label.replace(/"/g, '""')}"`,
       `"${op.operationTypeLabel.replace(/"/g, '""')}"`,
       op.kind,
-      op.amount.toFixed(2),
+      op.amount_cents,
       op.createdAt,
     ].join(',');
   });
@@ -94,10 +110,10 @@ export function exportCSV(
   URL.revokeObjectURL(url);
 }
 
-// ── Simple CSV parser (for import) ───────────────────────────
+// ── Extractor helper ──────────────────────────────────────────
 export interface ParsedCSVRow {
   label: string;
-  amount: number;
+  amount_cents: number;
 }
 
 export function parseCSV(text: string): ParsedCSVRow[] {
@@ -123,22 +139,22 @@ export function parseCSV(text: string): ParsedCSVRow[] {
 
       // Try to find label (first text-like col) and amount (first numeric col)
       let label = '';
-      let amount: number | null = null;
+      let amount_cents: number | null = null;
 
       for (const col of cols) {
         const trimmed = col.trim().replace(/^"|"$/g, '');
-        const num = parseFloat(trimmed.replace(',', '.').replace(/\s/g, ''));
-        if (!isNaN(num) && amount === null) {
-          amount = num;
+        const num = Math.round(parseFloat(trimmed.replace(',', '.').replace(/\s/g, '')) * 100);
+        if (!isNaN(num) && amount_cents === null) {
+          amount_cents = num;
         } else if (label === '' && trimmed !== '' && isNaN(num)) {
           label = trimmed;
         }
       }
 
       if (label === '' && cols[0]) label = cols[0].trim().replace(/^"|"$/g, '');
-      if (amount === null) return null;
+      if (amount_cents === null) return null;
 
-      return { label: label || 'Import', amount };
+      return { label: label || 'Import', amount_cents };
     })
     .filter((r): r is ParsedCSVRow => r !== null);
 }
@@ -164,14 +180,34 @@ function parseCSVLine(line: string): string[] {
 }
 
 // ── Metrics computation ───────────────────────────────────────
+export function generateCSVContent(
+  operations: Operation[],
+  months: any[]
+): string {
+  if (!operations || operations.length === 0) return '';
+  const header = `"Date","Libellé","Type","Montant"\n`;
+  const rows = operations
+    .map((op) => {
+      const monthObj = months.find((m) => m.id === op.monthId);
+      const dateStr = monthObj
+        ? `${String(monthObj.month).padStart(2, '0')}/${monthObj.year}`
+        : '';
+      const isDecaissement = op.kind === 'decaissement' || (op.kind as string) === 'décaissement';
+      const amount = (isDecaissement ? -op.amount_cents : op.amount_cents) / 100;
+      return `"${dateStr}","${op.label}","${op.operationTypeLabel}","${amount}"`;
+    })
+    .join('\n');
+  return header + rows;
+}
+
 export function computeMonthTotals(operations: Operation[], monthId: string) {
   const ops = operations.filter((op) => op.monthId === monthId);
   const totalEncaissement = ops
     .filter((op) => op.kind === 'encaissement')
-    .reduce((sum, op) => sum + op.amount, 0);
+    .reduce((sum, op) => sum + op.amount_cents, 0);
   const totalDecaissement = ops
-    .filter((op) => op.kind === 'decaissement')
-    .reduce((sum, op) => sum + op.amount, 0);
+    .filter((op) => op.kind === 'decaissement' || (op.kind as string) === 'décaissement')
+    .reduce((sum, op) => sum + op.amount_cents, 0);
   return {
     totalEncaissement,
     totalDecaissement,

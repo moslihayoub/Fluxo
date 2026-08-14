@@ -109,7 +109,7 @@ export default function AgentDialog({ defaultMonthId, onClose }: AgentDialogProp
 
         const ops = (parsed.operations ?? []).map((op: any) => ({
           label: String(op.label ?? 'Opération'),
-          amount: Math.abs(parseFloat(String(op.amount ?? 0))),
+          amount_cents: Math.abs(parseFloat(String(op.amount_cents ?? 0))),
           kind: op.kind === 'encaissement' || op.kind === 'decaissement' ? op.kind : 'decaissement',
           operationTypeSuggestion: String(op.operationTypeSuggestion ?? 'Frais divers'),
           selected: true,
@@ -118,8 +118,8 @@ export default function AgentDialog({ defaultMonthId, onClose }: AgentDialogProp
         data = {
           operations: ops,
           summary: {
-            totalEncaissement: ops.filter((o: any) => o.kind === 'encaissement').reduce((s: number, o: any) => s + o.amount, 0),
-            totalDecaissement: ops.filter((o: any) => o.kind === 'decaissement').reduce((s: number, o: any) => s + o.amount, 0),
+            totalEncaissement: ops.filter((o: any) => o.kind === 'encaissement').reduce((s: number, o: any) => s + o.amount_cents, 0),
+            totalDecaissement: ops.filter((o: any) => o.kind === 'decaissement').reduce((s: number, o: any) => s + o.amount_cents, 0),
             count: ops.length,
           },
         };
@@ -162,7 +162,7 @@ export default function AgentDialog({ defaultMonthId, onClose }: AgentDialogProp
         label: op.operationTypeSuggestion,
         operationTypeLabel: op.operationTypeSuggestion,
         kind: op.kind,
-        amount: op.amount,
+        amount_cents: op.amount_cents,
         notes: op.notes ?? undefined,
       }))
     );
@@ -356,7 +356,15 @@ export default function AgentDialog({ defaultMonthId, onClose }: AgentDialogProp
                         }`}
                       >
                         <td className="px-2 py-1.5 text-center">
-                          <input type="checkbox" checked={op.selected} onChange={() => toggleOp(i)} className="rounded" />
+                          <div className="relative inline-flex items-center">
+                            <input
+                              type="checkbox"
+                              className="sr-only peer"
+                              checked={op.selected}
+                              onChange={() => toggleOp(i)}
+                            />
+                            <div className="w-9 h-5 bg-zinc-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-violet-600"></div>
+                          </div>
                         </td>
                         <td className="px-2 py-1.5 text-zinc-700 dark:text-zinc-300 max-w-[120px] truncate" title={op.label}>
                           {op.label}
@@ -386,7 +394,7 @@ export default function AgentDialog({ defaultMonthId, onClose }: AgentDialogProp
                         <td className={`px-2 py-1.5 text-right font-mono tabular-nums font-medium ${
                           op.kind === 'encaissement' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
                         }`}>
-                          {op.kind === 'encaissement' ? '+' : '−'}{formatCurrency(op.amount)}
+                          {op.kind === 'encaissement' ? '+' : '−'}{formatCurrency(op.amount_cents)}
                         </td>
                       </tr>
                     ))}

@@ -24,6 +24,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
       
       // Update global user id state if you add it to your store, or handle sync logic here
+      // @ts-ignore
       useStore.setState({ userUid: currentUser?.uid || null });
     });
 

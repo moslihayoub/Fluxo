@@ -19,7 +19,7 @@ import {
   MoreHorizontal,
 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
-import { formatCurrency, getMonthLabel, MONTH_NAMES } from '@/lib/utils';
+import { formatCurrency, fromCents, toCents, MONTH_NAMES } from '@/lib/utils';
 import type { OperationType, Operation } from '@/types';
 import { getTranslation } from '@/lib/i18n';
 
@@ -34,7 +34,7 @@ function CategoryDialog({
   const { operationTypes, addOperationType, language } = useStore();
   const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(language, key);
   const [label, setLabel] = useState(category?.label ?? '');
-  const [defaultAmount, setDefaultAmount] = useState<string>(category?.defaultAmount?.toString() ?? '');
+  const [defaultAmount, setDefaultAmount] = useState<string>(category?.defaultAmount_cents ? (fromCents(category.defaultAmount_cents)).toString() : '');
   const [kind, setKind] = useState<'encaissement' | 'decaissement' | undefined>(category?.kind);
   const [error, setError] = useState('');
 
@@ -42,7 +42,7 @@ function CategoryDialog({
     e.preventDefault();
     if (!label.trim()) { setError('Le nom est requis.'); return; }
     
-    const parsedAmount = defaultAmount ? parseFloat(defaultAmount) : undefined;
+    const parsedAmount = defaultAmount ? toCents(defaultAmount) : undefined;
     if (defaultAmount && isNaN(parsedAmount!)) {
       setError('Montant par défaut invalide.');
       return;
@@ -59,7 +59,7 @@ function CategoryDialog({
       // Edit: rename the type in the store + update all linked operations
       useStore.setState((state) => ({
         operationTypes: state.operationTypes.map((ot) =>
-          ot.id === category.id ? { ...ot, label: label.trim(), defaultAmount: parsedAmount, kind } : ot
+          ot.id === category.id ? { ...ot, label: label.trim(), defaultAmount_cents: parsedAmount, kind } : ot
         ),
         operations: state.operations.map((op) =>
           op.operationTypeId === category.id || op.operationTypeLabel === category.label
@@ -140,7 +140,7 @@ function CategoryDialog({
               step="0.01"
               min="0"
               value={defaultAmount}
-              onChange={(e) => { setDefaultAmount(e.target.value); setError(''); }}
+              onChange={(e) => { setDefaultAmount(e.target.value.replace(',', '.')); setError(''); }}
               placeholder="Ex: 3400.00"
               className="w-full px-3 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white text-sm placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white transition-shadow font-mono"
             />
@@ -239,7 +239,16 @@ function CategoryDetailPanel({
   category: OperationType;
   onBack: () => void;
 }) {
-  const { operations, months } = useStore();
+  const { operations: allOperations, months, workspaceMode } = useStore();
+  
+  const operations = useMemo(() => {
+    return allOperations.filter(op => 
+      workspaceMode === 'business' 
+        ? op.workspaceMode === 'business' 
+        : (op.workspaceMode === 'personal' || !op.workspaceMode)
+    );
+  }, [allOperations, workspaceMode]);
+
   const monthMap = useMemo(
     () => new Map(months.map((m) => [m.id, m])),
     [months]
@@ -259,10 +268,10 @@ function CategoryDetailPanel({
 
   const totalEnc = catOps
     .filter((op) => op.kind === 'encaissement')
-    .reduce((s, op) => s + op.amount, 0);
+    .reduce((s, op) => s + op.amount_cents, 0);
   const totalDec = catOps
     .filter((op) => op.kind === 'decaissement')
-    .reduce((s, op) => s + op.amount, 0);
+    .reduce((s, op) => s + op.amount_cents, 0);
 
   return (
     <div className="animate-fade-in">
@@ -345,7 +354,7 @@ function CategoryDetailPanel({
                     <span className={`font-mono tabular-nums text-sm font-semibold ${
                       op.kind === 'encaissement' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
                     }`}>
-                      {op.kind === 'encaissement' ? '+' : '−'}{formatCurrency(op.amount)}
+                      {op.kind === 'encaissement' ? '+' : '−'}{formatCurrency(fromCents(op.amount_cents) || 0)}
                     </span>
                   </div>
                 </div>
@@ -360,8 +369,16 @@ function CategoryDetailPanel({
 
 // ── CategoriesView ────────────────────────────────────────────
 export default function CategoriesView() {
-  const { operationTypes, operations, language } = useStore();
+  const { operationTypes, operations: allOperations, language, workspaceMode } = useStore();
   const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(language, key);
+  
+  const operations = useMemo(() => {
+    return allOperations.filter(op => 
+      workspaceMode === 'business' 
+        ? op.workspaceMode === 'business' 
+        : (op.workspaceMode === 'personal' || !op.workspaceMode)
+    );
+  }, [allOperations, workspaceMode]);
   const [search, setSearch] = useState('');
   const [showDialog, setShowDialog] = useState(false);
   const [editingCat, setEditingCat] = useState<OperationType | undefined>();
@@ -377,10 +394,10 @@ export default function CategoriesView() {
       );
       const totalEnc = ops
         .filter((op) => op.kind === 'encaissement')
-        .reduce((s, op) => s + op.amount, 0);
+        .reduce((s, op) => s + op.amount_cents, 0);
       const totalDec = ops
         .filter((op) => op.kind === 'decaissement')
-        .reduce((s, op) => s + op.amount, 0);
+        .reduce((s, op) => s + op.amount_cents, 0);
       return { ...ot, count: ops.length, totalEnc, totalDec, solde: totalEnc - totalDec };
     });
   }, [operationTypes, operations]);
@@ -530,7 +547,7 @@ export default function CategoriesView() {
                   {/* Défaut */}
                   <div className="col-span-2 text-right">
                     <span className="text-xs font-mono tabular-nums text-zinc-600 dark:text-zinc-300">
-                      {cat.defaultAmount !== undefined ? formatCurrency(cat.defaultAmount) : '—'}
+                      {cat.defaultAmount_cents !== undefined ? formatCurrency(fromCents(cat.defaultAmount_cents) || 0) : '—'}
                     </span>
                   </div>
 

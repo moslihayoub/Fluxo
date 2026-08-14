@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { Upload, X, FileText, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useStore } from '@/store/useStore';
-import { parseCSV, formatCurrency } from '@/lib/utils';
+import { parseCSV, formatCurrency, fromCents } from '@/lib/utils';
 import type { Kind } from '@/types';
 
 interface ImportDialogProps {
@@ -13,7 +13,7 @@ interface ImportDialogProps {
 
 interface PreviewRow {
   label: string;
-  amount: number;
+  amount_cents: number;
   kind: Kind;
   selected: boolean;
 }
@@ -45,8 +45,8 @@ export default function ImportDialog({ monthId, onClose }: ImportDialogProps) {
         setPreview(
           rows.map((r) => ({
             label: r.label,
-            amount: Math.abs(r.amount),
-            kind: r.amount >= 0 ? 'encaissement' : 'decaissement',
+            amount_cents: Math.abs(r.amount_cents),
+            kind: r.amount_cents >= 0 ? 'encaissement' : 'decaissement',
             selected: true,
           }))
         );
@@ -76,14 +76,14 @@ export default function ImportDialog({ monthId, onClose }: ImportDialogProps) {
         label: r.label,
         operationTypeLabel: 'Import CSV',
         kind: r.kind,
-        amount: r.amount,
+        amount_cents: r.amount_cents,
       }))
     );
     setApplied(true);
   };
 
-  const totalEncaissement = preview.filter((r) => r.selected && r.kind === 'encaissement').reduce((s, r) => s + r.amount, 0);
-  const totalDecaissement = preview.filter((r) => r.selected && r.kind === 'decaissement').reduce((s, r) => s + r.amount, 0);
+  const totalEncaissement = preview.filter((r) => r.selected && r.kind === 'encaissement').reduce((s, r) => s + r.amount_cents, 0);
+  const totalDecaissement = preview.filter((r) => r.selected && r.kind === 'decaissement').reduce((s, r) => s + r.amount_cents, 0);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -165,19 +165,22 @@ export default function ImportDialog({ monthId, onClose }: ImportDialogProps) {
                         }`}
                       >
                         <td className="px-2 py-1.5 text-center">
-                          <input
-                            type="checkbox"
-                            checked={row.selected}
-                            onChange={() => toggleRow(i)}
-                            onClick={(e) => e.stopPropagation()}
-                            className="rounded"
-                          />
+                          <div className="relative inline-flex items-center">
+                            <input
+                              type="checkbox"
+                              className="sr-only peer"
+                              checked={row.selected}
+                              onChange={() => toggleRow(i)}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                            <div className="w-9 h-5 bg-zinc-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-violet-600"></div>
+                          </div>
                         </td>
                         <td className="px-2 py-1.5 text-zinc-700 dark:text-zinc-300 truncate max-w-[200px]">{row.label}</td>
                         <td className={`px-2 py-1.5 text-right font-mono tabular-nums font-medium ${
                           row.kind === 'encaissement' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
                         }`}>
-                          {row.kind === 'encaissement' ? '+' : '−'}{formatCurrency(row.amount)}
+                          {row.kind === 'encaissement' ? '+' : '−'}{new Intl.NumberFormat('fr-MA', { style: 'currency', currency: 'MAD' }).format(fromCents(row.amount_cents))}
                         </td>
                       </tr>
                     ))}

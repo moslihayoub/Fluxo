@@ -1,5 +1,7 @@
 'use client';
 
+import BusinessDashboard from './BusinessDashboard';
+
 import { useMemo, useState } from 'react';
 import {
   LineChart,
@@ -15,10 +17,13 @@ import {
   Cell,
 } from 'recharts';
 import { useStore } from '@/store/useStore';
-import { computeMonthTotals, formatCurrency, getMonthLabel, MONTH_NAMES } from '@/lib/utils';
+import { computeMonthTotals, formatCurrency, getMonthLabel, MONTH_NAMES, fromCents } from '@/lib/utils';
 import { TrendingUp, TrendingDown, Wallet, Activity, ChevronDown, Check, X } from 'lucide-react';
 import type { MonthMetrics, TypeMetrics } from '@/types';
 import { getTranslation } from '@/lib/i18n';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/Select';
+import PayPalSupportCard from '@/components/widgets/PayPalSupportCard';
+import GuestWarningBanner from '@/components/widgets/GuestWarningBanner';
 
 // Custom tooltip for dark mode
 const CustomTooltip = ({
@@ -77,7 +82,55 @@ function KPICard({
 }
 
 export default function DashboardView() {
-  const { months, operations, operationTypes, language } = useStore();
+  const { months, operations: allOperations, operationTypes, language, businessOrders, businessClients, businessSuppliers, workspaceMode, linkProGainsToPerso } = useStore();
+  
+  const operations = useMemo(() => {
+    let ops = allOperations.filter(op => 
+      workspaceMode === 'business' 
+        ? op.workspaceMode === 'business' 
+        : (op.workspaceMode === 'personal' || !op.workspaceMode)
+    );
+
+    if (workspaceMode !== 'business' && linkProGainsToPerso) {
+      months.forEach(m => {
+        const proOps = allOperations.filter(op => op.workspaceMode === 'business' && op.monthId === m.id);
+        const proIncomes = proOps.filter(o => o.kind === 'encaissement').reduce((acc, o) => acc + (o.amount_cents || 0), 0);
+        const proExpenses = proOps.filter(o => o.kind === 'decaissement').reduce((acc, o) => acc + (o.amount_cents || 0), 0);
+        
+        let proSales = 0;
+        let proCosts = 0;
+        (businessOrders || []).forEach(o => {
+          const d = new Date(o.date);
+          if (d.getMonth() + 1 === m.month && d.getFullYear() === m.year) {
+            proSales += o.amountTTC_cents || 0;
+            const itemsCost = (o.items || []).reduce((acc, item) => acc + ((item.unitCostPrice_cents || 0) * (item.quantity || 1)), 0);
+            const legacyCost = (o.unitCostPrice_cents || 0) * (o.quantity || 1);
+            proCosts += (o.items && o.items.length > 0) ? itemsCost : legacyCost;
+          }
+        });
+
+        const monthGains = (proIncomes + proSales) - (proExpenses + proCosts);
+
+        if (monthGains > 0) {
+          ops.push({
+            id: `pro-gains-${m.id}`,
+            monthId: m.id,
+            label: 'Bénéfices Activité Pro',
+            operationTypeLabel: 'Revenus Pro',
+            kind: 'encaissement',
+            amount_cents: monthGains,
+            createdAt: new Date(m.year, m.month - 1, 28).toISOString(),
+            updatedAt: new Date().toISOString(),
+            userId: 'auto',
+            workspaceMode: 'personal',
+            notes: 'Généré automatiquement'
+          });
+        }
+      });
+    }
+
+    return ops;
+  }, [allOperations, workspaceMode, linkProGainsToPerso, months, businessOrders]);
   const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(language, key);
   
   const [timeRange, setTimeRange] = useState<'1m'|'3m'|'6m'|'12m'|'all'>('1m');
@@ -110,19 +163,43 @@ export default function DashboardView() {
 
   // Global metrics
   const globalMetrics = useMemo(() => {
-    const totalEncaissement = filteredOperations
+    const totalEncaissement_cents = filteredOperations
       .filter((op) => op.kind === 'encaissement')
-      .reduce((s, op) => s + op.amount, 0);
-    const totalDecaissement = filteredOperations
+      .reduce((s, op) => s + (op.amount_cents || 0), 0);
+    const totalDecaissement_cents = filteredOperations
       .filter((op) => op.kind === 'decaissement')
-      .reduce((s, op) => s + op.amount, 0);
+      .reduce((s, op) => s + (op.amount_cents || 0), 0);
     return {
-      soldeGlobal: totalEncaissement - totalDecaissement,
-      totalEncaissement,
-      totalDecaissement,
+      soldeGlobal: fromCents(totalEncaissement_cents - totalDecaissement_cents),
+      totalEncaissement: fromCents(totalEncaissement_cents),
+      totalDecaissement: fromCents(totalDecaissement_cents),
       totalOps: filteredOperations.length,
     };
   }, [filteredOperations]);
+
+  // Business metrics
+  const businessMetrics = useMemo(() => {
+    const filteredOrders = (businessOrders || []).filter(o => {
+      return true;
+    });
+    
+    let totalSales_cents = 0;
+    let totalCosts_cents = 0;
+    
+    filteredOrders.forEach(o => {
+      totalSales_cents += o.amountTTC_cents || 0;
+      const itemsCost = (o.items || []).reduce((acc, item) => acc + ((item.unitCostPrice_cents || 0) * (item.quantity || 1)), 0);
+      const legacyCost = (o.unitCostPrice_cents || 0) * (o.quantity || 1);
+      totalCosts_cents += (o.items && o.items.length > 0) ? itemsCost : legacyCost;
+    });
+
+    return {
+      totalSales: fromCents(totalSales_cents),
+      totalCosts: fromCents(totalCosts_cents),
+      clientsCount: (businessClients || []).length,
+      suppliersCount: (businessSuppliers || []).length,
+    };
+  }, [businessOrders, businessClients, businessSuppliers]);
 
   // Per-month data for line chart (active months, sorted by date)
   const monthChartData = useMemo<MonthMetrics[]>(() => {
@@ -134,9 +211,9 @@ export default function DashboardView() {
         return {
           monthId: m.id,
           monthLabel: `${MONTH_NAMES[m.month - 1].slice(0, 3)} ${m.year}`,
-          totalEncaissement: t.totalEncaissement,
-          totalDecaissement: t.totalDecaissement,
-          solde: t.solde,
+          totalEncaissement: fromCents(t.totalEncaissement),
+          totalDecaissement: fromCents(t.totalDecaissement),
+          solde: fromCents(t.solde),
         };
       });
   }, [filteredMonths, operations]);
@@ -150,7 +227,7 @@ export default function DashboardView() {
         map.set(key, { label: key, totalAmount: 0, count: 0 });
       }
       const entry = map.get(key)!;
-      entry.totalAmount += op.amount;
+      entry.totalAmount += fromCents(op.amount_cents) || 0;
       entry.count++;
     }
     return Array.from(map.values())
@@ -165,6 +242,8 @@ export default function DashboardView() {
 
   return (
     <div className="space-y-6">
+      <GuestWarningBanner />
+
       {/* Title & Filter */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -174,18 +253,24 @@ export default function DashboardView() {
           </p>
         </div>
         
-        {/* Desktop Native Select */}
-        <select
-          value={timeRange}
-          onChange={(e) => setTimeRange(e.target.value as any)}
-          className="hidden sm:block bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-sm rounded-lg px-3 py-2 text-zinc-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-        >
-          <option value="1m">{t('dash.filter1m')}</option>
-          <option value="3m">{t('dash.filter3m')}</option>
-          <option value="6m">{t('dash.filter6m')}</option>
-          <option value="12m">{t('dash.filter12m')}</option>
-          <option value="all">{t('dash.allPeriods')}</option>
-        </select>
+        {/* Desktop Shadcn Select */}
+        <div className="hidden sm:block w-48">
+          <Select
+            value={timeRange}
+            onValueChange={(val) => setTimeRange(val as any)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1m">{t('dash.filter1m')}</SelectItem>
+              <SelectItem value="3m">{t('dash.filter3m')}</SelectItem>
+              <SelectItem value="6m">{t('dash.filter6m')}</SelectItem>
+              <SelectItem value="12m">{t('dash.filter12m')}</SelectItem>
+              <SelectItem value="all">{t('dash.allPeriods')}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
         {/* Mobile Drawer Trigger */}
         <button
@@ -247,8 +332,12 @@ export default function DashboardView() {
         </div>
       )}
 
-      {/* KPI cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {workspaceMode === 'business' ? (
+        <BusinessDashboard filteredMonths={filteredMonths} />
+      ) : (
+        <>
+          {/* Operational KPI cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard
           title={t('dash.balance')}
           value={formatCurrency(globalMetrics.soldeGlobal, true)}
@@ -286,11 +375,11 @@ export default function DashboardView() {
       </div>
 
       {/* Line chart */}
-      {monthChartData.length > 0 ? (
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 sm:p-6">
-          <h2 className="text-sm font-semibold text-zinc-900 dark:text-white mb-4">
-            {t('dash.chartTitle')}
-          </h2>
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 sm:p-6">
+        <h2 className="text-sm font-semibold text-zinc-900 dark:text-white mb-4">
+          {t('dash.chartTitle')}
+        </h2>
+        {monthChartData.length > 0 ? (
           <ResponsiveContainer width="100%" height={240}>
             <LineChart data={monthChartData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -325,19 +414,19 @@ export default function DashboardView() {
               />
             </LineChart>
           </ResponsiveContainer>
-        </div>
-      ) : (
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-8 text-center text-zinc-400">
-          <p className="text-sm">{t('dash.chartEmpty')}</p>
-        </div>
-      )}
+        ) : (
+          <div className="flex items-center justify-center h-[240px] text-zinc-400 text-sm">
+            {t('dash.chartEmpty')}
+          </div>
+        )}
+      </div>
 
       {/* Bar chart */}
-      {typeChartData.length > 0 && (
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 sm:p-6">
-          <h2 className="text-sm font-semibold text-zinc-900 dark:text-white mb-4">
-            {t('dash.catChartTitle')}
-          </h2>
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 sm:p-6">
+        <h2 className="text-sm font-semibold text-zinc-900 dark:text-white mb-4">
+          {t('dash.catChartTitle')}
+        </h2>
+        {typeChartData.length > 0 ? (
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={typeChartData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -361,8 +450,12 @@ export default function DashboardView() {
               </Bar>
             </BarChart>
           </ResponsiveContainer>
-        </div>
-      )}
+        ) : (
+          <div className="flex items-center justify-center h-[240px] text-zinc-400 text-sm">
+            {t('dash.chartEmpty')}
+          </div>
+        )}
+      </div>
 
       {/* Detail table per month */}
       {monthChartData.length > 0 && (
@@ -391,7 +484,7 @@ export default function DashboardView() {
                       {formatCurrency(m.totalDecaissement)}
                     </td>
                     <td className={`px-5 py-3 text-right font-mono tabular-nums font-semibold ${
-                      m.solde >= 0 ? 'text-zinc-900 dark:text-white' : 'text-rose-600 dark:text-rose-400'
+                      m.solde > 0 ? 'text-blue-600 dark:text-blue-400' : m.solde < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-zinc-900 dark:text-white'
                     }`}>
                       {formatCurrency(m.solde, true)}
                     </td>
@@ -408,7 +501,7 @@ export default function DashboardView() {
                 <div className="flex justify-between items-center">
                   <span className="font-medium text-zinc-900 dark:text-white">{m.monthLabel}</span>
                   <span className={`font-mono tabular-nums font-bold ${
-                    m.solde >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+                    m.solde > 0 ? 'text-blue-600 dark:text-blue-400' : m.solde < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-zinc-900 dark:text-white'
                   }`}>
                     {formatCurrency(m.solde, true)}
                   </span>
@@ -436,6 +529,9 @@ export default function DashboardView() {
           </div>
         </div>
       )}
+        </>
+      )}
+      <PayPalSupportCard className="mt-8" />
     </div>
   );
 }

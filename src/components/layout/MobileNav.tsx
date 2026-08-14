@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, X, Calendar, BarChart2, Tag, TrendingUp, Sun, Moon, Monitor, LogIn, LogOut, Globe } from 'lucide-react';
+import { Menu, X, Calendar, BarChart2, Tag, TrendingUp, Sun, Moon, Monitor, LogIn, LogOut, Globe, ShoppingBag, Users, Receipt, Briefcase, User, Settings } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/components/auth/AuthProvider';
@@ -10,6 +10,7 @@ import { signInWithPopup, signOut } from 'firebase/auth';
 import toast from 'react-hot-toast';
 import type { ActiveView } from '@/types';
 import { getTranslation } from '@/lib/i18n';
+import { Package, Search, Truck } from 'lucide-react';
 
 export default function MobileNav() {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,12 +18,23 @@ export default function MobileNav() {
   const setActiveView = useStore((s) => s.setActiveView);
   const language = useStore((s) => s.language);
   const setLanguage = useStore((s) => s.setLanguage);
+  const workspaceMode = useStore((s) => s.workspaceMode);
+  const setWorkspaceMode = useStore((s) => s.setWorkspaceMode);
+  const setBusinessProfileType = useStore((s) => s.setBusinessProfileType);
+  const setIsSearchModalOpen = useStore((s) => s.setIsSearchModalOpen);
   const { theme, setTheme } = useTheme();
   const { user } = useAuth();
 
   const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(language, key);
 
-  const navItems: { id: ActiveView; label: string; icon: React.ElementType }[] = [
+  const navItems: { id: string; label: string; icon: React.ElementType }[] = workspaceMode === 'business' ? [
+    { id: 'dashboard', label: t('nav.dashboard'), icon: TrendingUp },
+    { id: 'business_orders', label: t('nav.sales'), icon: ShoppingBag },
+    { id: 'business_clients', label: t('nav.clients'), icon: Users },
+    { id: 'business_products', label: t('nav.products'), icon: Package },
+    { id: 'business_suppliers', label: 'Fournisseurs', icon: Truck },
+    { id: 'business_fees', label: t('nav.fees'), icon: Receipt },
+  ] : [
     { id: 'dashboard', label: t('nav.dashboard'), icon: TrendingUp },
     { id: 'months', label: t('nav.periods'), icon: Calendar },
     { id: 'operations', label: t('nav.operations'), icon: BarChart2 },
@@ -68,18 +80,29 @@ export default function MobileNav() {
           </span>
         </div>
 
-        {/* Burger Menu Button */}
-        <button
-          onClick={() => setIsOpen(true)}
-          className="p-2 -mr-2 text-zinc-900 dark:text-white"
-        >
-          <Menu className="w-6 h-6" />
-        </button>
+        <div className="flex items-center gap-2">
+          {workspaceMode === 'business' && (
+            <button
+              onClick={() => setIsSearchModalOpen(true)}
+              className="p-2 text-zinc-900 dark:text-white"
+            >
+              <Search className="w-6 h-6" />
+            </button>
+          )}
+          {/* Burger Menu Button */}
+          <button
+            onClick={() => setIsOpen(true)}
+            aria-label="Menu"
+            className="p-2 -mr-2 text-zinc-900 dark:text-white"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+        </div>
       </div>
 
       {/* Full Page Overlay Menu */}
       {isOpen && (
-        <div className="sm:hidden fixed inset-0 z-[100] bg-white dark:bg-zinc-950 animate-in slide-in-from-bottom flex flex-col">
+        <div data-testid="mobile-nav-overlay" className="sm:hidden fixed inset-0 z-[100] bg-white dark:bg-zinc-950 animate-in slide-in-from-bottom flex flex-col">
           {/* Header of the menu */}
           <div className="flex items-center justify-between p-4 border-b border-zinc-100 dark:border-zinc-900">
             <div className="flex items-center gap-2">
@@ -105,7 +128,7 @@ export default function MobileNav() {
               {navItems.map(({ id, label, icon: Icon }) => (
                 <button
                   key={id}
-                  onClick={() => handleNavClick(id)}
+                  onClick={() => handleNavClick(id as any)}
                   className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-lg font-medium transition-all ${
                     activeView === id
                       ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900'
@@ -175,6 +198,39 @@ export default function MobileNav() {
                   </button>
                 </div>
               </div>
+
+              {/* Mode */}
+              {workspaceMode && (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 text-zinc-700 dark:text-zinc-300">
+                    {workspaceMode === 'business' ? <Briefcase className="w-5 h-5" /> : <User className="w-5 h-5" />}
+                    <span className="font-medium">Mode</span>
+                  </div>
+                  <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-lg p-1">
+                    <button
+                      onClick={() => {
+                        setWorkspaceMode('personal');
+                        setActiveView('months');
+                        setIsOpen(false);
+                      }}
+                      className={`px-3 py-1 text-sm font-medium rounded-md ${workspaceMode === 'personal' ? 'bg-white dark:bg-zinc-900 shadow-sm text-blue-600 dark:text-blue-400' : 'text-zinc-500'}`}
+                    >
+                      Perso
+                    </button>
+                    <button
+                      onClick={() => {
+                        setWorkspaceMode('business');
+                        if (!useStore.getState().businessProfileType) setBusinessProfileType('freelance');
+                        setActiveView('dashboard');
+                        setIsOpen(false);
+                      }}
+                      className={`px-3 py-1 text-sm font-medium rounded-md ${workspaceMode === 'business' ? 'bg-white dark:bg-zinc-900 shadow-sm text-violet-600 dark:text-violet-400' : 'text-zinc-500'}`}
+                    >
+                      Pro
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             <hr className="border-zinc-200 dark:border-zinc-800" />

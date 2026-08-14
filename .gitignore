@@ -12,3 +12,6 @@ dist/
 tsconfig.tsbuildinfo
 .agents/
 generate-icons.js
+test-results/
+playwright-report/
+debug_test.mjs

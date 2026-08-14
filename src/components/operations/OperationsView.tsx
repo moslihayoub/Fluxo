@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Plus, Pencil, Trash2, Upload, Download, Bot, Filter, TrendingUp, TrendingDown, MoreHorizontal, Eye } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import {
@@ -9,6 +9,8 @@ import {
   exportCSV,
   computeMonthTotals,
   MONTH_NAMES,
+  generateId,
+  fromCents,
 } from '@/lib/utils';
 import type { Operation } from '@/types';
 import OperationDialog from './OperationDialog';
@@ -16,6 +18,26 @@ import ImportDialog from './ImportDialog';
 import AgentDialog from '@/components/agent/AgentDialog';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { getTranslation } from '@/lib/i18n';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import {
+  Card,
+  CardContent,
+} from "@/components/ui/card"
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu"
 
 // ── Operations Table ──────────────────────────────────────────
 function OperationsTable({
@@ -49,139 +71,132 @@ function OperationsTable({
   return (
     <div className="-mx-1 sm:mx-0">
       {/* ── DESKTOP TABLE ── */}
-      <div className="hidden sm:block overflow-x-auto">
-        <table className="w-full text-sm min-w-[500px]">
-          <thead>
-            <tr className="border-b border-zinc-100 dark:border-zinc-800">
-              <th className="text-left px-2 py-2.5 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">{t('ops.label')}</th>
-              <th className="text-left px-2 py-2.5 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">{t('common.category')}</th>
-              <th className="text-left px-2 py-2.5 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">{t('common.type')}</th>
-              <th className="text-right px-2 py-2.5 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">{t('common.amount')}</th>
-              <th className="text-right px-2 py-2.5 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider w-16">{t('common.actions')}</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/50">
+      <div className="hidden sm:block overflow-x-auto rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t('ops.label')}</TableHead>
+              <TableHead>{t('common.category')}</TableHead>
+              <TableHead>{t('common.type')}</TableHead>
+              <TableHead className="text-right">{t('common.amount')}</TableHead>
+              <TableHead className="text-right w-16">{t('common.actions')}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {operations.map((op) => (
-              <tr key={op.id} className="group hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors">
-                <td className="px-2 py-3">
-                  <p className="font-medium text-zinc-900 dark:text-white text-sm truncate max-w-[160px]" title={op.label}>
+              <TableRow key={op.id} className="group cursor-default">
+                <TableCell className="font-medium">
+                  <p className="truncate max-w-[160px]" title={op.label}>
                     {op.label}
                   </p>
-                  {op.notes && <p className="text-xs text-zinc-400 truncate max-w-[160px]">{op.notes}</p>}
-                </td>
-                <td className="px-2 py-3">
+                  {op.notes && <p className="text-xs text-zinc-500 truncate max-w-[160px]">{op.notes}</p>}
+                </TableCell>
+                <TableCell>
                   <span className="text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full">
                     {op.operationTypeLabel}
                   </span>
-                </td>
-                <td className="px-2 py-3">
+                </TableCell>
+                <TableCell>
                   <span className={`inline-flex items-center text-xs px-2 py-0.5 rounded-full font-medium ${
                     op.kind === 'encaissement'
-                      ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
-                      : 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400'
+                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                      : 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'
                   }`}>
                     {op.kind === 'encaissement' ? '+' : '−'}
                   </span>
-                </td>
-                <td className="px-2 py-3 text-right">
+                </TableCell>
+                <TableCell className="text-right">
                   <span className={`font-mono tabular-nums font-semibold text-sm ${
                     op.kind === 'encaissement'
                       ? 'text-emerald-600 dark:text-emerald-400'
                       : 'text-rose-600 dark:text-rose-400'
                   }`}>
-                    {op.kind === 'encaissement' ? '+' : '−'}{formatCurrency(op.amount)}
+                    {op.kind === 'encaissement' ? '+' : '−'}{formatCurrency(fromCents(op.amount_cents) || 0)}
                   </span>
-                </td>
-                <td className="px-2 py-3 text-right">
-                  <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={() => onEdit(op)}
-                      className="p-1 rounded text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                      title="Modifier"
-                    >
-                      <Pencil className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => setOpToDelete(op.id)}
-                      className="p-1 rounded text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
-                      title={t('common.delete')}
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
+                </TableCell>
+                <TableCell className="text-right">
+                  {!(op as any).isVirtual && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger className="inline-flex items-center justify-center h-8 px-2.5 text-xs font-semibold gap-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+                      <MoreHorizontal className="w-3.5 h-3.5 text-zinc-500" />
+                      Actions
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => onEdit(op)}>
+                        <Eye className="w-4 h-4 mr-2" />
+                        {t('common.details')}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => onEdit(op)}>
+                        <Pencil className="w-4 h-4 mr-2" />
+                        {t('common.edit')}
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => setOpToDelete(op.id)} className="text-rose-600 focus:bg-rose-50 focus:text-rose-600 dark:focus:bg-rose-900/20 dark:focus:text-rose-400">
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        {t('common.delete')}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  )}
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* ── MOBILE LIST ── */}
-      <div className="sm:hidden flex flex-col divide-y divide-zinc-100 dark:divide-zinc-800/50">
+      <div className="sm:hidden flex flex-col gap-3 p-2">
         {operations.map((op) => (
-          <div key={op.id} className="p-4 transition-colors active:bg-zinc-50 dark:active:bg-zinc-800/50">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex flex-col min-w-0">
-                <p className="font-semibold text-zinc-900 dark:text-white text-sm truncate">{op.label}</p>
-                {op.notes && <p className="text-xs text-zinc-400 truncate mt-0.5">{op.notes}</p>}
-              </div>
-              <div className="relative ml-2">
-                <button
-                  onClick={() => setOpenDropdownId(openDropdownId === op.id ? null : op.id)}
-                  className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors bg-zinc-50 dark:bg-zinc-800/50"
-                >
-                  <MoreHorizontal className="w-4 h-4" />
-                </button>
-
-                {openDropdownId === op.id && (
-                  <>
-                    <div className="fixed inset-0 z-40 bg-black/20 dark:bg-black/50 backdrop-blur-sm sm:bg-transparent sm:backdrop-blur-none" onClick={() => setOpenDropdownId(null)} />
-                    <div className="fixed sm:absolute bottom-0 sm:bottom-auto left-0 sm:left-auto right-0 sm:top-full w-full sm:w-40 bg-white dark:bg-zinc-800 sm:border border-zinc-100 dark:border-zinc-700 rounded-t-2xl sm:rounded-lg shadow-[0_-8px_30px_rgba(0,0,0,0.12)] sm:shadow-xl z-50 overflow-hidden pb-safe sm:py-1 animate-in slide-in-from-bottom-full sm:slide-in-from-top-2 sm:fade-in zoom-in-95 duration-200">
-                      <div className="w-10 h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded-full mx-auto my-3 sm:hidden" />
-                      <button
-                        onClick={() => { onEdit(op); setOpenDropdownId(null); }}
-                        className="w-full flex items-center gap-3 sm:gap-2 px-5 sm:px-3 py-4 sm:py-2 text-base sm:text-sm text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700 hover:text-zinc-900 dark:hover:text-white transition-colors"
-                      >
-                        <Eye className="w-5 h-5 sm:w-4 sm:h-4" />
+          <Card key={op.id}>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex flex-col min-w-0">
+                  <p className="font-semibold text-sm truncate">{op.label}</p>
+                  {op.notes && <p className="text-xs text-zinc-500 truncate mt-0.5">{op.notes}</p>}
+                </div>
+                <div className="relative ml-2 shrink-0">
+                  {!(op as any).isVirtual && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger className="inline-flex items-center justify-center h-8 px-2 text-xs font-semibold gap-1 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+                      <MoreHorizontal className="w-3.5 h-3.5" />
+                      Actions
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => onEdit(op)}>
+                        <Eye className="w-4 h-4 mr-2" />
                         {t('common.details')}
-                      </button>
-                      <button
-                        onClick={() => { onEdit(op); setOpenDropdownId(null); }}
-                        className="w-full flex items-center gap-3 sm:gap-2 px-5 sm:px-3 py-4 sm:py-2 text-base sm:text-sm text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700 hover:text-zinc-900 dark:hover:text-white transition-colors"
-                      >
-                        <Pencil className="w-5 h-5 sm:w-4 sm:h-4" />
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => onEdit(op)}>
+                        <Pencil className="w-4 h-4 mr-2" />
                         {t('common.edit')}
-                      </button>
-                      <button
-                        onClick={() => {
-                          setOpToDelete(op.id);
-                          setOpenDropdownId(null);
-                        }}
-                        className="w-full flex items-center gap-3 sm:gap-2 px-5 sm:px-3 py-4 sm:py-2 text-base sm:text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
-                      >
-                        <Trash2 className="w-5 h-5 sm:w-4 sm:h-4" />
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => setOpToDelete(op.id)} className="text-rose-600 focus:bg-rose-50 focus:text-rose-600 dark:focus:bg-rose-900/20 dark:focus:text-rose-400">
+                        <Trash2 className="w-4 h-4 mr-2" />
                         {t('common.delete')}
-                      </button>
-                    </div>
-                  </>
-                )}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  )}
+                </div>
               </div>
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800/50 px-2 py-1 rounded-md uppercase tracking-wider truncate max-w-[120px]">
-                {op.operationTypeLabel}
-              </span>
               
-              <span className={`font-mono tabular-nums font-bold text-sm ${
-                op.kind === 'encaissement'
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : 'text-rose-600 dark:text-rose-400'
-              }`}>
-                {op.kind === 'encaissement' ? '+' : '−'}{formatCurrency(op.amount)}
-              </span>
-            </div>
-          </div>
+              <div className="flex items-center justify-between mt-3">
+                <span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800/50 px-2 py-1 rounded-md uppercase tracking-wider truncate max-w-[120px]">
+                  {op.operationTypeLabel}
+                </span>
+                
+                <span className={`font-mono tabular-nums font-bold text-sm ${
+                  op.kind === 'encaissement'
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-rose-600 dark:text-rose-400'
+                }`}>
+                  {op.kind === 'encaissement' ? '+' : '−'}{formatCurrency(fromCents(op.amount_cents) || 0)}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
@@ -211,6 +226,9 @@ export default function OperationsView() {
     deleteMonth,
     filter,
     setFilter,
+    workspaceMode,
+    linkProGainsToPerso,
+    businessOrders,
     language,
   } = useStore();
   const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(language, key);
@@ -229,12 +247,62 @@ export default function OperationsView() {
     .sort((a, b) => b.year - a.year || b.month - a.month);
 
   const currentMonth = months.find((m) => m.id === activeMonthId);
-  const monthOps = operations
+  
+  const currentOperations = useMemo(() => {
+    let filtered = operations.filter((op) => 
+      workspaceMode === 'business' 
+        ? op.workspaceMode === 'business' 
+        : (op.workspaceMode === 'personal' || !op.workspaceMode)
+    );
+    
+    // Inject Pro profit into Perso
+    if (workspaceMode === 'personal' && linkProGainsToPerso && activeMonthId) {
+      const activeMonth = months.find(m => m.id === activeMonthId);
+      const proOps = operations.filter((op) => op.workspaceMode === 'business' && op.monthId === activeMonthId);
+      const proIncomes = proOps.filter(o => o.kind === 'encaissement').reduce((acc, o) => acc + (o.amount_cents || 0), 0);
+      const proExpenses = proOps.filter(o => o.kind === 'decaissement').reduce((acc, o) => acc + (o.amount_cents || 0), 0);
+      
+      let proSales = 0;
+      let proCosts = 0;
+      if (activeMonth) {
+        (businessOrders || []).forEach(o => {
+          const d = new Date(o.date);
+          if (d.getMonth() + 1 === activeMonth.month && d.getFullYear() === activeMonth.year) {
+            proSales += Number(o.amountTTC_cents) || 0;
+            const itemsCost = (o.items || []).reduce((acc, item) => acc + ((Number(item.unitCostPrice_cents) || 0) * (Number(item.quantity) || 1)), 0);
+            const legacyCost = (Number(o.unitCostPrice_cents) || 0) * (Number(o.quantity) || 1);
+            proCosts += (o.items && o.items.length > 0) ? itemsCost : legacyCost;
+          }
+        });
+      }
+
+      const proProfit = (proIncomes + proSales) - (proExpenses + proCosts);
+      
+      if (proProfit > 0) {
+        filtered.push({
+          id: 'virtual-pro-profit',
+          label: 'Bénéfice Pro (Auto)',
+          operationTypeId: 'pro-profit',
+          operationTypeLabel: 'Bénéfice Net Pro',
+          amount_cents: proProfit,
+          kind: 'encaissement',
+          workspaceMode: 'personal',
+          monthId: activeMonthId!,
+          date: new Date().toISOString(), // Fallback date
+          isVirtual: true,
+        } as unknown as Operation);
+      }
+    }
+    
+    return filtered;
+  }, [operations, workspaceMode, linkProGainsToPerso, activeMonthId, months, businessOrders]);
+
+  const monthOps = currentOperations
     .filter((op) => op.monthId === activeMonthId)
     .filter((op) => filter === 'all' || op.kind === filter)
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-  const metrics = activeMonthId ? computeMonthTotals(operations, activeMonthId) : null;
+  const metrics = activeMonthId ? computeMonthTotals(currentOperations, activeMonthId) : null;
 
   const handleEdit = (op: Operation) => {
     setEditingOp(op);
@@ -248,7 +316,7 @@ export default function OperationsView() {
 
   const handleExportMonth = () => {
     if (!currentMonth) return;
-    const ops = operations.filter((op) => op.monthId === activeMonthId);
+    const ops = currentOperations.filter((op) => op.monthId === activeMonthId);
     const monthLabel = `${MONTH_NAMES[currentMonth.month - 1]}-${currentMonth.year}`;
     exportCSV(ops, months, `encaissements-${monthLabel}.csv`);
   };
@@ -279,7 +347,7 @@ export default function OperationsView() {
                       {t('periods.active')}
                     </p>
                     {activeMonths.map((m) => {
-                      const t = computeMonthTotals(operations, m.id);
+                      const t = computeMonthTotals(currentOperations, m.id);
                       return (
                         <button
                           key={m.id}
@@ -350,24 +418,26 @@ export default function OperationsView() {
                     
                     {/* Filter (Mobile) with action button */}
                     <div className="flex sm:hidden gap-2 w-full">
-                      <div className="flex flex-1 rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-700 text-xs">
-                        {(['all', 'encaissement', 'decaissement'] as const).map((f) => (
-                          <button
-                            key={`mobile-${f}`}
-                            onClick={() => setFilter(f)}
-                            className={`px-2 py-2 font-medium transition-colors flex-1 text-center ${
-                              filter === f
-                                ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900'
-                                : 'bg-white dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-700'
-                            }`}
-                          >
-                            {f === 'all' ? t('common.all') : f === 'encaissement' ? t('common.incomes') : t('common.expenses')}
-                          </button>
-                        ))}
-                      </div>
+                      {metrics && metrics.count > 0 && (
+                        <div className="flex flex-1 rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-700 text-xs">
+                          {(['all', 'encaissement', 'decaissement'] as const).map((f) => (
+                            <button
+                              key={`mobile-${f}`}
+                              onClick={() => setFilter(f)}
+                              className={`px-2 py-2 font-medium transition-colors flex-1 text-center ${
+                                filter === f
+                                  ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900'
+                                  : 'bg-white dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-700'
+                              }`}
+                            >
+                              {f === 'all' ? t('common.all') : f === 'encaissement' ? t('common.incomes') : t('common.expenses')}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                       <button
                         onClick={() => setShowMobileActions(true)}
-                        className="p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors flex-shrink-0"
+                        className={`p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors flex-shrink-0 ${!(metrics && metrics.count > 0) ? 'ml-auto' : ''}`}
                       >
                         <MoreHorizontal className="w-5 h-5" />
                       </button>
@@ -385,21 +455,23 @@ export default function OperationsView() {
                   </div>
 
                   {/* Filter (Desktop) */}
-                  <div className="hidden sm:flex rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-700 text-xs">
-                    {(['all', 'encaissement', 'decaissement'] as const).map((f) => (
-                      <button
-                        key={`desktop-${f}`}
-                        onClick={() => setFilter(f)}
-                        className={`px-2.5 py-1.5 font-medium transition-colors ${
-                          filter === f
-                            ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900'
-                            : 'bg-white dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-700'
-                        }`}
-                      >
-                        {f === 'all' ? t('common.all') : f === 'encaissement' ? t('common.incomes') : t('common.expenses')}
-                      </button>
-                    ))}
-                  </div>
+                  {metrics && metrics.count > 0 && (
+                    <div className="hidden sm:flex rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-700 text-xs">
+                      {(['all', 'encaissement', 'decaissement'] as const).map((f) => (
+                        <button
+                          key={`desktop-${f}`}
+                          onClick={() => setFilter(f)}
+                          className={`px-2.5 py-1.5 font-medium transition-colors ${
+                            filter === f
+                              ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900'
+                              : 'bg-white dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-700'
+                          }`}
+                        >
+                          {f === 'all' ? t('common.all') : f === 'encaissement' ? t('common.incomes') : t('common.expenses')}
+                        </button>
+                      ))}
+                    </div>
+                  )}
 
                   {/* Action buttons */}
                   <div className="flex items-center gap-1.5">
@@ -410,27 +482,31 @@ export default function OperationsView() {
                     >
                       <Upload className="w-3.5 h-3.5" />
                     </button>
-                    <button
-                      onClick={handleExportMonth}
-                      title={t('ops.exportMonth')}
-                      className="hidden sm:flex p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white transition-colors text-xs items-center gap-1"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => {
-                        const ops = operations.filter(op => op.monthId === activeMonthId);
-                        if (ops.length === 0) {
-                          deleteMonth(activeMonthId!);
-                        } else {
-                          setMonthToDelete(activeMonthId);
-                        }
-                      }}
-                      title={t('common.delete')}
-                      className="hidden sm:flex p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-rose-500 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors text-xs items-center gap-1"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    {metrics && metrics.count > 0 && (
+                      <>
+                        <button
+                          onClick={handleExportMonth}
+                          title={t('ops.exportMonth')}
+                          className="hidden sm:flex p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white transition-colors text-xs items-center gap-1"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            const ops = currentOperations.filter(op => op.monthId === activeMonthId);
+                            if (ops.length === 0) {
+                              deleteMonth(activeMonthId!);
+                            } else {
+                              setMonthToDelete(activeMonthId);
+                            }
+                          }}
+                          title={t('common.delete')}
+                          className="hidden sm:flex p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-rose-500 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors text-xs items-center gap-1"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </>
+                    )}
                     <button
                       disabled
                       title="Fonctionnalité d'intelligence artificielle disponible prochainement !"
@@ -441,6 +517,7 @@ export default function OperationsView() {
                     </button>
                     <button
                       onClick={() => setShowOpDialog(true)}
+                      data-testid="add-operation-btn"
                       className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-xs font-medium hover:bg-zinc-700 dark:hover:bg-zinc-100 transition-colors"
                     >
                       <Plus className="w-3.5 h-3.5" />
@@ -467,6 +544,8 @@ export default function OperationsView() {
       {/* FAB for Mobile */}
       <button
         onClick={() => setShowOpDialog(true)}
+        data-testid="add-operation-btn"
+        aria-label="Ajouter une opération"
         className="sm:hidden fixed bottom-20 right-4 z-40 w-14 h-14 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
       >
         <Plus className="w-6 h-6" />
@@ -496,7 +575,7 @@ export default function OperationsView() {
             <button
               onClick={() => {
                 if (activeMonthId) {
-                  const ops = operations.filter(op => op.monthId === activeMonthId);
+                  const ops = currentOperations.filter(op => op.monthId === activeMonthId);
                   if (ops.length === 0) {
                     deleteMonth(activeMonthId);
                   } else {

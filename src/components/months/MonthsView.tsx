@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Plus, Archive, RotateCcw, Eye, TrendingUp, TrendingDown, Trash2, Download, CheckSquare, Square } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { formatCurrency, computeMonthTotals, getMonthLabel, MONTH_NAMES, exportCSV } from '@/lib/utils';
-import type { Month } from '@/types';
+import type { Month, Operation } from '@/types';
 import { getTranslation } from '@/lib/i18n';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/Select';
 
 // ── New Month Dialog ──────────────────────────────────────────
 function NewMonthDialog({ onClose }: { onClose: () => void }) {
@@ -45,29 +46,37 @@ function NewMonthDialog({ onClose }: { onClose: () => void }) {
               <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
                 {t('periods.month')}
               </label>
-              <select
-                value={month}
-                onChange={(e) => { setMonth(+e.target.value); setError(''); }}
-                className="w-full px-3 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white transition-shadow"
+              <Select
+                value={month.toString()}
+                onValueChange={(val) => { setMonth(+val); setError(''); }}
               >
-                {MONTH_NAMES.map((name, i) => (
-                  <option key={i} value={i + 1}>{name}</option>
-                ))}
-              </select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choisir un mois..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {MONTH_NAMES.map((name, i) => (
+                    <SelectItem key={i} value={(i + 1).toString()}>{name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
                 {t('periods.year')}
               </label>
-              <select
-                value={year}
-                onChange={(e) => { setYear(+e.target.value); setError(''); }}
-                className="w-full px-3 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white transition-shadow"
+              <Select
+                value={year.toString()}
+                onValueChange={(val) => { setYear(+val); setError(''); }}
               >
-                {years.map((y) => (
-                  <option key={y} value={y}>{y}</option>
-                ))}
-              </select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choisir une année..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {years.map((y) => (
+                    <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {error && (
@@ -100,10 +109,57 @@ function NewMonthDialog({ onClose }: { onClose: () => void }) {
 
 // ── Month Card ────────────────────────────────────────────────
 function MonthCard({ month, isSelectionMode, isSelected, onSelect, onLongPress }: { month: Month, isSelectionMode: boolean, isSelected: boolean, onSelect: (id: string) => void, onLongPress: () => void }) {
-  const { operations, archiveMonth, deleteMonth, restoreMonth, setActiveMonth, setActiveView, language } = useStore();
+  const { operations: allOperations, months, businessOrders, archiveMonth, deleteMonth, restoreMonth, setActiveMonth, setActiveView, language, workspaceMode, linkProGainsToPerso } = useStore();
   const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(language, key);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const metrics = computeMonthTotals(operations, month.id);
+  
+  const currentOperations = useMemo(() => {
+    let filtered = allOperations.filter(op => 
+      workspaceMode === 'business' 
+        ? op.workspaceMode === 'business' 
+        : (op.workspaceMode === 'personal' || !op.workspaceMode)
+    );
+    
+    if (workspaceMode === 'personal' && linkProGainsToPerso) {
+      // For each month, compute pro profit and inject it if > 0
+      months.forEach(m => {
+        const proOps = allOperations.filter(op => op.workspaceMode === 'business' && op.monthId === m.id);
+        const proIncomes = proOps.filter(o => o.kind === 'encaissement').reduce((acc, o) => acc + (o.amount_cents || 0), 0);
+        const proExpenses = proOps.filter(o => o.kind === 'decaissement').reduce((acc, o) => acc + (o.amount_cents || 0), 0);
+        
+        let proSales = 0;
+        let proCosts = 0;
+        (businessOrders || []).forEach(o => {
+          const d = new Date(o.date);
+          if (d.getMonth() + 1 === m.month && d.getFullYear() === m.year) {
+            proSales += Number(o.amountTTC_cents) || 0;
+            const itemsCost = (o.items || []).reduce((acc, item) => acc + ((Number(item.unitCostPrice_cents) || 0) * (Number(item.quantity) || 1)), 0);
+            const legacyCost = (Number(o.unitCostPrice_cents) || 0) * (Number(o.quantity) || 1);
+            proCosts += (o.items && o.items.length > 0) ? itemsCost : legacyCost;
+          }
+        });
+
+        const proProfit = (proIncomes + proSales) - (proExpenses + proCosts);
+
+        if (proProfit > 0) {
+          filtered.push({
+            id: `virtual-pro-${m.id}`,
+            label: 'Bénéfice Pro (Auto)',
+            operationTypeId: 'pro-profit',
+            operationTypeLabel: 'Bénéfice Net Pro',
+            amount_cents: proProfit,
+            kind: 'encaissement',
+            workspaceMode: 'personal',
+            monthId: m.id,
+            date: new Date().toISOString(), // Fallback
+          } as unknown as Operation);
+        }
+      });
+    }
+    return filtered;
+  }, [allOperations, workspaceMode, linkProGainsToPerso, months, businessOrders]);
+
+  const metrics = computeMonthTotals(currentOperations, month.id);
 
   const handleViewOperations = () => {
     setActiveMonth(month.id);
@@ -162,9 +218,11 @@ function MonthCard({ month, isSelectionMode, isSelected, onSelect, onLongPress }
         </div>
         <div className="text-right">
           <p className={`text-lg font-bold tabular-nums font-mono ${
-            metrics.solde >= 0
-              ? 'text-zinc-900 dark:text-white'
-              : 'text-red-600 dark:text-red-400'
+            metrics.solde > 0
+              ? 'text-blue-600 dark:text-blue-400'
+              : metrics.solde < 0
+              ? 'text-red-600 dark:text-red-400'
+              : 'text-zinc-900 dark:text-white'
           }`}>
             {formatCurrency(metrics.solde, true)}
           </p>
@@ -269,9 +327,17 @@ function MonthCard({ month, isSelectionMode, isSelected, onSelect, onLongPress }
 
 // ── MonthsView ────────────────────────────────────────────────
 export default function MonthsView() {
-  const { months, operations, language } = useStore();
+  const { months, operations: allOperations, language, workspaceMode } = useStore();
   const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(language, key);
   const [showDialog, setShowDialog] = useState(false);
+  
+  const operations = useMemo(() => {
+    return allOperations.filter(op => 
+      workspaceMode === 'business' 
+        ? op.workspaceMode === 'business' 
+        : (op.workspaceMode === 'personal' || !op.workspaceMode)
+    );
+  }, [allOperations, workspaceMode]);
   
   // Multi-selection state
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -327,48 +393,50 @@ export default function MonthsView() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {isSelectionMode ? (
-            <>
-              <button
-                onClick={toggleSelectionMode}
-                className="px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
-              >
-                {t('common.cancel')}
-              </button>
-              <button
-                onClick={() => setShowMultiDeleteConfirm(true)}
-                disabled={selectedMonthIds.size === 0}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Trash2 className="w-4 h-4" />
-                {t('common.delete')} ({selectedMonthIds.size})
-              </button>
-              <button
-                onClick={handleExportSelected}
-                disabled={selectedMonthIds.size === 0}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Download className="w-4 h-4" />
-                {t('ops.export')} ({selectedMonthIds.size})
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={toggleSelectionMode}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors shadow-sm"
-              >
-                <CheckSquare className="w-4 h-4" />
-                {t('common.select')}
-              </button>
-              <button
-                onClick={() => setShowDialog(true)}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-sm font-medium hover:bg-zinc-700 dark:hover:bg-zinc-100 transition-colors shadow-sm"
-              >
-                <Plus className="w-4 h-4" />
-                {t('periods.new')}
-              </button>
-            </>
+          {(activeMonths.length > 0 || archivedMonths.length > 0) && (
+            isSelectionMode ? (
+              <>
+                <button
+                  onClick={toggleSelectionMode}
+                  className="px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                >
+                  {t('common.cancel')}
+                </button>
+                <button
+                  onClick={() => setShowMultiDeleteConfirm(true)}
+                  disabled={selectedMonthIds.size === 0}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  {t('common.delete')} ({selectedMonthIds.size})
+                </button>
+                <button
+                  onClick={handleExportSelected}
+                  disabled={selectedMonthIds.size === 0}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Download className="w-4 h-4" />
+                  {t('ops.export')} ({selectedMonthIds.size})
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={toggleSelectionMode}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors shadow-sm"
+                >
+                  <CheckSquare className="w-4 h-4" />
+                  {t('common.select')}
+                </button>
+                <button
+                  onClick={() => setShowDialog(true)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-sm font-medium hover:bg-zinc-700 dark:hover:bg-zinc-100 transition-colors shadow-sm"
+                >
+                  <Plus className="w-4 h-4" />
+                  {t('periods.new')}
+                </button>
+              </>
+            )
           )}
         </div>
       </div>
