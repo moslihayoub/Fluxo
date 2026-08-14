@@ -71,11 +71,11 @@ export const BusinessSupplierSchema = z.object({
   contactName: z.string().optional(),
   contactFirstName: z.string().optional(),
   contactLastName: z.string().optional(),
-  phone: z.string(),
+  phone: z.string().optional().default(''),
   whatsapp: z.string().optional(),
   city: z.string().optional(),
   address: z.string().optional(),
-  email: z.string().email().optional().or(z.literal('')),
+  email: z.string().optional(),
   website: z.string().optional(),
   socialLinks: z.object({
     insta: z.string().optional(),
@@ -84,9 +84,9 @@ export const BusinessSupplierSchema = z.object({
     other: z.string().optional(),
   }).optional(),
   merchandiseType: z.string().optional(),
-  createdAt: z.string().datetime({ offset: true }),
-  updatedAt: z.string().datetime({ offset: true }),
-  userId: z.string().min(1),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  userId: z.string().optional(),
 });
 
 export const BusinessProductSchema = z.object({
@@ -100,9 +100,9 @@ export const BusinessProductSchema = z.object({
   isActive: z.boolean(),
   isFree: z.boolean().optional(),
   discountRate: z.number().optional(),
-  createdAt: z.string().datetime({ offset: true }),
-  updatedAt: z.string().datetime({ offset: true }),
-  userId: z.string().min(1),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  userId: z.string().optional(),
 });
 
 export const BusinessClientSchema = z.object({
@@ -110,8 +110,8 @@ export const BusinessClientSchema = z.object({
   name: z.string().min(1),
   firstName: z.string().optional(),
   lastName: z.string().optional(),
-  phone: z.string(),
-  email: z.string().email().optional().or(z.literal('')),
+  phone: z.string().optional().default(''),
+  email: z.string().optional(),
   avatarUrl: z.string().optional(),
   address: z.string().optional(),
   city: z.string().optional(),
@@ -119,11 +119,11 @@ export const BusinessClientSchema = z.object({
   isVip: z.boolean().optional(),
   defaultDiscountRate: z.number().optional(),
   freeProductIds: z.array(z.string()).optional(),
-  totalSpent_cents: z.number().int(),
-  totalPending_cents: z.number().int(),
-  createdAt: z.string().datetime({ offset: true }),
-  updatedAt: z.string().datetime({ offset: true }),
-  userId: z.string().min(1),
+  totalSpent_cents: z.number().int().default(0),
+  totalPending_cents: z.number().int().default(0),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  userId: z.string().optional(),
 });
 
 export const OrderItemSchema = z.object({
