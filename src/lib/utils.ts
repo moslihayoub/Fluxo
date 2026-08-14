@@ -12,10 +12,15 @@ export function generateId(): string {
 }
 
 // ── Firebase helper ───────────────────────────────────────────
-export const cleanForFirebase = (obj: any) => {
-  return Object.fromEntries(
-    Object.entries(obj).filter(([_, v]) => v !== undefined)
-  );
+export const cleanForFirebase = (obj: any): any => {
+  if (obj === null || typeof obj !== 'object') return obj;
+  if (Array.isArray(obj)) return obj.map(cleanForFirebase);
+  return Object.entries(obj).reduce((acc, [key, val]) => {
+    if (val !== undefined) {
+      acc[key] = typeof val === 'object' && val !== null ? cleanForFirebase(val) : val;
+    }
+    return acc;
+  }, {} as any);
 };
 
 // ── Financial conversion ─────────────────────────────────────

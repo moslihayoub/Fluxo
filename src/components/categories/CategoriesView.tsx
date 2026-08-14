@@ -601,7 +601,7 @@ export default function CategoriesView() {
                     </button>
                     <button
                       onClick={() => setSelectedCat(cat)}
-                      className="hidden xl:flex items-center gap-1 ml-1 text-xs text-zinc-400 hover:text-zinc-900 dark:hover:white transition-colors"
+                      className="hidden xl:flex items-center gap-1 ml-1 text-xs text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
                     >
                       Détail <ChevronRight className="w-3 h-3" />
                     </button>

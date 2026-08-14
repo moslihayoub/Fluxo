@@ -85,54 +85,81 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
     onClose();
   };
 
+  const handlePhoneChange = (phone: string) => {
+    setFormData(prev => ({
+      ...prev,
+      phone,
+      whatsapp: prev.isWhatsappSameAsPhone ? phone : prev.whatsapp
+    }));
+  };
+
+  const handleWhatsappToggle = (checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      isWhatsappSameAsPhone: checked,
+      whatsapp: checked ? prev.phone : ''
+    }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
 
     if (!formData.brandName.trim()) {
-      toast.error('La marque du fournisseur est obligatoire');
+      toast.error('Le nom de la marque est obligatoire');
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      const fullContactName = formData.contactFirstName.trim() || formData.contactLastName.trim()
-        ? `${formData.contactFirstName.trim()} ${formData.contactLastName.trim()}`.trim()
-        : undefined;
+      const rawBrand = formData.brandName.trim();
+      const rawPhone = formData.phone ? formData.phone.trim() : '';
+      const rawWhatsapp = formData.isWhatsappSameAsPhone ? rawPhone : (formData.whatsapp ? formData.whatsapp.trim() : undefined);
+      const rawEmail = formData.email ? formData.email.trim() : undefined;
+      const rawCity = formData.city ? formData.city.trim() : undefined;
+      const rawAddress = formData.address ? formData.address.trim() : undefined;
+      const rawWebsite = formData.website ? formData.website.trim() : undefined;
+      const rawFname = formData.contactFirstName ? formData.contactFirstName.trim() : undefined;
+      const rawLname = formData.contactLastName ? formData.contactLastName.trim() : undefined;
+      const fullContact = (rawFname || rawLname) ? `${rawFname || ''} ${rawLname || ''}`.trim() : undefined;
 
-      const payload = {
-        brandName: formData.brandName.trim(),
-        avatarUrl: formData.avatarUrl || undefined,
-        contactName: fullContactName,
-        contactFirstName: formData.contactFirstName.trim() || undefined,
-        contactLastName: formData.contactLastName.trim() || undefined,
-        phone: formData.phone || '',
-        whatsapp: formData.isWhatsappSameAsPhone ? formData.phone : (formData.whatsapp || undefined),
-        city: formData.city || undefined,
-        address: formData.address || undefined,
-        email: formData.email || undefined,
-        website: formData.website || undefined,
-        socialLinks: {
-          insta: formData.insta || undefined,
-          fb: formData.fb || undefined,
-          tiktok: formData.tiktok || undefined,
-          other: formData.other || undefined,
-        },
-        merchandiseType: formData.merchandiseType || undefined,
+      const socialLinks: any = {};
+      if (formData.insta?.trim()) socialLinks.insta = formData.insta.trim();
+      if (formData.fb?.trim()) socialLinks.fb = formData.fb.trim();
+      if (formData.tiktok?.trim()) socialLinks.tiktok = formData.tiktok.trim();
+      if (formData.other?.trim()) socialLinks.other = formData.other.trim();
+
+      const payload: any = {
+        brandName: rawBrand,
+        avatarUrl: formData.avatarUrl?.trim() || undefined,
+        contactName: fullContact,
+        contactFirstName: rawFname,
+        contactLastName: rawLname,
+        phone: rawPhone,
+        whatsapp: rawWhatsapp || undefined,
+        city: rawCity,
+        address: rawAddress,
+        email: rawEmail || undefined,
+        website: rawWebsite,
+        merchandiseType: formData.merchandiseType || 'physical',
       };
+      if (Object.keys(socialLinks).length > 0) {
+        payload.socialLinks = socialLinks;
+      }
 
       if (supplier) {
         updateSupplier(supplier.id, payload);
-        toast.success('Fournisseur modifié');
+        toast.success('Fournisseur modifié avec succès');
       } else {
         addSupplier(payload);
-        toast.success('Fournisseur ajouté');
+        toast.success('Fournisseur ajouté avec succès');
       }
 
       handleClose();
-    } catch (err) {
-      toast.error("Erreur lors de l'enregistrement");
+    } catch (err: any) {
+      console.error('Erreur enregistrement fournisseur:', err);
+      toast.error(err?.message || "Erreur lors de l'enregistrement");
     } finally {
       setIsSubmitting(false);
     }
@@ -192,19 +219,33 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Type de Marchandise</label>
-                <Select
-                  value={formData.merchandiseType}
-                  onValueChange={(val: 'physical' | 'digital') => setFormData({ ...formData, merchandiseType: val })}
-                >
-                  <SelectTrigger className="w-full h-10">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="physical">Produit Physique (Stock / Matériel)</SelectItem>
-                    <SelectItem value="digital">Digital / Service (Licences / Prestations)</SelectItem>
-                  </SelectContent>
-                </Select>
+                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1.5">
+                  Type de Marchandise
+                </label>
+                <div className="grid grid-cols-2 gap-2 bg-zinc-100 dark:bg-zinc-800/80 p-1 rounded-xl">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, merchandiseType: 'physical' })}
+                    className={`py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                      formData.merchandiseType === 'physical'
+                        ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-xs'
+                        : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
+                    }`}
+                  >
+                    📦 Produit Physique
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, merchandiseType: 'digital' })}
+                    className={`py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                      formData.merchandiseType === 'digital'
+                        ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-xs'
+                        : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
+                    }`}
+                  >
+                    ⚡ Digital / Service
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -212,12 +253,14 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
             <div className="space-y-4 pt-2 border-t border-zinc-100 dark:border-zinc-800">
               <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
                 <User className="w-4 h-4 text-violet-500" />
-                Contact Commercial
+                Contact Commercial <span className="text-xs font-normal text-zinc-400">(Optionnel)</span>
               </h3>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Prénom</label>
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">
+                    Prénom <span className="text-zinc-400 font-normal lowercase">(optionnel)</span>
+                  </label>
                   <Input
                     type="text"
                     value={formData.contactFirstName}
@@ -227,7 +270,9 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Nom</label>
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">
+                    Nom <span className="text-zinc-400 font-normal lowercase">(optionnel)</span>
+                  </label>
                   <Input
                     type="text"
                     value={formData.contactLastName}
@@ -239,26 +284,30 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Numéro Téléphone</label>
+                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">
+                  Numéro Téléphone <span className="text-zinc-400 font-normal lowercase">(optionnel)</span>
+                </label>
                 <PhoneInput
                   value={formData.phone}
-                  onChange={(phone) => setFormData({ ...formData, phone })}
+                  onChange={handlePhoneChange}
                   placeholder="Ex: 6 00 00 00 00"
                   enableCopy
                 />
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">WhatsApp</label>
+                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">
+                  WhatsApp <span className="text-zinc-400 font-normal lowercase">(optionnel)</span>
+                </label>
                 <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-400 cursor-pointer">
+                  <label className="flex items-center gap-2.5 text-xs text-zinc-600 dark:text-zinc-300 cursor-pointer select-none bg-zinc-50 dark:bg-zinc-800/50 p-2 rounded-xl border border-zinc-200/60 dark:border-zinc-700/60 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
                     <input
                       type="checkbox"
                       checked={formData.isWhatsappSameAsPhone}
-                      onChange={(e) => setFormData({ ...formData, isWhatsappSameAsPhone: e.target.checked })}
-                      className="rounded border-zinc-300 text-violet-600 focus:ring-violet-500"
+                      onChange={(e) => handleWhatsappToggle(e.target.checked)}
+                      className="w-4 h-4 rounded border-zinc-300 text-violet-600 focus:ring-violet-500"
                     />
-                    Identique au numéro de téléphone
+                    <span className="font-medium">Identique au numéro de téléphone</span>
                   </label>
                   {!formData.isWhatsappSameAsPhone && (
                     <PhoneInput
@@ -272,7 +321,9 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Email</label>
+                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">
+                  Email <span className="text-zinc-400 font-normal lowercase">(optionnel)</span>
+                </label>
                 <Input
                   type="email"
                   value={formData.email}

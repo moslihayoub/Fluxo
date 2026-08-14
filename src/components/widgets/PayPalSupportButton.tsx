@@ -74,16 +74,16 @@ export default function PayPalSupportButton({ variant = 'default', className = '
       href={paypalUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className={`inline-flex items-center justify-center gap-2.5 px-5 py-2.5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 hover:border-blue-500 text-zinc-900 dark:text-white font-bold hover:scale-105 active:scale-95 transition-all shadow-md ${className}`}
+      className={`inline-flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 hover:border-blue-500 hover:shadow-md text-zinc-900 dark:text-white font-bold transition-all shadow-xs ${className}`}
     >
       <Coffee className="w-4 h-4 text-amber-500 fill-amber-500 shrink-0" />
-      <span>{t('paypal.button')}</span>
-      <span className="text-zinc-300 dark:text-zinc-700">|</span>
+      <span className="text-xs sm:text-sm">{t('paypal.button')}</span>
+      <span className="text-zinc-300 dark:text-zinc-700 font-light">|</span>
       <span className="inline-flex items-center gap-1.5">
         <PayPalLogo className="w-4 h-4 shrink-0" />
-        <span className="text-blue-600 dark:text-blue-400 font-extrabold">PayPal</span>
+        <span className="text-xs sm:text-sm text-blue-600 dark:text-blue-400 font-extrabold">PayPal</span>
       </span>
-      <ExternalLink className="w-3.5 h-3.5 text-zinc-400 ml-0.5" />
+      <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
     </a>
   );
 }

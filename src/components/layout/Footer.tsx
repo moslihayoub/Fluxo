@@ -13,7 +13,7 @@ export default function Footer() {
   const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(language, key);
 
   return (
-    <footer className="fixed bottom-0 left-0 right-0 z-30 border-t border-zinc-200/80 dark:border-zinc-800/80 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md py-2.5 px-4 text-xs text-zinc-500 dark:text-zinc-400">
+    <footer className="relative sm:fixed sm:bottom-0 sm:left-0 sm:right-0 z-30 border-t border-zinc-200/80 dark:border-zinc-800/80 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md py-3 sm:py-2.5 px-4 text-xs text-zinc-500 dark:text-zinc-400 mt-auto">
       <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
         {/* Left: Copyright & Moslih84 Attribution */}
         <div className="flex items-center gap-1.5 flex-wrap justify-center sm:justify-start">
