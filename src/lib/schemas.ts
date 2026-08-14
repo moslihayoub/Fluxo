@@ -86,7 +86,7 @@ export const BusinessSupplierSchema = z.object({
   merchandiseType: z.string().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
-  userId: z.string().optional(),
+  userId: z.string(),
 });
 
 export const BusinessProductSchema = z.object({
@@ -102,7 +102,7 @@ export const BusinessProductSchema = z.object({
   discountRate: z.number().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
-  userId: z.string().optional(),
+  userId: z.string(),
 });
 
 export const BusinessClientSchema = z.object({
@@ -123,7 +123,7 @@ export const BusinessClientSchema = z.object({
   totalPending_cents: z.number().int().default(0),
   createdAt: z.string(),
   updatedAt: z.string(),
-  userId: z.string().optional(),
+  userId: z.string(),
 });
 
 export const OrderItemSchema = z.object({

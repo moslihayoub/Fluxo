@@ -15,16 +15,17 @@ export default function OnboardingView() {
   const [selectedProfile, setSelectedProfile] = useState<BusinessProfileType | null>(null);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 px-4 py-8 overflow-y-auto">
-      <div className="w-full max-w-4xl mx-auto space-y-8 animate-in fade-in zoom-in-95 duration-500">
-        
-        <div className="text-center space-y-3">
-          <div className="w-16 h-16 rounded-2xl bg-zinc-900 dark:bg-white mx-auto flex items-center justify-center shadow-xl mb-6">
-            <span className="text-white dark:text-zinc-900 text-2xl font-black tracking-tighter font-mono">FX</span>
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
-            Bienvenue sur Fluxo
-          </h1>
+    <div className="fixed inset-0 z-50 bg-zinc-50 dark:bg-zinc-950 overflow-y-auto">
+      <div className="min-h-full flex flex-col items-center justify-start sm:justify-center p-4 sm:p-8 pt-10 sm:pt-8">
+        <div className="w-full max-w-4xl mx-auto space-y-6 sm:space-y-8 my-auto animate-in fade-in zoom-in-95 duration-500 pb-8">
+          
+          <div className="text-center space-y-2 sm:space-y-3">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-zinc-900 dark:bg-white mx-auto flex items-center justify-center shadow-xl mb-4 sm:mb-6">
+              <span className="text-white dark:text-zinc-900 text-xl sm:text-2xl font-black tracking-tighter font-mono">FX</span>
+            </div>
+            <h1 className="text-2xl sm:text-4xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
+              Bienvenue sur Fluxo
+            </h1>
           <p className="text-zinc-500 dark:text-zinc-400 text-lg max-w-lg mx-auto">
             {selectedMode === 'business' 
               ? 'Sélectionnez votre profil vendeur pour adapter la fiscalité (TVA).'
@@ -142,6 +143,7 @@ export default function OnboardingView() {
           </div>
         ) : null}
 
+        </div>
       </div>
     </div>
   );
