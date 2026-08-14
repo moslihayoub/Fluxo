@@ -43,6 +43,17 @@
   border-color: hsl(var(--border));
 }
 
+::selection {
+  background-color: #8b5cf6 !important;
+  color: #ffffff !important;
+}
+
+input::selection,
+textarea::selection {
+  background-color: #7c3aed !important;
+  color: #ffffff !important;
+}
+
 html,
 body {
   max-width: 100vw;

@@ -1,5 +1,7 @@
+'use client';
+
 import { useState, useEffect } from 'react';
-import { X, Building2, Phone, Mail, MapPin, Globe, Instagram, Facebook, Link as LinkIcon, User } from 'lucide-react';
+import { X, Building2, Phone, Mail, MapPin, Globe, Instagram, Facebook, Link as LinkIcon, User, Loader2, CheckCircle2 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import type { BusinessSupplier } from '@/types';
 import toast from 'react-hot-toast';
@@ -15,28 +17,31 @@ interface SupplierDialogProps {
   supplier: BusinessSupplier | null;
 }
 
+const INITIAL_STATE = {
+  brandName: '',
+  avatarUrl: '',
+  contactFirstName: '',
+  contactLastName: '',
+  phone: '',
+  whatsapp: '',
+  city: '',
+  address: '',
+  email: '',
+  website: '',
+  insta: '',
+  fb: '',
+  tiktok: '',
+  other: '',
+  merchandiseType: 'physical' as 'physical' | 'digital',
+  isWhatsappSameAsPhone: false,
+};
+
 export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDialogProps) {
   const addSupplier = useStore((s) => s.addBusinessSupplier);
   const updateSupplier = useStore((s) => s.updateBusinessSupplier);
   
-  const [formData, setFormData] = useState({
-    brandName: '',
-    avatarUrl: '',
-    contactFirstName: '',
-    contactLastName: '',
-    phone: '',
-    whatsapp: '',
-    city: '',
-    address: '',
-    email: '',
-    website: '',
-    insta: '',
-    fb: '',
-    tiktok: '',
-    other: '',
-    merchandiseType: 'physical' as 'physical' | 'digital',
-    isWhatsappSameAsPhone: false,
-  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState(INITIAL_STATE);
 
   useEffect(() => {
     if (isOpen) {
@@ -64,86 +69,91 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
           tiktok: supplier.socialLinks?.tiktok || '',
           other: supplier.socialLinks?.other || '',
           merchandiseType: (supplier.merchandiseType as 'physical' | 'digital') || 'physical',
-          isWhatsappSameAsPhone: supplier.whatsapp === supplier.phone && !!supplier.phone
+          isWhatsappSameAsPhone: supplier.whatsapp === supplier.phone && !!supplier.phone,
         });
       } else {
-        setFormData({
-          brandName: '',
-          avatarUrl: '',
-          contactFirstName: '',
-          contactLastName: '',
-          phone: '',
-          whatsapp: '',
-          city: '',
-          address: '',
-          email: '',
-          website: '',
-          insta: '',
-          fb: '',
-          tiktok: '',
-          other: '',
-          merchandiseType: 'physical',
-          isWhatsappSameAsPhone: false
-        });
+        setFormData(INITIAL_STATE);
       }
     }
   }, [isOpen, supplier]);
 
   if (!isOpen) return null;
 
+  const handleClose = () => {
+    setFormData(INITIAL_STATE);
+    setIsSubmitting(false);
+    onClose();
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
     if (!formData.brandName.trim()) {
       toast.error('La marque du fournisseur est obligatoire');
       return;
     }
 
-    const fullContactName = formData.contactFirstName.trim() || formData.contactLastName.trim()
-      ? `${formData.contactFirstName.trim()} ${formData.contactLastName.trim()}`.trim()
-      : undefined;
+    setIsSubmitting(true);
 
-    const payload = {
-      brandName: formData.brandName.trim(),
-      avatarUrl: formData.avatarUrl || undefined,
-      contactName: fullContactName,
-      contactFirstName: formData.contactFirstName.trim() || undefined,
-      contactLastName: formData.contactLastName.trim() || undefined,
-      phone: formData.phone || '',
-      whatsapp: formData.isWhatsappSameAsPhone ? formData.phone : (formData.whatsapp || undefined),
-      city: formData.city || undefined,
-      address: formData.address || undefined,
-      email: formData.email || undefined,
-      website: formData.website || undefined,
-      socialLinks: {
-        insta: formData.insta || undefined,
-        fb: formData.fb || undefined,
-        tiktok: formData.tiktok || undefined,
-        other: formData.other || undefined,
-      },
-      merchandiseType: formData.merchandiseType || undefined,
-    };
+    try {
+      const fullContactName = formData.contactFirstName.trim() || formData.contactLastName.trim()
+        ? `${formData.contactFirstName.trim()} ${formData.contactLastName.trim()}`.trim()
+        : undefined;
 
-    if (supplier) {
-      updateSupplier(supplier.id, payload);
-      toast.success('Fournisseur modifié');
-    } else {
-      addSupplier(payload);
-      toast.success('Fournisseur ajouté');
+      const payload = {
+        brandName: formData.brandName.trim(),
+        avatarUrl: formData.avatarUrl || undefined,
+        contactName: fullContactName,
+        contactFirstName: formData.contactFirstName.trim() || undefined,
+        contactLastName: formData.contactLastName.trim() || undefined,
+        phone: formData.phone || '',
+        whatsapp: formData.isWhatsappSameAsPhone ? formData.phone : (formData.whatsapp || undefined),
+        city: formData.city || undefined,
+        address: formData.address || undefined,
+        email: formData.email || undefined,
+        website: formData.website || undefined,
+        socialLinks: {
+          insta: formData.insta || undefined,
+          fb: formData.fb || undefined,
+          tiktok: formData.tiktok || undefined,
+          other: formData.other || undefined,
+        },
+        merchandiseType: formData.merchandiseType || undefined,
+      };
+
+      if (supplier) {
+        updateSupplier(supplier.id, payload);
+        toast.success('Fournisseur modifié');
+      } else {
+        addSupplier(payload);
+        toast.success('Fournisseur ajouté');
+      }
+
+      handleClose();
+    } catch (err) {
+      toast.error("Erreur lors de l'enregistrement");
+    } finally {
+      setIsSubmitting(false);
     }
-    onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center sm:block p-4 sm:p-0">
-      <div className="absolute sm:fixed inset-0 bg-zinc-950/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose} />
+    <div className="fixed inset-0 z-[110] flex items-center justify-center sm:block p-4 sm:p-0">
+      <div className="absolute sm:fixed inset-0 bg-zinc-950/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={handleClose} />
       <div className="relative sm:fixed sm:inset-y-0 sm:right-0 z-10 bg-white dark:bg-zinc-900 w-full max-w-md sm:max-w-none sm:w-[50%] rounded-3xl sm:rounded-none sm:rounded-l-3xl shadow-xl overflow-hidden flex flex-col max-h-[90vh] sm:max-h-none sm:h-full animate-in fade-in sm:slide-in-from-right duration-300">
         
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-zinc-100 dark:border-zinc-800">
-          <h2 className="text-lg font-bold text-zinc-900 dark:text-white">
-            {supplier ? 'Modifier le fournisseur' : 'Nouveau fournisseur'}
-          </h2>
-          <button onClick={onClose} className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 flex items-center justify-center">
+              <Building2 className="w-5 h-5" />
+            </div>
+            <h2 className="text-lg font-bold text-zinc-900 dark:text-white">
+              {supplier ? 'Modifier le fournisseur' : 'Nouveau fournisseur'}
+            </h2>
+          </div>
+          <button onClick={handleClose} className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -176,209 +186,199 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
                   required
                   value={formData.brandName}
                   onChange={(e) => setFormData({ ...formData, brandName: e.target.value })}
-                  placeholder="Ex: Zara"
+                  placeholder="Ex: Zara, Apple, Supplier LLC"
+                  enableCopy
                 />
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Type de marchandise *</label>
-                <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-md p-1 w-full h-10 items-center">
-                  <button
-                    type="button"
-                    onClick={() => setFormData({...formData, merchandiseType: 'physical'})}
-                    className={`flex-1 h-full text-xs font-medium rounded transition-colors flex items-center justify-center ${formData.merchandiseType === 'physical' ? 'bg-white dark:bg-zinc-900 shadow-sm text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
-                  >
-                    Physique
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFormData({...formData, merchandiseType: 'digital'})}
-                    className={`flex-1 h-full text-xs font-medium rounded transition-colors flex items-center justify-center ${formData.merchandiseType === 'digital' ? 'bg-white dark:bg-zinc-900 shadow-sm text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
-                  >
-                    Digital
-                  </button>
-                </div>
+                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Type de Marchandise</label>
+                <Select
+                  value={formData.merchandiseType}
+                  onValueChange={(val: 'physical' | 'digital') => setFormData({ ...formData, merchandiseType: val })}
+                >
+                  <SelectTrigger className="w-full h-10">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="physical">Produit Physique (Stock / Matériel)</SelectItem>
+                    <SelectItem value="digital">Digital / Service (Licences / Prestations)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
-            <hr className="border-zinc-100 dark:border-zinc-800" />
-
             {/* Contact Person */}
-            <div className="space-y-4">
+            <div className="space-y-4 pt-2 border-t border-zinc-100 dark:border-zinc-800">
               <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
-                <User className="w-4 h-4 text-emerald-500" />
-                Contact Responsable
+                <User className="w-4 h-4 text-violet-500" />
+                Contact Commercial
               </h3>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Prénom du contact</label>
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Prénom</label>
                   <Input
                     type="text"
                     value={formData.contactFirstName}
                     onChange={(e) => setFormData({ ...formData, contactFirstName: e.target.value })}
-                    placeholder="Ex: Mehdi"
-                    iconLeft={<User className="w-4 h-4" />}
+                    placeholder="Ex: Youssef"
+                    enableCopy
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Nom du contact (optionnel)</label>
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Nom</label>
                   <Input
                     type="text"
                     value={formData.contactLastName}
                     onChange={(e) => setFormData({ ...formData, contactLastName: e.target.value })}
-                    placeholder="Ex: Alaoui"
-                    iconLeft={<User className="w-4 h-4" />}
+                    placeholder="Ex: Benani"
+                    enableCopy
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Téléphone Appel</label>
+                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Numéro Téléphone</label>
                 <PhoneInput
                   value={formData.phone}
-                  onChange={(val) => setFormData({ ...formData, phone: val })}
-                  placeholder="Numéro pour appels"
+                  onChange={(phone) => setFormData({ ...formData, phone })}
+                  placeholder="Ex: 6 00 00 00 00"
+                  enableCopy
                 />
               </div>
 
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase">WhatsApp</label>
-                  <label className="relative inline-flex items-center cursor-pointer">
+                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">WhatsApp</label>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-400 cursor-pointer">
                     <input
                       type="checkbox"
-                      className="sr-only peer"
                       checked={formData.isWhatsappSameAsPhone}
-                      onChange={(e) => {
-                        const isSame = e.target.checked;
-                        setFormData({ 
-                          ...formData, 
-                          isWhatsappSameAsPhone: isSame,
-                          whatsapp: isSame ? formData.phone : formData.whatsapp
-                        });
-                      }}
+                      onChange={(e) => setFormData({ ...formData, isWhatsappSameAsPhone: e.target.checked })}
+                      className="rounded border-zinc-300 text-violet-600 focus:ring-violet-500"
                     />
-                    <div className="relative w-9 h-5 bg-zinc-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-zinc-600 peer-checked:bg-violet-600"></div>
-                    <span className="ml-2 text-xs font-medium text-zinc-600 dark:text-zinc-400">Identique au téléphone</span>
+                    Identique au numéro de téléphone
                   </label>
+                  {!formData.isWhatsappSameAsPhone && (
+                    <PhoneInput
+                      value={formData.whatsapp}
+                      onChange={(whatsapp) => setFormData({ ...formData, whatsapp })}
+                      placeholder="Ex: 6 00 00 00 00"
+                      enableCopy
+                    />
+                  )}
                 </div>
-                <PhoneInput
-                  value={formData.isWhatsappSameAsPhone ? formData.phone : formData.whatsapp}
-                  onChange={(val) => !formData.isWhatsappSameAsPhone && setFormData({ ...formData, whatsapp: val })}
-                  placeholder="Numéro WhatsApp"
-                  disabled={formData.isWhatsappSameAsPhone}
-                />
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Email (Optionnel)</label>
+                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Email</label>
                 <Input
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="Ex: contact@zara.com"
+                  placeholder="contact@fournisseur.com"
                   iconLeft={<Mail className="w-4 h-4" />}
+                  enableCopy
                 />
               </div>
             </div>
 
-            <hr className="border-zinc-100 dark:border-zinc-800" />
-
-            {/* Address */}
-            <div className="space-y-4">
+            {/* Localisation */}
+            <div className="space-y-4 pt-2 border-t border-zinc-100 dark:border-zinc-800">
               <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-amber-500" />
+                <MapPin className="w-4 h-4 text-violet-500" />
                 Localisation
               </h3>
-
-              <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Ville (Optionnelle)</label>
-                <CityInput
-                  value={formData.city}
-                  onChange={(city) => setFormData({ ...formData, city })}
-                  placeholder="Ex: Casablanca"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Adresse (Optionnelle)</label>
-                <Input
-                  type="text"
-                  value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  placeholder="Ex: 123 Bd Anfa"
-                  iconLeft={<MapPin className="w-4 h-4" />}
-                />
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Ville</label>
+                  <CityInput
+                    value={formData.city}
+                    onChange={(city) => setFormData({ ...formData, city })}
+                    placeholder="Ex: Casablanca"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Adresse</label>
+                  <Input
+                    type="text"
+                    value={formData.address}
+                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    placeholder="123 Rue Commerciale"
+                    enableCopy
+                  />
+                </div>
               </div>
             </div>
 
-            <hr className="border-zinc-100 dark:border-zinc-800" />
-
-            {/* Online Links */}
-            <div className="space-y-4">
+            {/* Links & Socials */}
+            <div className="space-y-4 pt-2 border-t border-zinc-100 dark:border-zinc-800">
               <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
-                <Globe className="w-4 h-4 text-blue-500" />
-                Présence en ligne
+                <Globe className="w-4 h-4 text-violet-500" />
+                Liens & Réseaux Sociaux
               </h3>
-
+              
               <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase">Site Web (Optionnel)</label>
+                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Site Web</label>
                 <Input
                   type="url"
                   value={formData.website}
                   onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-                  className="mt-1"
-                  placeholder="Ex: https://zara.com"
+                  placeholder="https://fournisseur.com"
                   iconLeft={<Globe className="w-4 h-4" />}
+                  enableCopy
                 />
               </div>
 
-              <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase">Instagram (Optionnel)</label>
-                <Input
-                  type="text"
-                  value={formData.insta}
-                  onChange={(e) => setFormData({ ...formData, insta: e.target.value })}
-                  className="mt-1"
-                  placeholder="Lien ou @pseudo"
-                  iconLeft={<Instagram className="w-4 h-4" />}
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Instagram</label>
+                  <Input
+                    type="text"
+                    value={formData.insta}
+                    onChange={(e) => setFormData({ ...formData, insta: e.target.value })}
+                    placeholder="@fournisseur"
+                    iconLeft={<Instagram className="w-4 h-4" />}
+                    enableCopy
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Facebook</label>
+                  <Input
+                    type="text"
+                    value={formData.fb}
+                    onChange={(e) => setFormData({ ...formData, fb: e.target.value })}
+                    placeholder="Page Facebook"
+                    iconLeft={<Facebook className="w-4 h-4" />}
+                    enableCopy
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase">Facebook (Optionnel)</label>
-                <Input
-                  type="text"
-                  value={formData.fb}
-                  onChange={(e) => setFormData({ ...formData, fb: e.target.value })}
-                  className="mt-1"
-                  placeholder="Lien de la page"
-                  iconLeft={<Facebook className="w-4 h-4" />}
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase">TikTok (Optionnel)</label>
-                <Input
-                  type="text"
-                  value={formData.tiktok}
-                  onChange={(e) => setFormData({ ...formData, tiktok: e.target.value })}
-                  className="mt-1"
-                  placeholder="Lien ou @pseudo"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase">Autre lien (Optionnel)</label>
-                <Input
-                  type="url"
-                  value={formData.other}
-                  onChange={(e) => setFormData({ ...formData, other: e.target.value })}
-                  className="mt-1"
-                  placeholder="Autre lien pertinent"
-                  iconLeft={<LinkIcon className="w-4 h-4" />}
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">TikTok</label>
+                  <Input
+                    type="text"
+                    value={formData.tiktok}
+                    onChange={(e) => setFormData({ ...formData, tiktok: e.target.value })}
+                    placeholder="@pseudo"
+                    enableCopy
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Autre lien</label>
+                  <Input
+                    type="url"
+                    value={formData.other}
+                    onChange={(e) => setFormData({ ...formData, other: e.target.value })}
+                    placeholder="Lien supplémentaire"
+                    iconLeft={<LinkIcon className="w-4 h-4" />}
+                    enableCopy
+                  />
+                </div>
               </div>
             </div>
 
@@ -389,17 +389,25 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
         <div className="p-4 border-t border-zinc-100 dark:border-zinc-800 flex justify-end gap-3 bg-zinc-50 dark:bg-zinc-800/40">
           <button
             type="button"
-            onClick={onClose}
-            className="px-6 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-xl font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+            onClick={handleClose}
+            disabled={isSubmitting}
+            className="px-6 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-xl font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50"
           >
             Annuler
           </button>
           <button
             type="submit"
             form="supplier-form"
-            className="px-6 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-xl font-bold hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors shadow-sm"
+            disabled={isSubmitting}
+            className="px-6 py-2.5 bg-violet-600 dark:bg-violet-500 text-white rounded-xl font-bold hover:bg-violet-700 dark:hover:bg-violet-600 transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50"
           >
-            {supplier ? 'Enregistrer' : 'Créer'}
+            {isSubmitting ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : supplier ? (
+              <><CheckCircle2 className="w-4 h-4" /> Enregistrer</>
+            ) : (
+              <><Building2 className="w-4 h-4" /> Créer</>
+            )}
           </button>
         </div>
 

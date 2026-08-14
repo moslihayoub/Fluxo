@@ -8,10 +8,13 @@ export type ActiveView =
   | 'months'
   | 'operations'
   | 'dashboard'
+  | 'business_dashboard'
   | 'categories'
+  | 'settings'
   | 'business_clients'
   | 'business_products'
   | 'business_orders'
+  | 'business_suppliers'
   | 'business_fees'
   | 'business_settings'
   | 'new_sale';

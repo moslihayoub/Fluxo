@@ -1,13 +1,15 @@
+'use client';
+
 import { useState, useEffect } from 'react';
-import { X, User, Phone, Mail, MapPin, Percent, Star } from 'lucide-react';
+import { X, User, Phone, Mail, MapPin, Star, Percent, Package, Loader2, CheckCircle2 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import type { BusinessClient } from '@/types';
-import { Package } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Input } from '@/components/ui/Input';
 import { PhoneInput } from '@/components/ui/PhoneInput';
 import { CityInput } from '@/components/ui/CityInput';
 import { AvatarUpload } from '@/components/ui/AvatarUpload';
+import { fromCents } from '@/lib/utils';
 
 interface ClientDialogProps {
   isOpen: boolean;
@@ -15,24 +17,27 @@ interface ClientDialogProps {
   client: BusinessClient | null;
 }
 
+const INITIAL_STATE = {
+  firstName: '',
+  lastName: '',
+  phone: '',
+  email: '',
+  address: '',
+  isVip: false,
+  defaultDiscountRate: '',
+  avatarUrl: '',
+  freeProductIds: [] as string[],
+  clientType: 'perso' as 'perso' | 'pro',
+  city: '',
+};
+
 export default function ClientDialog({ isOpen, onClose, client }: ClientDialogProps) {
   const addClient = useStore((s) => s.addBusinessClient);
   const updateClient = useStore((s) => s.updateBusinessClient);
   const businessProducts = useStore((s) => s.businessProducts) || [];
-  
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    phone: '',
-    email: '',
-    address: '',
-    isVip: false,
-    defaultDiscountRate: '',
-    avatarUrl: '',
-    freeProductIds: [] as string[],
-    clientType: 'perso' as 'perso' | 'pro',
-    city: ''
-  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState(INITIAL_STATE);
 
   useEffect(() => {
     if (isOpen) {
@@ -47,7 +52,7 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
         setFormData({
           firstName: fName,
           lastName: lName,
-          phone: client.phone,
+          phone: client.phone || '',
           email: client.email || '',
           address: client.address || '',
           isVip: client.isVip || false,
@@ -55,72 +60,94 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
           avatarUrl: client.avatarUrl || '',
           freeProductIds: client.freeProductIds || [],
           clientType: client.clientType || 'perso',
-          city: client.city || ''
+          city: client.city || '',
         });
       } else {
-        setFormData({ firstName: '', lastName: '', phone: '', email: '', address: '', isVip: false, defaultDiscountRate: '', avatarUrl: '', freeProductIds: [], clientType: 'perso', city: '' });
+        setFormData(INITIAL_STATE);
       }
     }
   }, [isOpen, client]);
 
   if (!isOpen) return null;
 
+  const handleClose = () => {
+    setFormData(INITIAL_STATE);
+    setIsSubmitting(false);
+    onClose();
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
     if (!formData.firstName.trim() || !formData.phone) {
       toast.error('Le prénom et le téléphone sont obligatoires');
       return;
     }
 
-    const fullName = formData.lastName.trim()
-      ? `${formData.firstName.trim()} ${formData.lastName.trim()}`
-      : formData.firstName.trim();
+    setIsSubmitting(true);
 
-    const payload = {
-      name: fullName,
-      firstName: formData.firstName.trim(),
-      lastName: formData.lastName.trim() || undefined,
-      phone: formData.phone,
-      email: formData.email || undefined,
-      address: formData.address || undefined,
-      isVip: formData.isVip,
-      defaultDiscountRate: formData.defaultDiscountRate ? parseFloat(formData.defaultDiscountRate) : undefined,
-      avatarUrl: formData.avatarUrl || undefined,
-      freeProductIds: formData.freeProductIds.length > 0 ? formData.freeProductIds : undefined,
-      clientType: formData.clientType,
-      city: formData.city || undefined,
-    };
+    try {
+      const fullName = formData.lastName.trim()
+        ? `${formData.firstName.trim()} ${formData.lastName.trim()}`
+        : formData.firstName.trim();
 
-    if (client) {
-      updateClient(client.id, payload);
-      toast.success('Client modifié');
-    } else {
-      addClient(payload);
-      toast.success('Client ajouté');
+      const payload = {
+        name: fullName,
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim() || undefined,
+        phone: formData.phone,
+        email: formData.email || undefined,
+        address: formData.address || undefined,
+        isVip: formData.isVip,
+        defaultDiscountRate: formData.defaultDiscountRate ? parseFloat(formData.defaultDiscountRate) : undefined,
+        avatarUrl: formData.avatarUrl || undefined,
+        freeProductIds: formData.freeProductIds.length > 0 ? formData.freeProductIds : undefined,
+        clientType: formData.clientType,
+        city: formData.city || undefined,
+      };
+
+      if (client) {
+        updateClient(client.id, payload);
+        toast.success('Client modifié');
+      } else {
+        addClient(payload);
+        toast.success('Client ajouté');
+      }
+
+      handleClose();
+    } catch (err) {
+      toast.error("Erreur lors de l'enregistrement");
+    } finally {
+      setIsSubmitting(false);
     }
-    onClose();
   };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center sm:block p-4 sm:p-0">
-      <div className="absolute sm:fixed inset-0 bg-zinc-950/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose} />
+      <div className="absolute sm:fixed inset-0 bg-zinc-950/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={handleClose} />
       <div className="relative sm:fixed sm:inset-y-0 sm:right-0 z-10 bg-white dark:bg-zinc-900 w-full max-w-md sm:max-w-none sm:w-[50%] rounded-3xl sm:rounded-none sm:rounded-l-3xl shadow-xl overflow-hidden flex flex-col max-h-[90vh] sm:max-h-none sm:h-full animate-in fade-in sm:slide-in-from-right duration-300">
         
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-zinc-100 dark:border-zinc-800">
-          <h2 className="text-lg font-bold text-zinc-900 dark:text-white">
-            {client ? 'Modifier le client' : 'Nouveau client'}
-          </h2>
-          <button onClick={onClose} className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 flex items-center justify-center">
+              <User className="w-5 h-5" />
+            </div>
+            <h2 className="text-lg font-bold text-zinc-900 dark:text-white">
+              {client ? 'Modifier le client' : 'Nouveau client'}
+            </h2>
+          </div>
+          <button onClick={handleClose} className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-5">
-          <form id="client-form" onSubmit={handleSubmit} className="space-y-4">
+          <form id="client-form" onSubmit={handleSubmit} className="space-y-6">
             
-            {/* Avatar with Dual Solution: Import or URL */}
+            {/* Avatar with Dual Solution */}
             <div className="mb-4">
               <AvatarUpload
                 value={formData.avatarUrl}
@@ -130,9 +157,9 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
               />
             </div>
 
-            {/* Infos de base */}
+            {/* Client Info */}
             <div className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">
                     Prénom *
@@ -144,6 +171,7 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
                     onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                     placeholder="Ex: Youssef"
                     iconLeft={<User className="w-4 h-4" />}
+                    enableCopy
                   />
                 </div>
                 <div>
@@ -156,6 +184,7 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
                     onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                     placeholder="Ex: Benjelloun"
                     iconLeft={<User className="w-4 h-4" />}
+                    enableCopy
                   />
                 </div>
               </div>
@@ -166,6 +195,7 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
                   value={formData.phone}
                   onChange={(val) => setFormData({ ...formData, phone: val })}
                   placeholder="Ex: 6 12 34 56 78"
+                  enableCopy
                 />
               </div>
 
@@ -177,6 +207,7 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   placeholder="Ex: email@domaine.com"
                   iconLeft={<Mail className="w-4 h-4" />}
+                  enableCopy
                 />
               </div>
 
@@ -186,15 +217,23 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
                   <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-md p-1 w-full h-10 items-center">
                     <button
                       type="button"
-                      onClick={() => setFormData({...formData, clientType: 'perso'})}
-                      className={`flex-1 h-full text-xs font-medium rounded transition-colors flex items-center justify-center ${formData.clientType === 'perso' ? 'bg-white dark:bg-zinc-900 shadow-sm text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
+                      onClick={() => setFormData({ ...formData, clientType: 'perso' })}
+                      className={`flex-1 h-full text-xs font-medium rounded transition-colors flex items-center justify-center ${
+                        formData.clientType === 'perso'
+                          ? 'bg-white dark:bg-zinc-900 shadow-xs text-zinc-900 dark:text-white font-semibold'
+                          : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+                      }`}
                     >
                       Perso
                     </button>
                     <button
                       type="button"
-                      onClick={() => setFormData({...formData, clientType: 'pro'})}
-                      className={`flex-1 h-full text-xs font-medium rounded transition-colors flex items-center justify-center ${formData.clientType === 'pro' ? 'bg-white dark:bg-zinc-900 shadow-sm text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
+                      onClick={() => setFormData({ ...formData, clientType: 'pro' })}
+                      className={`flex-1 h-full text-xs font-medium rounded transition-colors flex items-center justify-center ${
+                        formData.clientType === 'pro'
+                          ? 'bg-white dark:bg-zinc-900 shadow-xs text-zinc-900 dark:text-white font-semibold'
+                          : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+                      }`}
                     >
                       Pro
                     </button>
@@ -219,6 +258,7 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   placeholder="Ex: 123 Rue Maarif"
                   iconLeft={<MapPin className="w-4 h-4" />}
+                  enableCopy
                 />
               </div>
             </div>
@@ -291,7 +331,7 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
                                 <Package className="w-4 h-4 text-zinc-400" />
                                 {product.name}
                               </span>
-                              <span className="text-xs text-zinc-500">{product.defaultPrice_cents.toFixed(2)} MAD</span>
+                              <span className="text-xs text-zinc-500">{(fromCents(product.defaultPrice_cents) || 0).toFixed(2)} MAD</span>
                             </div>
                           </label>
                         );
@@ -310,17 +350,25 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
         <div className="p-4 border-t border-zinc-100 dark:border-zinc-800 flex justify-end gap-3 bg-zinc-50 dark:bg-zinc-800/40">
           <button
             type="button"
-            onClick={onClose}
-            className="px-6 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-xl font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+            onClick={handleClose}
+            disabled={isSubmitting}
+            className="px-6 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-xl font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50"
           >
             Annuler
           </button>
           <button
             type="submit"
             form="client-form"
-            className="px-6 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-xl font-bold hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors shadow-sm"
+            disabled={isSubmitting}
+            className="px-6 py-2.5 bg-violet-600 dark:bg-violet-500 text-white rounded-xl font-bold hover:bg-violet-700 dark:hover:bg-violet-600 transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50"
           >
-            {client ? 'Enregistrer' : 'Créer'}
+            {isSubmitting ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : client ? (
+              <><CheckCircle2 className="w-4 h-4" /> Enregistrer</>
+            ) : (
+              <><User className="w-4 h-4" /> Créer</>
+            )}
           </button>
         </div>
 

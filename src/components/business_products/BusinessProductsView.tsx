@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Package, Plus, Search, Tag, Settings2, Pencil, Trash2, Download } from 'lucide-react';
+import { Package, Plus, Search, Tag, Settings2, Pencil, Trash2, Download, MoreHorizontal } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import type { BusinessProduct } from '@/types';
 import { formatCurrency, fromCents } from '@/lib/utils';
@@ -15,23 +15,24 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 import {
   Card,
   CardContent,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu"
-import { MoreHorizontal } from 'lucide-react';
+} from "@/components/ui/dropdown-menu";
 import { ScrollReveal } from '@/components/ui/Animation';
+
 export default function BusinessProductsView() {
   const products = useStore((s) => s.businessProducts) || [];
   const categories = useStore((s) => s.businessCategories) || [];
+  const suppliers = useStore((s) => s.businessSuppliers) || [];
   const globalSearch = useStore((s) => s.globalSearch) || '';
   const deleteProduct = useStore((s) => s.deleteBusinessProduct);
   const updateProduct = useStore((s) => s.updateBusinessProduct);
@@ -45,6 +46,11 @@ export default function BusinessProductsView() {
       return parent ? `${parent.name} › ${cat.name}` : cat.name;
     }
     return cat.name;
+  };
+
+  const getSupplierName = (suppId?: string) => {
+    if (!suppId) return '';
+    return suppliers.find(s => s.id === suppId)?.brandName || '';
   };
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -77,15 +83,14 @@ export default function BusinessProductsView() {
             Produits & Services
           </h1>
           <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-            Gérez votre catalogue pour accélérer la création de ventes.
+            Gérez votre catalogue de produits, prestations et leurs tarifs.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {products.length > 0 && (
             <button
               onClick={handleExport}
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-200 rounded-xl font-medium hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors shadow-sm"
-              title="Exporter le catalogue en CSV"
+              className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/50 rounded-xl font-medium transition-colors shadow-sm"
             >
               <Download className="w-4 h-4" /> Exporter
             </button>
@@ -102,9 +107,6 @@ export default function BusinessProductsView() {
           </button>
         </div>
       </div>
-
-      {/* Search & Stats */}
-      {/* Search has been moved to global Header */}
 
       {/* List */}
       <div className="w-full">
@@ -166,11 +168,18 @@ export default function BusinessProductsView() {
                                 {product.type === 'service' ? 'Digital / Service' : 'Produit physique'}
                               </span>
                             </div>
-                            {getCategoryName(product.categoryId) && (
-                              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 truncate max-w-xs">
-                                {getCategoryName(product.categoryId)}
-                              </p>
-                            )}
+                            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                              {getCategoryName(product.categoryId) && (
+                                <span className="text-xs text-zinc-500 dark:text-zinc-400 truncate max-w-xs">
+                                  {getCategoryName(product.categoryId)}
+                                </span>
+                              )}
+                              {getSupplierName(product.supplierId) && (
+                                <span className="text-[10px] px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-400 font-medium">
+                                  Fournisseur: {getSupplierName(product.supplierId)}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </TableCell>
@@ -219,11 +228,11 @@ export default function BusinessProductsView() {
               </Table>
             </div>
 
-            {/* ── MOBILE LIST ── */}
-            <div className="sm:hidden flex flex-col gap-3">
+            {/* ── MOBILE CARDS ── */}
+            <div className="sm:hidden space-y-3">
               {filteredProducts.map((product) => (
-                <Card key={product.id}>
-                  <CardContent className="p-4 flex flex-col gap-3">
+                <Card key={product.id} className="border-zinc-200 dark:border-zinc-800 shadow-sm bg-white dark:bg-zinc-900">
+                  <CardContent className="p-4 space-y-3">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${product.isActive ? 'bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400'}`}>
@@ -234,11 +243,18 @@ export default function BusinessProductsView() {
                             {product.name}
                           </h4>
                           <span className="text-xs text-zinc-500 block mt-0.5">ID: {product.id.slice(0, 8)}</span>
-                          {getCategoryName(product.categoryId) && (
-                            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 truncate max-w-[200px]">
-                              {getCategoryName(product.categoryId)}
-                            </p>
-                          )}
+                          <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                            {getCategoryName(product.categoryId) && (
+                              <span className="text-xs text-zinc-500 dark:text-zinc-400 truncate max-w-[150px]">
+                                {getCategoryName(product.categoryId)}
+                              </span>
+                            )}
+                            {getSupplierName(product.supplierId) && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-400 font-medium">
+                                {getSupplierName(product.supplierId)}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                       <div className="relative ml-2 shrink-0 flex items-center gap-2">
@@ -274,10 +290,17 @@ export default function BusinessProductsView() {
                         </DropdownMenu>
                       </div>
                     </div>
-
-                    <div className="flex items-center justify-between pt-3 border-t border-zinc-100 dark:border-zinc-800">
-                      <span className="text-xs text-zinc-500 font-medium">Prix</span>
-                      <span className="font-bold text-zinc-900 dark:text-white">{formatCurrency(fromCents(product.defaultPrice_cents) || 0)}</span>
+                    <div className="flex items-center justify-between pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                        product.type === 'service'
+                          ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                          : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
+                      }`}>
+                        {product.type === 'service' ? 'Digital / Service' : 'Produit physique'}
+                      </span>
+                      <div className="font-bold text-zinc-900 dark:text-white">
+                        {formatCurrency(fromCents(product.defaultPrice_cents) || 0)}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

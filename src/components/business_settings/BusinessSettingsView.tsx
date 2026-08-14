@@ -14,6 +14,7 @@ import { CityInput } from '@/components/ui/CityInput';
 import { CountrySelect } from '@/components/ui/CountrySelect';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/Select';
 import { ScrollReveal } from '@/components/ui/Animation';
+import { AvatarUpload } from '@/components/ui/AvatarUpload';
 import AdminLogsView from '@/components/admin/AdminLogsView';
 import AdminStackView from '@/components/admin/AdminStackView';
 
@@ -198,30 +199,24 @@ export default function BusinessSettingsView() {
             <ScrollReveal className="space-y-8">
               <div className="space-y-4">
                 <h2 className="text-lg font-semibold text-zinc-900 dark:text-white border-b border-zinc-100 dark:border-zinc-800 pb-2">Identité Visuelle</h2>
-                <div className="flex items-center gap-6">
-                  <div 
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-24 h-24 rounded-2xl border-2 border-dashed border-zinc-300 dark:border-zinc-700 flex flex-col items-center justify-center cursor-pointer hover:border-violet-500 dark:hover:border-violet-500 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors overflow-hidden group relative"
-                  >
-                    <input type="file" ref={fileInputRef} onChange={handleLogoUpload} accept="image/*" className="hidden" />
-                    {logoBase64 ? (
-                      <>
-                        <img src={logoBase64} alt="Logo" className="w-full h-full object-contain p-2" />
-                        <div className="absolute inset-0 bg-black/50 hidden group-hover:flex items-center justify-center">
-                          <ImageIcon className="w-6 h-6 text-white" />
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <ImageIcon className="w-8 h-8 text-zinc-400 mb-1" />
-                        <span className="text-[10px] text-zinc-500 font-medium uppercase">Logo</span>
-                      </>
-                    )}
-                  </div>
-                  <div className="flex-1 space-y-4">
+                <div className="flex flex-col sm:flex-row items-center gap-6">
+                  <AvatarUpload
+                    value={logoBase64}
+                    onChange={setLogoBase64}
+                    defaultIcon="building"
+                    shape="rounded"
+                    label="Logo Entreprise"
+                  />
+                  <div className="flex-1 w-full space-y-4">
                     <div>
                       <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Nom de l'entreprise</label>
-                      <Input type="text" value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="Fluxo LLC" />
+                      <Input
+                        type="text"
+                        value={companyName}
+                        onChange={e => setCompanyName(e.target.value)}
+                        placeholder="Fluxo LLC"
+                        enableCopy
+                      />
                     </div>
                   </div>
                 </div>
@@ -237,6 +232,7 @@ export default function BusinessSettingsView() {
                       value={phone}
                       onChange={setPhone}
                       placeholder="Ex: 6 00 00 00 00"
+                      enableCopy
                     />
                   </div>
                   <div>
@@ -247,6 +243,7 @@ export default function BusinessSettingsView() {
                       onChange={e => setEmail(e.target.value)}
                       placeholder="contact@entreprise.com"
                       iconLeft={<Mail className="w-4 h-4" />}
+                      enableCopy
                     />
                   </div>
                   <div className="md:col-span-2">
@@ -257,6 +254,7 @@ export default function BusinessSettingsView() {
                       onChange={e => setAddress(e.target.value)}
                       placeholder="123 Rue de la réussite..."
                       iconLeft={<MapPin className="w-4 h-4" />}
+                      enableCopy
                     />
                   </div>
                   <div>
