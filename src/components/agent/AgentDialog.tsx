@@ -363,7 +363,7 @@ export default function AgentDialog({ defaultMonthId, onClose }: AgentDialogProp
                               checked={op.selected}
                               onChange={() => toggleOp(i)}
                             />
-                            <div className="w-9 h-5 bg-zinc-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-violet-600"></div>
+                            <div className="relative w-9 h-5 bg-zinc-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-violet-600"></div>
                           </div>
                         </td>
                         <td className="px-2 py-1.5 text-zinc-700 dark:text-zinc-300 max-w-[120px] truncate" title={op.label}>

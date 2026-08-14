@@ -498,7 +498,7 @@ export default function OrderDialog({ isOpen, onClose, order }: OrderDialogProps
 
                         {/* Option Enregistrer dans le catalogue sous le nom du produit */}
                         <div className="pt-1">
-                          <label className="inline-flex items-center cursor-pointer gap-2 select-none group">
+                          <label className="relative inline-flex items-center cursor-pointer gap-2 select-none group">
                             <input
                               type="checkbox"
                               className="sr-only peer"
@@ -512,7 +512,7 @@ export default function OrderDialog({ isOpen, onClose, order }: OrderDialogProps
                                 });
                               }}
                             />
-                            <div className="w-9 h-5 bg-zinc-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-zinc-600 peer-checked:bg-violet-600"></div>
+                            <div className="relative w-9 h-5 bg-zinc-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-zinc-600 peer-checked:bg-violet-600"></div>
                             <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-200 transition-colors">
                               Enregistrer cet article dans mon catalogue produit permanent
                             </span>
@@ -644,7 +644,7 @@ export default function OrderDialog({ isOpen, onClose, order }: OrderDialogProps
                                   });
                                 }} 
                               />
-                              <div className="w-9 h-5 bg-zinc-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+                              <div className="relative w-9 h-5 bg-zinc-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
                               <span className="ml-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300">Gratuit</span>
                             </label>
                           </div>

@@ -133,7 +133,7 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase">
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">
                     Prénom *
                   </label>
                   <Input
@@ -141,20 +141,18 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
                     required
                     value={formData.firstName}
                     onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    className="mt-1"
                     placeholder="Ex: Youssef"
                     iconLeft={<User className="w-4 h-4" />}
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase">
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">
                     Nom (optionnel)
                   </label>
                   <Input
                     type="text"
                     value={formData.lastName}
                     onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    className="mt-1"
                     placeholder="Ex: Benjelloun"
                     iconLeft={<User className="w-4 h-4" />}
                   />
@@ -171,32 +169,31 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase">Email</label>
+                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Email</label>
                 <Input
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="mt-1"
                   placeholder="Ex: email@domaine.com"
                   iconLeft={<Mail className="w-4 h-4" />}
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase mb-1 block">Type de Client</label>
-                  <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-lg p-1 w-full h-[42px]">
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Type de Client</label>
+                  <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-md p-1 w-full h-10 items-center">
                     <button
                       type="button"
                       onClick={() => setFormData({...formData, clientType: 'perso'})}
-                      className={`flex-1 text-xs font-medium rounded-md transition-colors ${formData.clientType === 'perso' ? 'bg-white dark:bg-zinc-900 shadow-sm text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
+                      className={`flex-1 h-full text-xs font-medium rounded transition-colors flex items-center justify-center ${formData.clientType === 'perso' ? 'bg-white dark:bg-zinc-900 shadow-sm text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
                     >
                       Perso
                     </button>
                     <button
                       type="button"
                       onClick={() => setFormData({...formData, clientType: 'pro'})}
-                      className={`flex-1 text-xs font-medium rounded-md transition-colors ${formData.clientType === 'pro' ? 'bg-white dark:bg-zinc-900 shadow-sm text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
+                      className={`flex-1 h-full text-xs font-medium rounded transition-colors flex items-center justify-center ${formData.clientType === 'pro' ? 'bg-white dark:bg-zinc-900 shadow-sm text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
                     >
                       Pro
                     </button>
@@ -204,12 +201,11 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase">Ville</label>
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Ville</label>
                   <Input
                     type="text"
                     value={formData.city}
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    className="mt-1"
                     placeholder="Ex: Casablanca"
                     iconLeft={<MapPin className="w-4 h-4" />}
                   />
@@ -217,12 +213,11 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase">Adresse</label>
+                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Adresse</label>
                 <Input
                   type="text"
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className="mt-1"
                   placeholder="Ex: 123 Rue Maarif"
                   iconLeft={<MapPin className="w-4 h-4" />}
                 />
@@ -247,19 +242,18 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" className="sr-only peer" checked={formData.isVip} onChange={e => setFormData({...formData, isVip: e.target.checked})} />
-                  <div className="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-amber-500"></div>
+                  <div className="relative w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-amber-500"></div>
                 </label>
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase">Promo Auto (Pourcentage)</label>
+                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Promo Auto (Pourcentage)</label>
                 <Input
                   type="number"
                   min="0"
                   max="100"
                   value={formData.defaultDiscountRate}
                   onChange={(e) => setFormData({ ...formData, defaultDiscountRate: e.target.value })}
-                  className="mt-1"
                   placeholder="Ex: 10 pour 10%"
                   iconLeft={<Percent className="w-4 h-4 text-emerald-500" />}
                 />
@@ -291,7 +285,7 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
                                   setFormData({ ...formData, freeProductIds: newIds });
                                 }}
                               />
-                              <div className="w-9 h-5 bg-zinc-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-violet-600"></div>
+                              <div className="relative w-9 h-5 bg-zinc-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-violet-600"></div>
                             </div>
                             <div className="flex-1 flex justify-between items-center">
                               <span className="text-sm font-medium text-zinc-900 dark:text-white flex items-center gap-2">

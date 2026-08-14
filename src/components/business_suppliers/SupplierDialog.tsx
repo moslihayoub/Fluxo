@@ -169,31 +169,30 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
               </h3>
               
               <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase">Nom de la Marque *</label>
+                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Nom de la Marque *</label>
                 <Input
                   type="text"
                   required
                   value={formData.brandName}
                   onChange={(e) => setFormData({ ...formData, brandName: e.target.value })}
-                  className="mt-1"
                   placeholder="Ex: Zara"
                 />
               </div>
 
               <div>
                 <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Type de marchandise *</label>
-                <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-lg p-1 w-full h-[42px]">
+                <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-md p-1 w-full h-10 items-center">
                   <button
                     type="button"
                     onClick={() => setFormData({...formData, merchandiseType: 'physical'})}
-                    className={`flex-1 text-xs font-medium rounded-md transition-colors ${formData.merchandiseType === 'physical' ? 'bg-white dark:bg-zinc-900 shadow-sm text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
+                    className={`flex-1 h-full text-xs font-medium rounded transition-colors flex items-center justify-center ${formData.merchandiseType === 'physical' ? 'bg-white dark:bg-zinc-900 shadow-sm text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
                   >
                     Physique
                   </button>
                   <button
                     type="button"
                     onClick={() => setFormData({...formData, merchandiseType: 'digital'})}
-                    className={`flex-1 text-xs font-medium rounded-md transition-colors ${formData.merchandiseType === 'digital' ? 'bg-white dark:bg-zinc-900 shadow-sm text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
+                    className={`flex-1 h-full text-xs font-medium rounded transition-colors flex items-center justify-center ${formData.merchandiseType === 'digital' ? 'bg-white dark:bg-zinc-900 shadow-sm text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
                   >
                     Digital
                   </button>
@@ -212,23 +211,21 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase">Prénom du contact</label>
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Prénom du contact</label>
                   <Input
                     type="text"
                     value={formData.contactFirstName}
                     onChange={(e) => setFormData({ ...formData, contactFirstName: e.target.value })}
-                    className="mt-1"
                     placeholder="Ex: Mehdi"
                     iconLeft={<User className="w-4 h-4" />}
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase">Nom du contact (optionnel)</label>
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Nom du contact (optionnel)</label>
                   <Input
                     type="text"
                     value={formData.contactLastName}
                     onChange={(e) => setFormData({ ...formData, contactLastName: e.target.value })}
-                    className="mt-1"
                     placeholder="Ex: Alaoui"
                     iconLeft={<User className="w-4 h-4" />}
                   />
@@ -236,17 +233,17 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Téléphone</label>
+                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Téléphone Appel</label>
                 <PhoneInput
                   value={formData.phone}
                   onChange={(val) => setFormData({ ...formData, phone: val })}
-                  placeholder="Ex: 6 12 34 56 78"
+                  placeholder="Numéro pour appels"
                 />
               </div>
 
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">WhatsApp (Optionnel)</label>
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase">WhatsApp</label>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
                       type="checkbox"
@@ -261,7 +258,7 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
                         });
                       }}
                     />
-                    <div className="w-9 h-5 bg-zinc-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-zinc-600 peer-checked:bg-violet-600"></div>
+                    <div className="relative w-9 h-5 bg-zinc-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-zinc-600 peer-checked:bg-violet-600"></div>
                     <span className="ml-2 text-xs font-medium text-zinc-600 dark:text-zinc-400">Identique au téléphone</span>
                   </label>
                 </div>
