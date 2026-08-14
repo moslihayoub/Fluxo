@@ -22,6 +22,7 @@ import { useStore } from '@/store/useStore';
 import { formatCurrency, fromCents, toCents, MONTH_NAMES } from '@/lib/utils';
 import type { OperationType, Operation } from '@/types';
 import { getTranslation } from '@/lib/i18n';
+import { ScrollReveal } from '@/components/ui/Animation';
 
 // ── Add / Edit Category Dialog ────────────────────────────────
 function CategoryDialog({
@@ -428,7 +429,7 @@ export default function CategoriesView() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <ScrollReveal className="space-y-6">
       {/* Header */}
       <div className="sticky top-0 z-30 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md pt-4 sm:pt-6 pb-4 flex items-center justify-between -mx-4 px-4 sm:mx-0 sm:px-0">
         <div>
@@ -702,6 +703,6 @@ export default function CategoriesView() {
           onClose={() => setDeletingCat(undefined)}
         />
       )}
-    </div>
+    </ScrollReveal>
   );
 }

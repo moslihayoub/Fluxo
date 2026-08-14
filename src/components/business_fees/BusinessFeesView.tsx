@@ -16,6 +16,7 @@ import {
   Card,
   CardContent,
 } from "@/components/ui/card"
+import { ScrollReveal } from '@/components/ui/Animation';
 export default function BusinessFeesView() {
   const fees = useStore((s) => s.businessFees);
   const globalSearch = useStore((s) => s.globalSearch);
@@ -26,12 +27,8 @@ export default function BusinessFeesView() {
     return fee.label.toLowerCase().includes(s) || fee.category.toLowerCase().includes(s);
   });
 
-  
-    
-  
-
   return (
-    <div className="w-full max-w-6xl mx-auto p-4 space-y-6 animate-in fade-in duration-500">
+    <ScrollReveal className="w-full max-w-6xl mx-auto p-4 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-zinc-900 dark:text-white tracking-tight flex items-center gap-2">
@@ -124,6 +121,6 @@ export default function BusinessFeesView() {
           </div>
         </>
       )}
-    </div>
+    </ScrollReveal>
   );
 }

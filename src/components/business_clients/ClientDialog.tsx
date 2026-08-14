@@ -6,6 +6,7 @@ import { Package } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Input } from '@/components/ui/Input';
 import { PhoneInput } from '@/components/ui/PhoneInput';
+import { CityInput } from '@/components/ui/CityInput';
 import { AvatarUpload } from '@/components/ui/AvatarUpload';
 
 interface ClientDialogProps {
@@ -202,12 +203,10 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
 
                 <div>
                   <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Ville</label>
-                  <Input
-                    type="text"
+                  <CityInput
                     value={formData.city}
-                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                    onChange={(city) => setFormData({ ...formData, city })}
                     placeholder="Ex: Casablanca"
-                    iconLeft={<MapPin className="w-4 h-4" />}
                   />
                 </div>
               </div>

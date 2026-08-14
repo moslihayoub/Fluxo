@@ -3,13 +3,17 @@
 import { useState, useRef, useEffect } from 'react';
 import { useStore } from '@/store/useStore';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { Image as ImageIcon, Plus, Trash2, Building2, Globe, Calculator, FileText, Settings2, CreditCard, Database, Terminal, Layers } from 'lucide-react';
+import { Image as ImageIcon, Plus, Trash2, Building2, Globe, Calculator, FileText, Settings2, CreditCard, Database, Terminal, Layers, Mail, MapPin, Phone } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { generateId } from '@/lib/utils';
 import { COUNTRIES, CURRENCIES } from '@/lib/data';
 import type { LegalIdentifier, TaxMode } from '@/types';
 import { Input } from '@/components/ui/Input';
+import { PhoneInput } from '@/components/ui/PhoneInput';
+import { CityInput } from '@/components/ui/CityInput';
+import { CountrySelect } from '@/components/ui/CountrySelect';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/Select';
+import { ScrollReveal } from '@/components/ui/Animation';
 import AdminLogsView from '@/components/admin/AdminLogsView';
 import AdminStackView from '@/components/admin/AdminStackView';
 
@@ -32,7 +36,7 @@ export default function BusinessSettingsView() {
   const [companyName, setCompanyName] = useState(businessSettings.companyName || '');
   const [address, setAddress] = useState(businessSettings.address || '');
   const [city, setCity] = useState(businessSettings.city || '');
-  const [country, setCountry] = useState(businessSettings.country || '');
+  const [country, setCountry] = useState(businessSettings.country || 'Maroc');
   const [phone, setPhone] = useState(businessSettings.phone || '');
   const [email, setEmail] = useState(businessSettings.email || '');
   const [logoBase64, setLogoBase64] = useState(businessSettings.logoBase64 || '');
@@ -191,7 +195,7 @@ export default function BusinessSettingsView() {
           
           {/* TAB: PROFILE */}
           {activeTab === 'profile' && (
-            <div className="space-y-8 animate-in fade-in">
+            <ScrollReveal className="space-y-8">
               <div className="space-y-4">
                 <h2 className="text-lg font-semibold text-zinc-900 dark:text-white border-b border-zinc-100 dark:border-zinc-800 pb-2">Identité Visuelle</h2>
                 <div className="flex items-center gap-6">
@@ -216,7 +220,7 @@ export default function BusinessSettingsView() {
                   </div>
                   <div className="flex-1 space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Nom de l'entreprise</label>
+                      <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Nom de l'entreprise</label>
                       <Input type="text" value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="Fluxo LLC" />
                     </div>
                   </div>
@@ -228,24 +232,47 @@ export default function BusinessSettingsView() {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Téléphone</label>
-                    <Input type="text" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+212 6 00 00 00 00" />
+                    <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Téléphone</label>
+                    <PhoneInput
+                      value={phone}
+                      onChange={setPhone}
+                      placeholder="Ex: 6 00 00 00 00"
+                    />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Email</label>
-                    <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="contact@entreprise.com" />
+                    <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Email</label>
+                    <Input
+                      type="email"
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      placeholder="contact@entreprise.com"
+                      iconLeft={<Mail className="w-4 h-4" />}
+                    />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Adresse</label>
-                    <textarea value={address} onChange={e => setAddress(e.target.value)} placeholder="123 Rue de la réussite..." rows={2} className="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 resize-none" />
+                    <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Adresse</label>
+                    <Input
+                      type="text"
+                      value={address}
+                      onChange={e => setAddress(e.target.value)}
+                      placeholder="123 Rue de la réussite..."
+                      iconLeft={<MapPin className="w-4 h-4" />}
+                    />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Ville</label>
-                    <Input type="text" value={city} onChange={e => setCity(e.target.value)} placeholder="Casablanca" />
+                    <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Ville</label>
+                    <CityInput
+                      value={city}
+                      onChange={setCity}
+                      placeholder="Ex: Casablanca"
+                    />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Pays</label>
-                    <Input type="text" value={country} onChange={e => setCountry(e.target.value)} placeholder="Maroc" />
+                    <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Pays</label>
+                    <CountrySelect
+                      value={country || 'Maroc'}
+                      onChange={setCountry}
+                    />
                   </div>
                 </div>
               </div>
@@ -286,17 +313,17 @@ export default function BusinessSettingsView() {
                 </div>
               </div>
 
-            </div>
+            </ScrollReveal>
           )}
 
           {/* TAB: LOCALIZATION */}
           {activeTab === 'localization' && (
-            <div className="space-y-8 animate-in fade-in">
+            <ScrollReveal className="space-y-8">
               <div className="space-y-4">
                 <h2 className="text-lg font-semibold text-zinc-900 dark:text-white border-b border-zinc-100 dark:border-zinc-800 pb-2">Pays & Monnaie</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Pays d'opération</label>
+                    <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Pays d'opération</label>
                     <Select value={countryCode} onValueChange={setCountryCode}>
                       <SelectTrigger>
                         <SelectValue placeholder="Choisir un pays..." />
@@ -309,7 +336,7 @@ export default function BusinessSettingsView() {
                     </Select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Devise principale</label>
+                    <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Devise principale</label>
                     <Select value={currency} onValueChange={setCurrency}>
                       <SelectTrigger>
                         <SelectValue placeholder="Choisir une devise..." />
@@ -323,12 +350,12 @@ export default function BusinessSettingsView() {
                   </div>
                 </div>
               </div>
-            </div>
+            </ScrollReveal>
           )}
 
           {/* TAB: FISCALITY */}
           {activeTab === 'fiscality' && (
-            <div className="space-y-8 animate-in fade-in">
+            <ScrollReveal className="space-y-8">
               <div className="bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 p-4 rounded-xl text-sm border border-blue-100 dark:border-blue-900/30">
                 <p className="font-medium mb-1">Information fiscale : {businessProfileType === 'freelance' ? 'Auto-entrepreneur' : 'Société'}</p>
                 {businessProfileType === 'freelance' 
@@ -341,7 +368,7 @@ export default function BusinessSettingsView() {
                 <h2 className="text-lg font-semibold text-zinc-900 dark:text-white border-b border-zinc-100 dark:border-zinc-800 pb-2">TVA (Taxe sur la Valeur Ajoutée)</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Régime de TVA par défaut</label>
+                    <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Régime de TVA par défaut</label>
                     <Select 
                       value={defaultTaxMode} 
                       onValueChange={(val) => setDefaultTaxMode(val as TaxMode)} 
@@ -358,7 +385,7 @@ export default function BusinessSettingsView() {
                     </Select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Taux de TVA par défaut (%)</label>
+                    <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Taux de TVA par défaut (%)</label>
                     <Input 
                       type="number" 
                       value={defaultTaxRate} 
@@ -374,7 +401,7 @@ export default function BusinessSettingsView() {
                 <p className="text-sm text-zinc-500">Permet à l'application de calculer vos bénéfices nets réels en provisionnant cet impôt.</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Taux IR pour Produits Physiques (%)</label>
+                    <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Taux IR pour Produits Physiques (%)</label>
                     <Input 
                       type="number" 
                       step="0.1"
@@ -383,7 +410,7 @@ export default function BusinessSettingsView() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Taux IR pour Services (%)</label>
+                    <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Taux IR pour Services (%)</label>
                     <Input 
                       type="number" 
                       step="0.1"
@@ -393,18 +420,18 @@ export default function BusinessSettingsView() {
                   </div>
                 </div>
               </div>
-            </div>
+            </ScrollReveal>
           )}
 
           {/* TAB: DOCUMENTS */}
           {activeTab === 'documents' && (
-            <div className="space-y-8 animate-in fade-in">
+            <ScrollReveal className="space-y-8">
               
               <div className="space-y-4">
                 <h2 className="text-lg font-semibold text-zinc-900 dark:text-white border-b border-zinc-100 dark:border-zinc-800 pb-2">Personnalisation des Documents</h2>
                 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Mention Légale Automatique</label>
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Mention Légale Automatique</label>
                   <p className="text-xs text-zinc-500 mb-2">S'affichera en bas de vos factures si vous êtes hors champ de la TVA.</p>
                   <Input 
                     type="text" 
@@ -415,25 +442,25 @@ export default function BusinessSettingsView() {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Modalités de paiement (Ex: RIB Bancaire)</label>
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Modalités de paiement (Ex: RIB Bancaire)</label>
                   <p className="text-xs text-zinc-500 mb-2">S'affichera sous le montant total si le client paie par virement.</p>
                   <textarea 
                     value={paymentInstructions} 
                     onChange={e => setPaymentInstructions(e.target.value)} 
                     placeholder="Banque Populaire&#10;RIB: 000 000 00000000000000 00" 
                     rows={3}
-                    className="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 resize-none" 
+                    className="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 resize-none text-sm" 
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Pied de page (RIB, Conditions...)</label>
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Pied de page (RIB, Conditions...)</label>
                   <textarea 
                     value={invoiceFooterText} 
                     onChange={e => setInvoiceFooterText(e.target.value)} 
                     placeholder="RIB: 000 000 00000000000000 00 | Merci pour votre confiance." 
                     rows={4}
-                    className="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 resize-none" 
+                    className="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 resize-none text-sm" 
                   />
                 </div>
               </div>
@@ -474,12 +501,12 @@ export default function BusinessSettingsView() {
                 )}
               </div>
 
-            </div>
+            </ScrollReveal>
           )}
 
           {/* TAB: ADVANCED */}
           {activeTab === 'advanced' && (
-            <div className="space-y-8 animate-in fade-in">
+            <ScrollReveal className="space-y-8">
               <div className="space-y-4">
                 <h2 className="text-lg font-semibold text-zinc-900 dark:text-white border-b border-zinc-100 dark:border-zinc-800 pb-2">Données de test (Scénarios)</h2>
                 <p className="text-sm text-zinc-500">Injectez des données fictives pour tester le Dashboard et les différents scénarios.</p>
@@ -503,7 +530,7 @@ export default function BusinessSettingsView() {
                   Générer des données fictives
                 </button>
               </div>
-            </div>
+            </ScrollReveal>
           )}
 
           {/* TAB: ADMIN LOGS */}

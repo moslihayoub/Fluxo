@@ -18,6 +18,7 @@ import ImportDialog from './ImportDialog';
 import AgentDialog from '@/components/agent/AgentDialog';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { getTranslation } from '@/lib/i18n';
+import { ScrollReveal } from '@/components/ui/Animation';
 import {
   Table,
   TableBody,
@@ -324,7 +325,7 @@ export default function OperationsView() {
   const [showMobileActions, setShowMobileActions] = useState(false);
 
   return (
-    <div className="h-full">
+    <ScrollReveal className="h-full">
       {/* Title */}
       <div className="mb-4">
         <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">{t('ops.title')}</h1>
@@ -622,6 +623,6 @@ export default function OperationsView() {
         confirmText={t('common.delete')}
         cancelText={t('common.cancel')}
       />
-    </div>
+    </ScrollReveal>
   );
 }

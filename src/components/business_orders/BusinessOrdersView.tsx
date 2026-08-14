@@ -26,8 +26,8 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from 'lucide-react';
+import { ScrollReveal } from '@/components/ui/Animation';
 export default function BusinessOrdersView() {
   const orders = useStore((s) => s.businessOrders);
   const globalSearch = useStore((s) => s.globalSearch);
@@ -111,7 +111,7 @@ export default function BusinessOrdersView() {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-4 space-y-6 animate-in fade-in duration-500">
+    <ScrollReveal className="w-full max-w-6xl mx-auto p-4 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-zinc-900 dark:text-white tracking-tight flex items-center gap-2">
@@ -334,6 +334,6 @@ export default function BusinessOrdersView() {
         onClose={() => setIsInvoiceOpen(false)}
         order={selectedInvoiceOrder}
       />
-    </div>
+    </ScrollReveal>
   );
 }

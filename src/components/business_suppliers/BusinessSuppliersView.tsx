@@ -27,6 +27,7 @@ import {
 import { MoreHorizontal, Edit2, Trash2 } from 'lucide-react';
 
 import { formatCurrency, fromCents } from '@/lib/utils';
+import { ScrollReveal } from '@/components/ui/Animation';
 
 export default function BusinessSuppliersView() {
   const suppliers = useStore((s) => s.businessSuppliers) || [];
@@ -100,7 +101,7 @@ export default function BusinessSuppliersView() {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-4 space-y-6 animate-in fade-in duration-500">
+    <ScrollReveal className="w-full max-w-6xl mx-auto p-4 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-zinc-900 dark:text-white tracking-tight">Fournisseurs</h1>
@@ -339,6 +340,6 @@ export default function BusinessSuppliersView() {
         onClose={() => setIsDialogOpen(false)} 
         supplier={editingSupplier} 
       />
-    </div>
+    </ScrollReveal>
   );
 }

@@ -20,6 +20,9 @@ const BusinessSettingsView = dynamic(() => import('@/components/business_setting
 const BusinessProductsView = dynamic(() => import('@/components/business_products/BusinessProductsView'), { ssr: false });
 const BusinessSuppliersView = dynamic(() => import('@/components/business_suppliers/BusinessSuppliersView'), { ssr: false });
 
+import { PageTransition } from '@/components/ui/Animation';
+import { AnimatePresence } from 'framer-motion';
+
 export default function Home() {
   const isHydrated = useHydration();
   const activeView = useStore((s) => s.activeView);
@@ -40,23 +43,25 @@ export default function Home() {
 
   return (
     <ErrorBoundary>
-      <div 
-        key={activeView} 
-        className={`animate-in fade-in slide-in-from-bottom-4 duration-500 ${activeView !== 'dashboard' ? (workspaceMode === 'business' ? '' : 'pt-[52px] sm:pt-0') : ''}`}
-      >
-        {activeView === 'months' && <MonthsView />}
-        {activeView === 'operations' && <OperationsView />}
-        {activeView === 'categories' && <CategoriesView />}
-        {activeView === 'dashboard' && workspaceMode === 'personal' && <DashboardView />}
-        {activeView === 'dashboard' && workspaceMode === 'business' && <BusinessDashboardView />}
-        {activeView === 'business_clients' && <BusinessClientsView />}
-        {(activeView as any) === 'business_suppliers' && <BusinessSuppliersView />}
-        {activeView === 'business_products' && <BusinessProductsView />}
-        {activeView === 'business_orders' && <BusinessOrdersView />}
-        {activeView === 'business_fees' && <BusinessFeesView />}
-        {activeView === 'business_settings' && <BusinessSettingsView />}
-        {activeView === 'new_sale' && <NewSalePage />}
-      </div>
+      <AnimatePresence mode="wait">
+        <PageTransition 
+          viewKey={activeView} 
+          className={`w-full ${activeView !== 'dashboard' ? (workspaceMode === 'business' ? '' : 'pt-[52px] sm:pt-0') : ''}`}
+        >
+          {activeView === 'months' && <MonthsView />}
+          {activeView === 'operations' && <OperationsView />}
+          {activeView === 'categories' && <CategoriesView />}
+          {activeView === 'dashboard' && workspaceMode === 'personal' && <DashboardView />}
+          {activeView === 'dashboard' && workspaceMode === 'business' && <BusinessDashboardView />}
+          {activeView === 'business_clients' && <BusinessClientsView />}
+          {(activeView as any) === 'business_suppliers' && <BusinessSuppliersView />}
+          {activeView === 'business_products' && <BusinessProductsView />}
+          {activeView === 'business_orders' && <BusinessOrdersView />}
+          {activeView === 'business_fees' && <BusinessFeesView />}
+          {activeView === 'business_settings' && <BusinessSettingsView />}
+          {activeView === 'new_sale' && <NewSalePage />}
+        </PageTransition>
+      </AnimatePresence>
     </ErrorBoundary>
   );
 }

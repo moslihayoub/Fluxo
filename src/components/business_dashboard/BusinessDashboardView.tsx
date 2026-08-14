@@ -9,6 +9,7 @@ import BusinessImportDialog from './BusinessImportDialog';
 import OrderDialog from '@/components/business_orders/OrderDialog';
 import PayPalSupportCard from '@/components/widgets/PayPalSupportCard';
 import GuestWarningBanner from '@/components/widgets/GuestWarningBanner';
+import { ScrollReveal } from '@/components/ui/Animation';
 
 export default function BusinessDashboardView() {
   const orders = useStore((s) => s.businessOrders);
@@ -130,7 +131,7 @@ export default function BusinessDashboardView() {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-4 space-y-6 animate-in fade-in duration-500">
+    <ScrollReveal className="w-full max-w-6xl mx-auto p-4 space-y-6">
       <GuestWarningBanner />
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -182,7 +183,7 @@ export default function BusinessDashboardView() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* KPI: Chiffre d'affaires */}
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl shadow-sm">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl shadow-sm hover:border-blue-500/30 transition-all">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
               <TrendingUp className="w-5 h-5" />
@@ -190,34 +191,34 @@ export default function BusinessDashboardView() {
             <h3 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">{language === 'fr' ? 'Chiffre d\'Affaires' : 'Revenue'}</h3>
           </div>
           <p className={`text-2xl font-black ${totalCA > 0 ? 'text-blue-600 dark:text-blue-400' : 'text-zinc-900 dark:text-white'}`}>
-            {formatCurrency(totalCA)}
+            {totalCA} DH
           </p>
         </div>
 
         {/* KPI: Bénéfice net */}
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl shadow-sm">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl shadow-sm hover:border-emerald-500/30 transition-all">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
               <DollarSign className="w-5 h-5" />
             </div>
             <h3 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">{language === 'fr' ? 'Bénéfice Net' : 'Net Profit'}</h3>
           </div>
-          <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{formatCurrency(totalProfit)}</p>
+          <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{totalProfit} DH</p>
         </div>
 
         {/* KPI: Impayés */}
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl shadow-sm">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl shadow-sm hover:border-rose-500/30 transition-all">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center text-rose-600 dark:text-rose-400">
               <AlertCircle className="w-5 h-5" />
             </div>
             <h3 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">{language === 'fr' ? 'Reste à recouvrer' : 'Unpaid Balance'}</h3>
           </div>
-          <p className="text-2xl font-black text-rose-600 dark:text-rose-400">{formatCurrency(totalPending)}</p>
+          <p className="text-2xl font-black text-rose-600 dark:text-rose-400">{totalPending} DH</p>
         </div>
 
         {/* KPI: Ventes */}
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl shadow-sm">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl shadow-sm hover:border-violet-500/30 transition-all">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center text-violet-600 dark:text-violet-400">
               <ShoppingBag className="w-5 h-5" />
@@ -238,52 +239,40 @@ export default function BusinessDashboardView() {
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#3f3f46" opacity={0.2} />
                 <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#71717a' }} dy={10} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#71717a' }} tickFormatter={(val) => `${val} DH`} />
-                <Tooltip
-                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', backgroundColor: '#18181b', color: '#fff' }}
-                  itemStyle={{ color: '#fff' }}
-                  formatter={(value: any) => [`${Number(value).toLocaleString('fr-MA')} MAD`, 'Montant']}
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '12px', color: '#fff' }} 
+                  formatter={(val: any) => [`${val} MAD`, '']}
                 />
-                <Line type="monotone" dataKey="ca" name="Chiffre d'Affaires" stroke="#8b5cf6" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
-                <Line type="monotone" dataKey="profit" name="Bénéfice Net" stroke="#10b981" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} />
+                <Line type="monotone" dataKey="ca" name="CA" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, fill: '#3b82f6' }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="profit" name="Bénéfice" stroke="#10b981" strokeWidth={3} dot={{ r: 4, fill: '#10b981' }} activeDot={{ r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         ) : (
           <div className="h-72 w-full flex flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-900/50 rounded-xl border-2 border-dashed border-zinc-200 dark:border-zinc-800 text-zinc-400">
-            <p className="text-sm">Aucune donnée disponible pour le moment.</p>
+            <p className="text-sm">Aucune donnée de vente pour le moment.</p>
           </div>
         )}
       </div>
 
-      {/* Additional Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        
-        {/* Top Products Pie Chart */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Top Products */}
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl shadow-sm">
-          <h2 className="text-sm font-semibold text-zinc-900 dark:text-white mb-4">Top 5 Produits (Chiffre d'Affaires)</h2>
+          <h2 className="text-lg font-bold text-zinc-900 dark:text-white mb-4">Top Produits (en CA)</h2>
           {productData.length > 0 ? (
             <div className="h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie
-                    data={productData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
+                  <Pie data={productData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={(entry) => entry.name}>
                     {productData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend 
-                    verticalAlign="bottom" 
-                    height={36} 
-                    formatter={(value) => <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">{value}</span>}
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '12px', color: '#fff' }} 
+                    formatter={(val: any) => [`${val} MAD`, 'CA']}
                   />
+                  <Legend />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -294,28 +283,20 @@ export default function BusinessDashboardView() {
           )}
         </div>
 
-        {/* Top Clients Bar Chart */}
+        {/* Top Clients */}
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl shadow-sm">
-          <h2 className="text-sm font-semibold text-zinc-900 dark:text-white mb-4">Top 5 Clients</h2>
+          <h2 className="text-lg font-bold text-zinc-900 dark:text-white mb-4">Top Clients (en CA)</h2>
           {clientData.length > 0 ? (
             <div className="h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={clientData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <BarChart data={clientData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#3f3f46" opacity={0.2} />
-                  <XAxis 
-                    dataKey="name" 
-                    tick={{ fontSize: 10, fill: '#71717a' }} 
-                    axisLine={false} 
-                    tickLine={false} 
-                    dy={10} 
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#71717a' }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#71717a' }} tickFormatter={(val) => `${val} DH`} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '12px', color: '#fff' }} 
+                    formatter={(val: any) => [`${val} MAD`, 'CA']}
                   />
-                  <YAxis 
-                    tick={{ fontSize: 10, fill: '#71717a' }} 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tickFormatter={(val) => `${(val / 1000).toFixed(0)}k`} 
-                  />
-                  <Tooltip content={<CustomTooltip />} cursor={{ fill: '#3f3f46', opacity: 0.1 }} />
                   <Bar dataKey="value" name="Chiffre d'Affaires" radius={[4, 4, 0, 0]}>
                     {clientData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
@@ -343,6 +324,6 @@ export default function BusinessDashboardView() {
         onClose={() => setIsOrderDialogOpen(false)}
         order={null}
       />
-    </div>
+    </ScrollReveal>
   );
 }

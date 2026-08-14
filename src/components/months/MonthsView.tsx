@@ -8,6 +8,7 @@ import type { Month, Operation } from '@/types';
 import { getTranslation } from '@/lib/i18n';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/Select';
+import { ScrollReveal } from '@/components/ui/Animation';
 
 // ── New Month Dialog ──────────────────────────────────────────
 function NewMonthDialog({ onClose }: { onClose: () => void }) {
@@ -382,7 +383,7 @@ export default function MonthsView() {
   };
 
   return (
-    <div className="space-y-8 pb-20">
+    <ScrollReveal className="space-y-8 pb-20">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -540,6 +541,6 @@ export default function MonthsView() {
           </div>
         </div>
       )}
-    </div>
+    </ScrollReveal>
   );
 }

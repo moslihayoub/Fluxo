@@ -24,6 +24,7 @@ import { getTranslation } from '@/lib/i18n';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/Select';
 import PayPalSupportCard from '@/components/widgets/PayPalSupportCard';
 import GuestWarningBanner from '@/components/widgets/GuestWarningBanner';
+import { ScrollReveal } from '@/components/ui/Animation';
 
 // Custom tooltip for dark mode
 const CustomTooltip = ({
@@ -337,7 +338,7 @@ export default function DashboardView() {
       ) : (
         <>
           {/* Operational KPI cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <ScrollReveal className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard
           title={t('dash.balance')}
           value={formatCurrency(globalMetrics.soldeGlobal, true)}
@@ -372,10 +373,10 @@ export default function DashboardView() {
           color="bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400"
           valueColor="text-sky-600 dark:text-sky-400"
         />
-      </div>
+      </ScrollReveal>
 
       {/* Line chart */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 sm:p-6">
+      <ScrollReveal delay={0.1} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 sm:p-6">
         <h2 className="text-sm font-semibold text-zinc-900 dark:text-white mb-4">
           {t('dash.chartTitle')}
         </h2>
@@ -419,10 +420,10 @@ export default function DashboardView() {
             {t('dash.chartEmpty')}
           </div>
         )}
-      </div>
+      </ScrollReveal>
 
       {/* Bar chart */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 sm:p-6">
+      <ScrollReveal delay={0.2} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 sm:p-6">
         <h2 className="text-sm font-semibold text-zinc-900 dark:text-white mb-4">
           {t('dash.catChartTitle')}
         </h2>
@@ -455,11 +456,11 @@ export default function DashboardView() {
             {t('dash.chartEmpty')}
           </div>
         )}
-      </div>
+      </ScrollReveal>
 
       {/* Detail table per month */}
       {monthChartData.length > 0 && (
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden">
+        <ScrollReveal delay={0.25} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden">
           <div className="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
             <h2 className="text-sm font-semibold text-zinc-900 dark:text-white">{t('dash.recapTitle')}</h2>
           </div>
@@ -527,7 +528,7 @@ export default function DashboardView() {
               </div>
             ))}
           </div>
-        </div>
+        </ScrollReveal>
       )}
         </>
       )}

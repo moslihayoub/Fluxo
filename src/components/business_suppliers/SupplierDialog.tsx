@@ -5,6 +5,7 @@ import type { BusinessSupplier } from '@/types';
 import toast from 'react-hot-toast';
 import { Input } from '@/components/ui/Input';
 import { PhoneInput } from '@/components/ui/PhoneInput';
+import { CityInput } from '@/components/ui/CityInput';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/Select';
 import { AvatarUpload } from '@/components/ui/AvatarUpload';
 
@@ -271,12 +272,11 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase">Email (Optionnel)</label>
+                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Email (Optionnel)</label>
                 <Input
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="mt-1"
                   placeholder="Ex: contact@zara.com"
                   iconLeft={<Mail className="w-4 h-4" />}
                 />
@@ -293,24 +293,22 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
               </h3>
 
               <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase">Ville (Optionnelle)</label>
-                <Input
-                  type="text"
+                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Ville (Optionnelle)</label>
+                <CityInput
                   value={formData.city}
-                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  className="mt-1"
+                  onChange={(city) => setFormData({ ...formData, city })}
                   placeholder="Ex: Casablanca"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase">Adresse (Optionnelle)</label>
+                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Adresse (Optionnelle)</label>
                 <Input
                   type="text"
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className="mt-1"
                   placeholder="Ex: 123 Bd Anfa"
+                  iconLeft={<MapPin className="w-4 h-4" />}
                 />
               </div>
             </div>
