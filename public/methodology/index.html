@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fluxo — Guide Méthodologique & Référence Agentique</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  
+  <style>
+    :root {
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      /* Palette Light */
+      --bg-body: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-surface-elevated: #ffffff;
+      --bg-subtle: #f1f5f9;
+      --bg-code: #0f172a;
+      
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-subtle: #94a3b8;
+      
+      --border: #e2e8f0;
+      --border-focus: #3b82f6;
+      
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --primary-light: #e0f2fe;
+      --primary-text: #0369a1;
+
+      --emerald: #059669;
+      --emerald-light: #ecfdf5;
+      --emerald-text: #065f46;
+
+      --amber: #d97706;
+      --amber-light: #fffbeb;
+      --amber-text: #92400e;
+
+      --rose: #e11d48;
+      --rose-light: #fff1f2;
+      --rose-text: #9f1239;
+
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+      --sidebar-width: 280px;
+    }
+
+    [data-theme="dark"] {
+      --bg-body: #0b0f19;
+      --bg-surface: #111827;
+      --bg-surface-elevated: #1f2937;
+      --bg-subtle: #1e293b;
+      --bg-code: #030712;
+      
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-subtle: #6b7280;
+      
+      --border: #1f2937;
+      --border-focus: #60a5fa;
+      
+      --primary: #38bdf8;
+      --primary-hover: #0284c7;
+      --primary-light: rgba(56, 189, 248, 0.12);
+      --primary-text: #7dd3fc;
+
+      --emerald: #10b981;
+      --emerald-light: rgba(16, 185, 129, 0.12);
+      --emerald-text: #6ee7b7;
+
+      --amber: #f59e0b;
+      --amber-light: rgba(245, 158, 11, 0.12);
+      --amber-text: #fcd34d;
+
+      --rose: #f43f5e;
+      --rose-light: rgba(244, 63, 94, 0.12);
+      --rose-text: #fda4af;
+
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      line-height: 1.6;
+      transition: background-color 0.2s ease, color 0.2s ease;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Layout */
+    .app-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-width);
+      background-color: var(--bg-surface);
+      border-right: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      z-index: 40;
+    }
+
+    .sidebar-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--primary), #0284c7);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+
+    .logo-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      letter-spacing: -0.02em;
+    }
+
+    .logo-subtitle {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+
+    .sidebar-search {
+      padding: 1rem 1.25rem 0.5rem;
+    }
+
+    .search-box {
+      width: 100%;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.85rem;
+      color: var(--text-main);
+      outline: none;
+      transition: border 0.15s ease;
+      font-family: inherit;
+    }
+
+    .search-box:focus {
+      border-color: var(--border-focus);
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0.75rem 1rem 2rem;
+    }
+
+    .nav-group-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-subtle);
+      margin: 1rem 0.5rem 0.4rem;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.45rem 0.65rem;
+      border-radius: 6px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.15s ease;
+      margin-bottom: 2px;
+    }
+
+    .nav-link:hover {
+      background-color: var(--bg-subtle);
+      color: var(--text-main);
+    }
+
+    .nav-link.active {
+      background-color: var(--primary-light);
+      color: var(--primary-text);
+      font-weight: 600;
+    }
+
+    .nav-badge {
+      margin-left: auto;
+      font-size: 0.65rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 9999px;
+      background: var(--bg-subtle);
+      color: var(--text-muted);
+    }
+
+    /* Main Container */
+    .main-wrapper {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Navigation Bar */
+    .topbar {
+      height: 64px;
+      border-bottom: 1px solid var(--border);
+      background-color: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+    }
+
+    [data-theme="dark"] .topbar {
+      background-color: rgba(17, 24, 39, 0.8);
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .pill-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background-color: var(--emerald-light);
+      color: var(--emerald-text);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .theme-toggle-btn {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 0.45rem 0.8rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.15s ease;
+    }
+
+    .theme-toggle-btn:hover {
+      background: var(--border);
+    }
+
+    /* Content Area */
+    .content-container {
+      max-width: 1040px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2.5rem 2rem 6rem;
+    }
+
+    /* Hero Banner */
+    .hero-card {
+      background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-subtle) 100%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem;
+      margin-bottom: 2.5rem;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 250px;
+      height: 250px;
+      background: radial-gradient(circle, var(--primary-light) 0%, transparent 70%);
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .hero-title {
+      font-size: 2.1rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      margin-bottom: 0.85rem;
+    }
+
+    .hero-desc {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 750px;
+      line-height: 1.6;
+      margin-bottom: 1.75rem;
+    }
+
+    /* Metrics Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .metric-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      padding: 1.2rem;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .metric-val {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary);
+      font-family: var(--font-mono);
+    }
+
+    .metric-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    /* Section Component */
+    .section-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-sm);
+      scroll-margin-top: 80px;
+      transition: border-color 0.2s ease;
+    }
+
+    .section-card:hover {
+      border-color: rgba(2, 132, 199, 0.4);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .section-badge {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-primary { background: var(--primary-light); color: var(--primary-text); }
+    .badge-amber { background: var(--amber-light); color: var(--amber-text); }
+    .badge-emerald { background: var(--emerald-light); color: var(--emerald-text); }
+    .badge-rose { background: var(--rose-light); color: var(--rose-text); }
+
+    /* Prose Formatting */
+    p {
+      margin-bottom: 1rem;
+      color: var(--text-main);
+      font-size: 0.95rem;
+    }
+
+    ul, ol {
+      margin: 0.75rem 0 1.25rem 1.5rem;
+      font-size: 0.95rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    strong {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    /* Callout Alerts */
+    .callout {
+      border-left: 4px solid;
+      border-radius: 0 8px 8px 0;
+      padding: 1rem 1.25rem;
+      margin: 1.25rem 0;
+      font-size: 0.9rem;
+    }
+
+    .callout-warning {
+      border-color: var(--amber);
+      background: var(--amber-light);
+      color: var(--amber-text);
+    }
+
+    .callout-danger {
+      border-color: var(--rose);
+      background: var(--rose-light);
+      color: var(--rose-text);
+    }
+
+    .callout-info {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary-text);
+    }
+
+    .callout-title {
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Code Blocks */
+    .code-container {
+      background: var(--bg-code);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 1.25rem 0;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .code-header {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 0.5rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      font-family: var(--font-mono);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .copy-btn {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #cbd5e1;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.7rem;
+      font-family: var(--font-sans);
+      transition: all 0.15s ease;
+    }
+
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+
+    pre {
+      padding: 1rem;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: #e2e8f0;
+      line-height: 1.5;
+    }
+
+    code.inline-code {
+      font-family: var(--font-mono);
+      font-size: 0.85em;
+      padding: 0.15em 0.4em;
+      border-radius: 4px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      color: var(--primary-text);
+    }
+
+    /* Comparison Table */
+    .data-table-wrapper {
+      overflow-x: auto;
+      margin: 1.25rem 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      text-align: left;
+    }
+
+    .data-table th {
+      background: var(--bg-subtle);
+      padding: 0.75rem 1rem;
+      font-weight: 600;
+      color: var(--text-main);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .data-table td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Step Timeline Flow */
+    .workflow-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.75rem;
+      margin: 1.5rem 0;
+    }
+
+    .step-box {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.85rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .step-number {
+      width: 22px;
+      height: 22px;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+
+    .step-name {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .step-desc {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 960px) {
+      .sidebar {
+        display: none;
+      }
+      .content-container {
+        padding: 1.5rem 1rem 4rem;
+      }
+      .topbar {
+        padding: 0 1rem;
+      }
+      .hero-card {
+        padding: 1.5rem;
+      }
+      .hero-title {
+        font-size: 1.6rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-layout">
+  <!-- SIDEBAR NAVIGATION -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-badge">
+        <div class="logo-icon">F</div>
+        <div>
+          <div class="logo-title">Fluxo Methodo</div>
+          <div class="logo-subtitle">SKILL.md Spec</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-search">
+      <input type="text" id="navSearch" class="search-box" placeholder="Rechercher une règle..." onkeyup="filterSections()" />
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-group-title">Architecture & Conception</div>
+      <a href="#section-1" class="nav-link"><span class="nav-icon">🏛️</span> 1. Architecture Globale</a>
+      <a href="#section-2" class="nav-link"><span class="nav-icon">🔀</span> 2. Routage SPA-First</a>
+      <a href="#section-3" class="nav-link"><span class="nav-icon">📋</span> 3. Spec-Driven Dev (SDD)</a>
+
+      <div class="nav-group-title">Règles Métier & Données</div>
+      <a href="#section-4" class="nav-link"><span class="nav-icon">💰</span> 4. Intégrité Financière <span class="nav-badge">Critique</span></a>
+      <a href="#section-5" class="nav-link"><span class="nav-icon">🗃️</span> 5. Zustand Slice Pattern</a>
+      <a href="#section-6" class="nav-link"><span class="nav-icon">🎨</span> 6. Cadrage UXSpot MCP</a>
+
+      <div class="nav-group-title">Exécution & Sécurité</div>
+      <a href="#section-7" class="nav-link"><span class="nav-icon">🛠️</span> 7. Protocole d'Ajout UI</a>
+      <a href="#section-8" class="nav-link"><span class="nav-icon">📱</span> 8. Responsive & Mobile-First</a>
+      <a href="#section-9" class="nav-link"><span class="nav-icon">🤖</span> 9. Sécurité IA Gemini <span class="nav-badge">Zero-Trust</span></a>
+
+      <div class="nav-group-title">Validation & Déploiement</div>
+      <a href="#section-10" class="nav-link"><span class="nav-icon">🧪</span> 10. Tests DevTools MCP</a>
+      <a href="#section-11" class="nav-link"><span class="nav-icon">⚡</span> 11. Performance & SEO</a>
+      <a href="#section-12" class="nav-link"><span class="nav-icon">🚀</span> 12. Protocole de Déploiement</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN WRAPPER -->
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-left">
+        <span class="pill-tag">● Antigravity 2.0 Ready</span>
+        <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">Next.js 14 • Zustand • Firebase • Spec-Kit</span>
+      </div>
+      <div>
+        <button class="theme-toggle-btn" onclick="toggleTheme()">
+          <span id="themeIcon">🌙</span> <span id="themeLabel">Mode Sombre</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <!-- HERO -->
+      <section class="hero-card">
+        <h1 class="hero-title">Guide de Méthodologie & Référence Agentique</h1>
+        <p class="hero-desc">
+          Ce document définit les standards absolus de développement, de rigueur financière et d'interaction agentique pour le projet <strong>Fluxo (Charges & Encaissements)</strong>.
+        </p>
+
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <span class="metric-val">0.00 Float</span>
+            <span class="metric-label">Zéro calcul float (Centimes Entiers)</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-val">100% Zod</span>
+            <span class="metric-label">Validation SafeParse In & Out</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-val">6 Étapes</span>
+            <span class="metric-label">Cycle SDD via GitHub Spec-Kit</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-val">Zero-Trust</span>
+            <span class="metric-label">Isolation de l'agent IA Gemini</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 1 -->
+      <section id="section-1" class="section-card">
+        <div class="section-header">
+          <h2 class="section-title"><span>🏛️</span> 1. Architecture Globale & Carte du Codebase</h2>
+          <span class="section-badge badge-primary">Structure</span>
+        </div>
+        <p>L'application est architecturée autour de <strong>Next.js 14 (App Router)</strong> en mode Single Page Application (SPA / PWA) haute performance, orchestrée par un store Zustand unifié.</p>
+        
+        <div class="code-container">
+          <div class="code-header">
+            <span>Arborescence Clé</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+          </div>
+          <pre><code>/src
+  /app           ← layout.tsx (Providers & SEO), page.tsx (Routage SPA via Zustand), api/
+  /components    ← Composants par domaine métier (auth, layout, operations, months, dashboard)
+  /store         ← Zustand slices indépendants (operationsSlice, uiSlice, categoriesSlice...)
+  /lib           ← Firebase.ts, Schemas.ts (Zod), Utils.ts (toCents/fromCents)
+  /types         ← Définitions TypeScript globales
+.spec            ← Spécifications fonctionnelles et techniques (Spec-Kit SDD)</code></pre>
+        </div>
+      </section>
+
+      <!-- SECTION 2 -->
+      <section id="section-2" class="section-card">
+        <div class="section-header">
+          <h2 class="section-title"><span>🔀</span> 2. Stratégie de Routage — Compromis Assumé (SPA-First)</h2>
+          <span class="section-badge badge-amber">Décision Architecturale</span>
+        </div>
+        <div class="callout callout-info">
+          <div class="callout-title">📌 Décision délibérée et assumée</div>
+          Fluxo utilise un routage interne géré par l'état Zustand (<code class="inline-code">activeView</code>) plutôt que le routeur fichier de Next.js.
+        </div>
+        <ul>
+          <li><strong>Pourquoi ?</strong> Expérience d'application mobile installée (PWA), transitions instantanées sans rechargement, gestion du retour natif.</li>
+          <li><strong>Ce qu'on perd (assumé) :</strong> Pas d'URLs profondes directes ni de SEO par sous-vue. Les balises Open Graph et meta tags sont configurées à l'échelle globale de l'app.</li>
+        </ul>
+      </section>
+
+      <!-- SECTION 3 -->
+      <section id="section-3" class="section-card">
+        <div class="section-header">
+          <h2 class="section-title"><span>📋</span> 3. Spec-Driven Development (SDD) via GitHub spec-kit</h2>
+          <span class="section-badge badge-primary">Méthodologie</span>
+        </div>
+        <p>Toute fonctionnalité majeure suit strictement le cycle de vie <strong>Spec-Driven Development</strong> :</p>
+        
+        <div class="workflow-steps">
+          <div class="step-box">
+            <div class="step-number">1</div>
+            <div class="step-name">constitution</div>
+            <div class="step-desc">Règles fondamentales</div>
+          </div>
+          <div class="step-box">
+            <div class="step-number">2</div>
+            <div class="step-name">specify</div>
+            <div class="step-desc">Définition du besoin</div>
+          </div>
+          <div class="step-box">
+            <div class="step-number">3</div>
+            <div class="step-name">clarify & plan</div>
+            <div class="step-desc">Architecture technique</div>
+          </div>
+          <div class="step-box">
+            <div class="step-number">4</div>
+            <div class="step-name">tasks</div>
+            <div class="step-desc">Tâches atomiques</div>
+          </div>
+          <div class="step-box">
+            <div class="step-number">5</div>
+            <div class="step-name">implement</div>
+            <div class="step-desc">Codage ciblé</div>
+          </div>
+          <div class="step-box">
+            <div class="step-number">6</div>
+            <div class="step-name">converge</div>
+            <div class="step-desc">Validation & E2E</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 4 -->
+      <section id="section-4" class="section-card">
+        <div class="section-header">
+          <h2 class="section-title"><span>💰</span> 4. Intégrité des Données Financières — Règles Non-Négociables</h2>
+          <span class="section-badge badge-rose">Priorité Critique</span>
+        </div>
+        
+        <div class="callout callout-danger">
+          <div class="callout-title">⚠️ Règle Absolue : Zéro Float JavaScript</div>
+          Les montants financiers ne sont <strong>JAMAIS</strong> stockés ni calculés en virgule flottante. Ils sont obligatoirement manipulés en <strong>centimes entiers</strong> (<code class="inline-code">amount_cents: number</code>).
+        </div>
+
+        <div class="code-container">
+          <div class="code-header">
+            <span>src/lib/utils.ts (Conversion & Formatage)</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+          </div>
+          <pre><code>// Convertir une saisie utilisateur en centimes entiers
+export function toCents(value: string | number): number {
+  return Math.round(parseFloat(String(value)) * 100);
+}
+
+// Convertir des centimes entiers pour affichage formatté
+export function fromCents(cents: number): string {
+  return (cents / 100).toFixed(2);
+}</code></pre>
+        </div>
+
+        <p><strong>Validation systématique Zod :</strong> Tous les flux de données (Firestore, formulaire, agent Gemini) doivent valider leurs entrées via <code class="inline-code">.safeParse()</code>.</p>
+      </section>
+
+      <!-- SECTION 5 -->
+      <section id="section-5" class="section-card">
+        <div class="section-header">
+          <h2 class="section-title"><span>🗃️</span> 5. Architecture Zustand — Slices par Domaine</h2>
+          <span class="section-badge badge-primary">State Management</span>
+        </div>
+        <p>Pour prévenir le syndrome du "God Store", l'état applicatif est décomposé en <em>slices</em> spécialisés réunis dans <code class="inline-code">useStore.ts</code> :</p>
+        <ul>
+          <li><code class="inline-code">operationsSlice.ts</code> : Ajout, suppression, filtre des transactions</li>
+          <li><code class="inline-code">categoriesSlice.ts</code> : Paramétrage des catégories</li>
+          <li><code class="inline-code">monthsSlice.ts</code> : Gestion des clôtures comptables</li>
+          <li><code class="inline-code">uiSlice.ts</code> : <code class="inline-code">activeView</code>, thème, état des tiroirs et modales</li>
+        </ul>
+      </section>
+
+      <!-- SECTION 6 -->
+      <section id="section-6" class="section-card">
+        <div class="section-header">
+          <h2 class="section-title"><span>🎨</span> 6. Cadrage & Audit UX/UI via uxspot MCP</h2>
+          <span class="section-badge badge-emerald">Ergonomie</span>
+        </div>
+        <p>L'ergonomie et l'accessibilité sont vérifiées grâce aux outils MCP UXSpot :</p>
+        <ul>
+          <li><strong>Phase de Cadrage :</strong> Harmonisation du glossaire métier (<code class="inline-code">search_glossary</code>) et application des checklists mobiles (<code class="inline-code">get_checklist</code>).</li>
+          <li><strong>Phase de Vérification :</strong> Respect des cibles tactiles minimales (44x44px sur mobile) et exécution d'audits contrastes WCAG (<code class="inline-code">spot_check</code>).</li>
+        </ul>
+      </section>
+
+      <!-- SECTION 7 -->
+      <section id="section-7" class="section-card">
+        <div class="section-header">
+          <h2 class="section-title"><span>🛠️</span> 7. Protocole d'Implémentation d'une Fonctionnalité</h2>
+          <span class="section-badge badge-primary">Workflow</span>
+        </div>
+        <ol>
+          <li><strong>Schéma Zod d'abord :</strong> Définir les types dans <code class="inline-code">src/lib/schemas.ts</code>.</li>
+          <li><strong>Slice Zustand :</strong> Créer ou mettre à jour l'état et les actions métier.</li>
+          <li><strong>Composants UI :</strong> Créer le dossier dédié dans <code class="inline-code">src/components/[feature]/</code>.</li>
+          <li><strong>Brancher la Vue :</strong> Conditionner le rendu dans <code class="inline-code">app/page.tsx</code> selon <code class="inline-code">activeView</code>.</li>
+          <li><strong>Navigation :</strong> Ajouter le déclencheur dans le <code class="inline-code">Header.tsx</code>.</li>
+        </ol>
+      </section>
+
+      <!-- SECTION 8 -->
+      <section id="section-8" class="section-card">
+        <div class="section-header">
+          <h2 class="section-title"><span>📱</span> 8. Méthodologie Responsive & Mobile-First</h2>
+          <span class="section-badge badge-emerald">Design System</span>
+        </div>
+        <ul>
+          <li><strong>Mobile :</strong> Utilisation stricte de <em>Bottom Sheets</em> (tiroirs coulissants) et boutons d'action flottants (FAB).</li>
+          <li><strong>Desktop (<code class="inline-code">sm:</code>) :</strong> Modales centrées avec backdrop flouté.</li>
+          <li><strong>Écrans tactiles :</strong> Remplacer les <code class="inline-code">hover:</code> lourds par <code class="inline-code">active:</code> et désactiver les comportements non sollicités via <code class="inline-code">select-none</code>.</li>
+        </ul>
+      </section>
+
+      <!-- SECTION 9 -->
+      <section id="section-9" class="section-card">
+        <div class="section-header">
+          <h2 class="section-title"><span>🤖</span> 9. Sécurité de l'Agent IA (Gemini Finance Agent)</h2>
+          <span class="section-badge badge-rose">Zero-Trust</span>
+        </div>
+        <div class="callout callout-warning">
+          <div class="callout-title">🛡️ Principe Zero-Trust</div>
+          Toutes les réponses de l'agent IA sont considérées comme non fiables par défaut jusqu'à validation.
+        </div>
+        <ul>
+          <li><strong>Pas d'écriture directe :</strong> L'agent ne touche jamais Firestore directement. Il passe par une API route qui vérifie l'authentification.</li>
+          <li><strong>Validation Zod :</strong> Parsing strict par <code class="inline-code">safeParse</code> de tout JSON retourné.</li>
+          <li><strong>Confirmation utilisateur :</strong> Validation explicite requise pour toute action de suppression ou de modification en masse.</li>
+        </ul>
+      </section>
+
+      <!-- SECTION 10 -->
+      <section id="section-10" class="section-card">
+        <div class="section-header">
+          <h2 class="section-title"><span>🧪</span> 10. Phase de Convergence & Tests via chrome-devtools-mcp</h2>
+          <span class="section-badge badge-primary">Assurance Qualité</span>
+        </div>
+        <div class="data-table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Niveau de Test</th>
+                <th>Fréquence</th>
+                <th>Outils & Actions</th>
+                <th>Objectif</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Smoke Test</strong></td>
+                <td>Fin de chaque tâche</td>
+                <td>Screenshot DevTools MCP + navigation simple</td>
+                <td>Détecter les régressions visuelles immédiates</td>
+              </tr>
+              <tr>
+                <td><strong>Suite Complète</strong></td>
+                <td>Avant convergence / build</td>
+                <td>Émulation Desktop/Mobile + Scénarios E2E + Lighthouse</td>
+                <td>Valider les Core Web Vitals (LCP, INP) et les flux</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SECTION 11 -->
+      <section id="section-11" class="section-card">
+        <div class="section-header">
+          <h2 class="section-title"><span>⚡</span> 11. Normes de Performance, SEO & Sécurité</h2>
+          <span class="section-badge badge-emerald">Robustesse</span>
+        </div>
+        <ul>
+          <li><strong>Médias & LCP :</strong> Images WebP/AVIF avec <code class="inline-code">fetchpriority="high"</code> au-dessus de la ligne de flottaison.</li>
+          <li><strong>Résilience (Graceful Degradation) :</strong> Fallback <code class="inline-code">localStorage</code> ("Guest Mode") et gestion des erreurs réseau par toasts sans écran blanc.</li>
+          <li><strong>Firestore Rules :</strong> Contrôle strict d'accès <code class="inline-code">request.auth.uid == userId</code>.</li>
+        </ul>
+      </section>
+
+      <!-- SECTION 12 -->
+      <section id="section-12" class="section-card">
+        <div class="section-header">
+          <h2 class="section-title"><span>🚀</span> 12. Protocole de Déploiement Strict</h2>
+          <span class="section-badge badge-amber">Contrôle Humain</span>
+        </div>
+        <div class="callout callout-warning">
+          <div class="callout-title">🛑 Validation Humaine Obligatoire</div>
+          <strong>Ne JAMAIS exécuter de commit/push Git ni déclencher de pipeline de déploiement (Vercel) sans l'accord explicite préalable de l'utilisateur.</strong>
+        </div>
+        <ol>
+          <li>Smoke test de fin de tâche validé.</li>
+          <li>Linter sans erreur : <code class="inline-code">npm run lint</code>.</li>
+          <li>Build de production réussi en local : <code class="inline-code">npm run build</code>.</li>
+          <li>Alerte proactive si la session de conversation devient longue (recommander une nouvelle session pour maintenir des performances optimales).</li>
+        </ol>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script>
+  // Theme Toggle
+  function toggleTheme() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+      document.documentElement.removeAttribute('data-theme');
+      document.getElementById('themeIcon').textContent = '🌙';
+      document.getElementById('themeLabel').textContent = 'Mode Sombre';
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.getElementById('themeIcon').textContent = '☀️';
+      document.getElementById('themeLabel').textContent = 'Mode Clair';
+    }
+  }
+
+  // Copy Code Snippet
+  function copyCode(btn) {
+    const pre = btn.parentElement.nextElementSibling;
+    const text = pre.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      const prev = btn.innerText;
+      btn.innerText = 'Copié !';
+      btn.style.borderColor = 'var(--emerald)';
+      setTimeout(() => {
+        btn.innerText = prev;
+        btn.style.borderColor = '';
+      }, 2000);
+    });
+  }
+
+  // Filter sections by search
+  function filterSections() {
+    const input = document.getElementById('navSearch').value.toLowerCase();
+    const sections = document.querySelectorAll('.section-card');
+    const links = document.querySelectorAll('.nav-link');
+
+    sections.forEach((sec, idx) => {
+      const text = sec.innerText.toLowerCase();
+      const match = text.includes(input);
+      sec.style.display = match ? 'block' : 'none';
+      if (links[idx]) {
+        links[idx].style.display = match ? 'flex' : 'none';
+      }
+    });
+  }
+
+  // Active Link on Scroll Spy
+  window.addEventListener('scroll', () => {
+    const sections = document.querySelectorAll('.section-card');
+    const scrollPos = window.scrollY + 120;
+    
+    sections.forEach(section => {
+      const id = section.getAttribute('id');
+      const link = document.querySelector(`.nav-link[href="#${id}"]`);
+      if (link && section.offsetTop <= scrollPos && (section.offsetTop + section.offsetHeight) > scrollPos) {
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
