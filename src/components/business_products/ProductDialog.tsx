@@ -170,11 +170,11 @@ export default function ProductDialog({ product, onClose }: ProductDialogProps) 
                       onClick={() => setFormData({ ...formData, type: 'product' })}
                       className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
                         formData.type === 'product'
-                          ? 'border-violet-600 bg-violet-50/50 dark:bg-violet-950/20 text-violet-900 dark:text-violet-300 ring-2 ring-violet-500/20 font-medium'
+                          ? 'border-zinc-900 dark:border-white bg-zinc-50 dark:bg-zinc-800/50 text-zinc-900 dark:text-white ring-1 ring-zinc-900 dark:ring-white font-medium'
                           : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700'
                       }`}
                     >
-                      <div className={`p-2 rounded-lg shrink-0 ${formData.type === 'product' ? 'bg-violet-600 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'}`}>
+                      <div className={`p-2 rounded-lg shrink-0 ${formData.type === 'product' ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'}`}>
                         <Package className="w-4 h-4" />
                       </div>
                       <div>
@@ -188,11 +188,11 @@ export default function ProductDialog({ product, onClose }: ProductDialogProps) 
                       onClick={() => setFormData({ ...formData, type: 'service' })}
                       className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
                         formData.type === 'service'
-                          ? 'border-violet-600 bg-violet-50/50 dark:bg-violet-950/20 text-violet-900 dark:text-violet-300 ring-2 ring-violet-500/20 font-medium'
+                          ? 'border-zinc-900 dark:border-white bg-zinc-50 dark:bg-zinc-800/50 text-zinc-900 dark:text-white ring-1 ring-zinc-900 dark:ring-white font-medium'
                           : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700'
                       }`}
                     >
-                      <div className={`p-2 rounded-lg shrink-0 ${formData.type === 'service' ? 'bg-violet-600 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'}`}>
+                      <div className={`p-2 rounded-lg shrink-0 ${formData.type === 'service' ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'}`}>
                         <Laptop className="w-4 h-4" />
                       </div>
                       <div>
@@ -284,8 +284,8 @@ export default function ProductDialog({ product, onClose }: ProductDialogProps) 
                     <div className="text-sm font-medium text-zinc-900 dark:text-white">Actif dans le catalogue</div>
                     <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Le produit sera proposé lors des ventes</div>
                   </div>
-                  <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.isActive ? 'bg-violet-600' : 'bg-zinc-300 dark:bg-zinc-700'}`}>
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formData.isActive ? 'translate-x-6' : 'translate-x-1'}`} />
+                  <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.isActive ? 'bg-zinc-900 dark:bg-white' : 'bg-zinc-300 dark:bg-zinc-700'}`}>
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white dark:bg-zinc-900 transition-transform ${formData.isActive ? 'translate-x-6' : 'translate-x-1'}`} />
                   </div>
                   <input
                     type="checkbox"
@@ -306,8 +306,8 @@ export default function ProductDialog({ product, onClose }: ProductDialogProps) 
                       </div>
                       <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Offrir ce produit à tous les clients</div>
                     </div>
-                    <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.isFree ? 'bg-violet-600' : 'bg-zinc-300 dark:bg-zinc-700'}`}>
-                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formData.isFree ? 'translate-x-6' : 'translate-x-1'}`} />
+                    <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.isFree ? 'bg-zinc-900 dark:bg-white' : 'bg-zinc-300 dark:bg-zinc-700'}`}>
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white dark:bg-zinc-900 transition-transform ${formData.isFree ? 'translate-x-6' : 'translate-x-1'}`} />
                     </div>
                     <input
                       type="checkbox"

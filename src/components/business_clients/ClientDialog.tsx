@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, User, Phone, Mail, MapPin, Star, Percent, Package, Loader2, CheckCircle2 } from 'lucide-react';
+import { X, User, Phone, Mail, MapPin, Star, Percent, Package, Loader2, CheckCircle2, Building2 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import type { BusinessClient } from '@/types';
 import toast from 'react-hot-toast';
@@ -169,28 +169,40 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
               />
               
               <div>
-                <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-lg p-1 w-full h-11 items-center">
+                <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, clientType: 'perso' })}
-                    className={`flex-1 h-full text-sm font-medium rounded-md transition-all flex items-center justify-center ${
+                    className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
                       formData.clientType === 'perso'
-                        ? 'bg-white dark:bg-zinc-900 shadow-sm text-zinc-900 dark:text-white font-semibold'
-                        : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+                        ? 'border-zinc-900 dark:border-white bg-zinc-50 dark:bg-zinc-800/50 text-zinc-900 dark:text-white ring-1 ring-zinc-900 dark:ring-white font-medium'
+                        : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700'
                     }`}
                   >
-                    Perso
+                    <div className={`p-2 rounded-lg shrink-0 ${formData.clientType === 'perso' ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'}`}>
+                      <User className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold">Client Perso</div>
+                      <div className="text-[10px] text-zinc-500 dark:text-zinc-400">Particulier</div>
+                    </div>
                   </button>
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, clientType: 'pro' })}
-                    className={`flex-1 h-full text-sm font-medium rounded-md transition-all flex items-center justify-center ${
+                    className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
                       formData.clientType === 'pro'
-                        ? 'bg-white dark:bg-zinc-900 shadow-sm text-zinc-900 dark:text-white font-semibold'
-                        : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+                        ? 'border-zinc-900 dark:border-white bg-zinc-50 dark:bg-zinc-800/50 text-zinc-900 dark:text-white ring-1 ring-zinc-900 dark:ring-white font-medium'
+                        : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700'
                     }`}
                   >
-                    Pro
+                    <div className={`p-2 rounded-lg shrink-0 ${formData.clientType === 'pro' ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'}`}>
+                      <Building2 className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold">Client Pro</div>
+                      <div className="text-[10px] text-zinc-500 dark:text-zinc-400">Entreprise, B2B</div>
+                    </div>
                   </button>
                 </div>
               </div>
@@ -228,53 +240,58 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
                 </div>
               </div>
 
-              <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">
-                  Téléphone *
-                </label>
-                <PhoneInput
-                  value={formData.phone}
-                  onChange={(val) => {
-                    const updates: any = { phone: val };
-                    if (formData.isWhatsappSameAsPhone) {
-                      updates.whatsapp = val;
-                    }
-                    setFormData({ ...formData, ...updates });
-                  }}
-                  placeholder="Ex: 6 12 34 56 78"
-                  enableCopy
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">
-                  WhatsApp <span className="text-zinc-400 font-normal lowercase">(optionnel)</span>
-                </label>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2.5 text-xs text-zinc-600 dark:text-zinc-300 cursor-pointer select-none bg-zinc-50 dark:bg-zinc-800/50 p-2 rounded-xl border border-zinc-200/60 dark:border-zinc-700/60 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
-                    <input
-                      type="checkbox"
-                      checked={formData.isWhatsappSameAsPhone}
-                      onChange={(e) => {
-                        const checked = e.target.checked;
-                        setFormData({
-                          ...formData,
-                          isWhatsappSameAsPhone: checked,
-                          whatsapp: checked ? formData.phone : formData.whatsapp
-                        });
-                      }}
-                      className="w-4 h-4 rounded border-zinc-300 text-violet-600 focus:ring-violet-500"
-                    />
-                    <span className="font-medium">Identique au numéro de téléphone</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">
+                    Téléphone *
                   </label>
-                  {!formData.isWhatsappSameAsPhone && (
-                    <PhoneInput
-                      value={formData.whatsapp}
-                      onChange={(val) => setFormData({ ...formData, whatsapp: val })}
-                      placeholder="Ex: 6 12 34 56 78"
-                      enableCopy
-                    />
-                  )}
+                  <PhoneInput
+                    value={formData.phone}
+                    onChange={(val) => {
+                      const updates: any = { phone: val };
+                      if (formData.isWhatsappSameAsPhone) {
+                        updates.whatsapp = val;
+                      }
+                      setFormData({ ...formData, ...updates });
+                    }}
+                    placeholder="Ex: 6 12 34 56 78"
+                    enableCopy
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">
+                    WhatsApp <span className="text-zinc-400 font-normal lowercase">(optionnel)</span>
+                  </label>
+                  <div className="space-y-2">
+                    <label className="flex items-center justify-between p-2.5 bg-zinc-50 dark:bg-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-700 cursor-pointer">
+                      <div className="text-xs font-medium text-zinc-900 dark:text-white">Identique au téléphone</div>
+                      <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${formData.isWhatsappSameAsPhone ? 'bg-zinc-900 dark:bg-white' : 'bg-zinc-300 dark:bg-zinc-600'}`}>
+                        <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white dark:bg-zinc-900 transition-transform ${formData.isWhatsappSameAsPhone ? 'translate-x-5' : 'translate-x-1'}`} />
+                      </div>
+                      <input
+                        type="checkbox"
+                        className="sr-only"
+                        checked={formData.isWhatsappSameAsPhone}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setFormData({
+                            ...formData,
+                            isWhatsappSameAsPhone: checked,
+                            whatsapp: checked ? formData.phone : formData.whatsapp
+                          });
+                        }}
+                      />
+                    </label>
+                    {!formData.isWhatsappSameAsPhone && (
+                      <PhoneInput
+                        value={formData.whatsapp}
+                        onChange={(val) => setFormData({ ...formData, whatsapp: val })}
+                        placeholder="Ex: 6 12 34 56 78"
+                        enableCopy
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -326,9 +343,9 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
             <div className="space-y-4">
               <h3 className="text-sm font-bold text-zinc-900 dark:text-white">Avantages Client</h3>
               
-              <div className="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-100 dark:border-amber-900/30">
+              <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-200 dark:border-zinc-700/60">
                 <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg ${formData.isVip ? 'bg-amber-500 text-white' : 'bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-500'}`}>
+                  <div className="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white">
                     <Star className="w-5 h-5" />
                   </div>
                   <div>
@@ -338,7 +355,7 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" className="sr-only peer" checked={formData.isVip} onChange={e => setFormData({...formData, isVip: e.target.checked})} />
-                  <div className="relative w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-amber-500"></div>
+                  <div className="relative w-11 h-6 bg-zinc-300 peer-focus:outline-none rounded-full peer dark:bg-zinc-600 peer-checked:after:translate-x-full peer-checked:after:border-zinc-900 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-zinc-900 after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-zinc-900 dark:peer-checked:bg-white dark:peer-checked:after:border-white"></div>
                 </label>
               </div>
 
@@ -351,7 +368,7 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
                   value={formData.defaultDiscountRate}
                   onChange={(e) => setFormData({ ...formData, defaultDiscountRate: e.target.value })}
                   placeholder="Ex: 10 pour 10%"
-                  iconLeft={<Percent className="w-4 h-4 text-emerald-500" />}
+                  iconLeft={<Percent className="w-4 h-4" />}
                 />
                 <p className="text-xs text-zinc-500 mt-1">S&apos;appliquera automatiquement à ses futures commandes.</p>
               </div>
@@ -381,11 +398,11 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
                                   setFormData({ ...formData, freeProductIds: newIds });
                                 }}
                               />
-                              <div className="relative w-9 h-5 bg-zinc-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-violet-600"></div>
+                              <div className="relative w-9 h-5 bg-zinc-300 peer-focus:outline-none rounded-full peer dark:bg-zinc-600 peer-checked:after:translate-x-full peer-checked:after:border-zinc-900 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-zinc-900 after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-zinc-600 peer-checked:bg-zinc-900 dark:peer-checked:bg-white dark:peer-checked:after:border-white"></div>
                             </div>
                             <div className="flex-1 flex justify-between items-center">
                               <span className="text-sm font-medium text-zinc-900 dark:text-white flex items-center gap-2">
-                                <Package className="w-4 h-4 text-zinc-400" />
+                                <Package className="w-4 h-4 text-zinc-900 dark:text-white" />
                                 {product.name}
                               </span>
                               <span className="text-xs text-zinc-500">{(fromCents(product.defaultPrice_cents) || 0).toFixed(2)} MAD</span>

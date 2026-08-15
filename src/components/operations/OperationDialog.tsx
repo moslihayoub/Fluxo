@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { X, TrendingUp, TrendingDown, Tag, Plus, Trash2 } from 'lucide-react';
+import { X, TrendingUp, TrendingDown, Tag, Plus, Trash2, CheckCircle2 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { generateId, fromCents, toCents } from '@/lib/utils';
 import type { Operation, SubAmount } from '@/types';
@@ -117,51 +117,78 @@ export default function OperationDialog({ operation, monthId, onClose }: Operati
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-end">
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative z-10 w-full h-full sm:w-[450px] bg-white dark:bg-zinc-900 shadow-2xl sm:border-l border-zinc-200 dark:border-zinc-800 flex flex-col animate-in slide-in-from-bottom sm:slide-in-from-right duration-300">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center sm:block p-4 sm:p-0">
+      <div 
+        className="absolute sm:fixed inset-0 bg-zinc-950/50 backdrop-blur-sm animate-in fade-in duration-200" 
+        onClick={() => {
+          if (typeof window !== 'undefined' && window.innerWidth < 640) {
+            onClose();
+          }
+        }} 
+      />
+      <div className="relative sm:fixed sm:inset-y-0 sm:right-0 z-10 bg-white dark:bg-zinc-900 w-full max-w-md sm:max-w-none sm:w-[50%] rounded-3xl sm:rounded-none sm:rounded-l-3xl shadow-xl overflow-hidden flex flex-col max-h-[90vh] sm:max-h-none sm:h-full animate-in fade-in sm:slide-in-from-right duration-300">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-zinc-100 dark:border-zinc-800 shrink-0">
-          <h2 className="text-base font-semibold text-zinc-900 dark:text-white">
-            {isEditing ? t('ops.edit') : t('ops.new')}
-          </h2>
-          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
-            <X className="w-4 h-4" />
+        <div className="flex items-center justify-between p-4 border-b border-zinc-100 dark:border-zinc-800">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-zinc-100 dark:bg-zinc-800 rounded-xl flex items-center justify-center text-zinc-900 dark:text-white">
+              {kind === 'encaissement' ? <TrendingUp className="w-5 h-5" /> : <TrendingDown className="w-5 h-5" />}
+            </div>
+            <h2 className="text-lg font-bold text-zinc-900 dark:text-white">
+              {isEditing ? t('ops.edit') : t('ops.new')}
+            </h2>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded-full transition-colors"
+          >
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
-          <div className="p-5 space-y-4 overflow-y-auto flex-1">
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-5">
+          <form id="operation-form" onSubmit={handleSubmit} className="space-y-4">
 
             {/* 1. Type — encaissement / décaissement */}
           <div>
             <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">
               {t('common.type')}
             </label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => setKind('encaissement')}
-                className={`flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all border ${
+                className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
                   kind === 'encaissement'
-                    ? 'bg-emerald-600 border-emerald-600 text-white shadow-sm'
-                    : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-emerald-300 hover:text-emerald-600'
+                    ? 'border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-900 dark:text-emerald-300 ring-1 ring-emerald-500/20 font-medium'
+                    : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700'
                 }`}
               >
-                <TrendingUp className="w-4 h-4" />
-                {t('common.incomes')}
+                <div className={`p-2 rounded-lg shrink-0 ${kind === 'encaissement' ? 'bg-emerald-600 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'}`}>
+                  <TrendingUp className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold">{t('common.incomes')}</div>
+                  <div className="text-[10px] text-zinc-500 dark:text-zinc-400">Recettes, entrées</div>
+                </div>
               </button>
               <button
                 type="button"
                 onClick={() => setKind('decaissement')}
-                className={`flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all border ${
+                className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
                   kind === 'decaissement'
-                    ? 'bg-rose-600 border-rose-600 text-white shadow-sm'
-                    : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-rose-300 hover:text-rose-600'
+                    ? 'border-rose-600 bg-rose-50/50 dark:bg-rose-950/20 text-rose-900 dark:text-rose-300 ring-1 ring-rose-500/20 font-medium'
+                    : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700'
                 }`}
               >
-                <TrendingDown className="w-4 h-4" />
-                {t('common.expenses')}
+                <div className={`p-2 rounded-lg shrink-0 ${kind === 'decaissement' ? 'bg-rose-600 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'}`}>
+                  <TrendingDown className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold">{t('common.expenses')}</div>
+                  <div className="text-[10px] text-zinc-500 dark:text-zinc-400">Dépenses, sorties</div>
+                </div>
               </button>
             </div>
           </div>
@@ -217,7 +244,7 @@ export default function OperationDialog({ operation, monthId, onClose }: Operati
                       checked={addToList}
                       onChange={(e) => setAddToList(e.target.checked)}
                     />
-                    <div className="relative w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-violet-600"></div>
+                    <div className="relative w-11 h-6 bg-zinc-300 peer-focus:outline-none rounded-full peer dark:bg-zinc-600 peer-checked:after:translate-x-full peer-checked:after:border-zinc-900 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-zinc-900 after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-zinc-900 dark:peer-checked:bg-white dark:peer-checked:after:border-white"></div>
                   </div>
                 </label>
               </div>
@@ -239,7 +266,7 @@ export default function OperationDialog({ operation, monthId, onClose }: Operati
                     checked={hasSubAmounts}
                     onChange={(e) => setHasSubAmounts(e.target.checked)}
                   />
-                  <div className="relative w-9 h-5 bg-zinc-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-violet-600"></div>
+                  <div className="relative w-9 h-5 bg-zinc-300 peer-focus:outline-none rounded-full peer dark:bg-zinc-600 peer-checked:after:translate-x-full peer-checked:after:border-zinc-900 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-zinc-900 after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-zinc-600 peer-checked:bg-zinc-900 dark:peer-checked:bg-white dark:peer-checked:after:border-white"></div>
                 </div>
               </label>
             </div>
@@ -338,26 +365,31 @@ export default function OperationDialog({ operation, monthId, onClose }: Operati
             </p>
           )}
 
-          </div>
-          <div className="p-5 border-t border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 shrink-0 pb-safe">
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 px-4 py-2.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
-              >
-                {t('common.cancel')}
-              </button>
-              <button
-                type="submit"
-                data-testid="operation-submit-btn"
-                className="flex-1 px-4 py-2.5 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-sm font-medium hover:bg-zinc-700 dark:hover:bg-zinc-100 transition-colors"
-              >
-                {isEditing ? t('common.edit') : t('common.add')}
-              </button>
-            </div>
-          </div>
-        </form>
+          </form>
+        </div>
+
+        {/* Footer */}
+        <div className="p-4 border-t border-zinc-100 dark:border-zinc-800 flex justify-end gap-3 bg-zinc-50 dark:bg-zinc-800/40">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-6 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-xl font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+          >
+            {t('common.cancel')}
+          </button>
+          <button
+            type="submit"
+            form="operation-form"
+            data-testid="operation-submit-btn"
+            className={`px-6 py-2.5 text-white rounded-xl font-bold transition-colors shadow-sm flex items-center gap-2 ${
+              kind === 'encaissement' 
+                ? 'bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600' 
+                : 'bg-rose-600 hover:bg-rose-700 dark:bg-rose-500 dark:hover:bg-rose-600'
+            }`}
+          >
+            {isEditing ? <><CheckCircle2 className="w-4 h-4" /> {t('common.edit')}</> : <><Plus className="w-4 h-4" /> {t('common.add')}</>}
+          </button>
+        </div>
       </div>
     </div>
   );
