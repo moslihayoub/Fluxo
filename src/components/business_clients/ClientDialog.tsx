@@ -24,10 +24,10 @@ const INITIAL_STATE = {
   email: '',
   address: '',
   isVip: false,
-  defaultDiscountRate: '',
+  defaultDiscountRate: '0',
   avatarUrl: '',
-  freeProductIds: [] as string[],
   clientType: 'perso' as 'perso' | 'pro',
+  brandName: '',
   city: '',
   whatsapp: '',
   isWhatsappSameAsPhone: false,
@@ -40,6 +40,22 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState(INITIAL_STATE);
+
+  const handlePhoneChange = (phone: string) => {
+    setFormData(prev => ({
+      ...prev,
+      phone,
+      whatsapp: prev.isWhatsappSameAsPhone ? phone : prev.whatsapp
+    }));
+  };
+
+  const handleWhatsappToggle = (checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      isWhatsappSameAsPhone: checked,
+      whatsapp: checked ? prev.phone : ''
+    }));
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -58,10 +74,10 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
           email: client.email || '',
           address: client.address || '',
           isVip: client.isVip || false,
-          defaultDiscountRate: client.defaultDiscountRate ? String(client.defaultDiscountRate) : '',
+          defaultDiscountRate: client.defaultDiscountRate !== undefined ? String(client.defaultDiscountRate) : '0',
           avatarUrl: client.avatarUrl || '',
-          freeProductIds: client.freeProductIds || [],
           clientType: client.clientType || 'perso',
+          brandName: client.brandName || '',
           city: client.city || '',
           whatsapp: client.whatsapp || '',
           isWhatsappSameAsPhone: !client.whatsapp || client.whatsapp === client.phone,
@@ -104,10 +120,10 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
         email: formData.email || undefined,
         address: formData.address || undefined,
         isVip: formData.isVip,
-        defaultDiscountRate: formData.defaultDiscountRate ? parseFloat(formData.defaultDiscountRate) : undefined,
+        defaultDiscountRate: formData.defaultDiscountRate ? parseFloat(formData.defaultDiscountRate) : 0,
         avatarUrl: formData.avatarUrl || undefined,
-        freeProductIds: formData.freeProductIds.length > 0 ? formData.freeProductIds : undefined,
         clientType: formData.clientType,
+        brandName: formData.clientType === 'pro' && formData.brandName.trim() ? formData.brandName.trim() : undefined,
         city: formData.city || undefined,
         whatsapp: formData.isWhatsappSameAsPhone ? formData.phone : (formData.whatsapp || undefined),
       };
@@ -146,70 +162,72 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
             <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white flex items-center justify-center">
               <User className="w-5 h-5" />
             </div>
-            <h2 className="text-lg font-bold text-zinc-900 dark:text-white">
+            <h2 className="text-lg font-bold text-zinc-900 dark:text-white hidden sm:block">
               {client ? 'Modifier le client' : 'Nouveau client'}
             </h2>
           </div>
-          <button onClick={handleClose} className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">
-            <X className="w-5 h-5" />
-          </button>
+          
+          <div className="flex items-center gap-3">
+            <div className="flex bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl">
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, clientType: 'perso' })}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  formData.clientType === 'perso'
+                    ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-sm'
+                    : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+                }`}
+              >
+                <User className="w-3.5 h-3.5" /> Perso
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, clientType: 'pro' })}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  formData.clientType === 'pro'
+                    ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-sm'
+                    : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+                }`}
+              >
+                <Building2 className="w-3.5 h-3.5" /> Pro
+              </button>
+            </div>
+            <button onClick={handleClose} className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-5">
           <form id="client-form" onSubmit={handleSubmit} className="space-y-6">
             
-            {/* Avatar with Dual Solution */}
-            <div className="mb-4 space-y-4">
+            {/* Avatar */}
+            <div className="mb-4">
               <AvatarUpload
                 value={formData.avatarUrl}
                 onChange={(url) => setFormData({ ...formData, avatarUrl: url })}
                 defaultIcon="user"
                 shape="circle"
               />
-              
-              <div>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, clientType: 'perso' })}
-                    className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
-                      formData.clientType === 'perso'
-                        ? 'border-zinc-900 dark:border-white bg-zinc-50 dark:bg-zinc-800/50 text-zinc-900 dark:text-white ring-1 ring-zinc-900 dark:ring-white font-medium'
-                        : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700'
-                    }`}
-                  >
-                    <div className={`p-2 rounded-lg shrink-0 ${formData.clientType === 'perso' ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'}`}>
-                      <User className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold">Client Perso</div>
-                      <div className="text-[10px] text-zinc-500 dark:text-zinc-400">Particulier</div>
-                    </div>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, clientType: 'pro' })}
-                    className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
-                      formData.clientType === 'pro'
-                        ? 'border-zinc-900 dark:border-white bg-zinc-50 dark:bg-zinc-800/50 text-zinc-900 dark:text-white ring-1 ring-zinc-900 dark:ring-white font-medium'
-                        : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700'
-                    }`}
-                  >
-                    <div className={`p-2 rounded-lg shrink-0 ${formData.clientType === 'pro' ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'}`}>
-                      <Building2 className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold">Client Pro</div>
-                      <div className="text-[10px] text-zinc-500 dark:text-zinc-400">Entreprise, B2B</div>
-                    </div>
-                  </button>
-                </div>
-              </div>
             </div>
 
             {/* Client Info */}
             <div className="space-y-4 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+              {formData.clientType === 'pro' && (
+                <div>
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">
+                    Informations Marque
+                  </label>
+                  <Input
+                    type="text"
+                    value={formData.brandName}
+                    onChange={(e) => setFormData({ ...formData, brandName: e.target.value })}
+                    placeholder="Nom de la Marque"
+                    iconLeft={<Building2 className="w-4 h-4" />}
+                  />
+                </div>
+              )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">
@@ -247,51 +265,36 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
                   </label>
                   <PhoneInput
                     value={formData.phone}
-                    onChange={(val) => {
-                      const updates: any = { phone: val };
-                      if (formData.isWhatsappSameAsPhone) {
-                        updates.whatsapp = val;
-                      }
-                      setFormData({ ...formData, ...updates });
-                    }}
-                    placeholder="Ex: 6 12 34 56 78"
+                    onChange={handlePhoneChange}
+                    placeholder="Ex: 6 00 00 00 00"
                     enableCopy
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">
-                    WhatsApp <span className="text-zinc-400 font-normal lowercase">(optionnel)</span>
-                  </label>
-                  <div className="space-y-2">
-                    <label className="flex items-center justify-between p-2.5 bg-zinc-50 dark:bg-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-700 cursor-pointer">
-                      <div className="text-xs font-medium text-zinc-900 dark:text-white">Identique au téléphone</div>
-                      <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${formData.isWhatsappSameAsPhone ? 'bg-zinc-900 dark:bg-white' : 'bg-zinc-300 dark:bg-zinc-600'}`}>
-                        <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white dark:bg-zinc-900 transition-transform ${formData.isWhatsappSameAsPhone ? 'translate-x-5' : 'translate-x-1'}`} />
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase">
+                      WhatsApp <span className="text-zinc-400 font-normal lowercase">(optionnel)</span>
+                    </label>
+                    <label className="flex items-center gap-1.5 cursor-pointer">
+                      <span className="text-[10px] font-medium text-zinc-500">Identique au tél.</span>
+                      <div className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors ${formData.isWhatsappSameAsPhone ? 'bg-zinc-900 dark:bg-white' : 'bg-zinc-300 dark:bg-zinc-600'}`}>
+                        <span className={`inline-block h-2.5 w-2.5 transform rounded-full bg-white dark:bg-zinc-900 transition-transform ${formData.isWhatsappSameAsPhone ? 'translate-x-4' : 'translate-x-0.5'}`} />
                       </div>
                       <input
                         type="checkbox"
                         className="sr-only"
                         checked={formData.isWhatsappSameAsPhone}
-                        onChange={(e) => {
-                          const checked = e.target.checked;
-                          setFormData({
-                            ...formData,
-                            isWhatsappSameAsPhone: checked,
-                            whatsapp: checked ? formData.phone : formData.whatsapp
-                          });
-                        }}
+                        onChange={(e) => handleWhatsappToggle(e.target.checked)}
                       />
                     </label>
-                    {!formData.isWhatsappSameAsPhone && (
-                      <PhoneInput
-                        value={formData.whatsapp}
-                        onChange={(val) => setFormData({ ...formData, whatsapp: val })}
-                        placeholder="Ex: 6 12 34 56 78"
-                        enableCopy
-                      />
-                    )}
                   </div>
+                  <PhoneInput
+                    value={formData.isWhatsappSameAsPhone ? formData.phone : formData.whatsapp}
+                    onChange={(whatsapp) => !formData.isWhatsappSameAsPhone && setFormData({ ...formData, whatsapp })}
+                    placeholder="Ex: 6 00 00 00 00"
+                    enableCopy
+                  />
                 </div>
               </div>
 
@@ -373,48 +376,17 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
                 <p className="text-xs text-zinc-500 mt-1">S&apos;appliquera automatiquement à ses futures commandes.</p>
               </div>
 
-              <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase mb-2 block">
-                  Produits Offerts
-                </label>
-                <div className="bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-3 max-h-40 overflow-y-auto">
-                  {businessProducts.length === 0 ? (
-                    <p className="text-sm text-zinc-500 text-center py-2">Aucun produit disponible</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {businessProducts.map(product => {
-                        const isSelected = formData.freeProductIds.includes(product.id);
-                        return (
-                          <label key={product.id} className="flex items-center gap-3 p-2 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-lg cursor-pointer transition-colors border border-transparent hover:border-zinc-200 dark:hover:border-zinc-800">
-                            <div className="relative inline-flex items-center">
-                              <input
-                                type="checkbox"
-                                className="sr-only peer"
-                                checked={isSelected}
-                                onChange={(e) => {
-                                  const newIds = e.target.checked 
-                                    ? [...formData.freeProductIds, product.id]
-                                    : formData.freeProductIds.filter(id => id !== product.id);
-                                  setFormData({ ...formData, freeProductIds: newIds });
-                                }}
-                              />
-                              <div className="relative w-9 h-5 bg-zinc-300 peer-focus:outline-none rounded-full peer dark:bg-zinc-600 peer-checked:after:translate-x-full peer-checked:after:border-zinc-900 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-zinc-900 after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-zinc-600 peer-checked:bg-zinc-900 dark:peer-checked:bg-white dark:peer-checked:after:border-white"></div>
-                            </div>
-                            <div className="flex-1 flex justify-between items-center">
-                              <span className="text-sm font-medium text-zinc-900 dark:text-white flex items-center gap-2">
-                                <Package className="w-4 h-4 text-zinc-900 dark:text-white" />
-                                {product.name}
-                              </span>
-                              <span className="text-xs text-zinc-500">{(fromCents(product.defaultPrice_cents) || 0).toFixed(2)} MAD</span>
-                            </div>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  )}
+              {client && (
+                <div>
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Montant global payé (CA généré)</label>
+                  <Input
+                    type="text"
+                    disabled
+                    value={`${fromCents(client.totalSpent_cents || 0).toFixed(2)} MAD`}
+                    className="bg-zinc-50 dark:bg-zinc-900/50 cursor-not-allowed text-zinc-900 dark:text-white font-bold"
+                  />
                 </div>
-                <p className="text-xs text-zinc-500 mt-1">Ces produits seront facturés 0 MAD pour ce client.</p>
-              </div>
+              )}
             </div>
 
           </form>

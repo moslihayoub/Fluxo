@@ -144,6 +144,8 @@ export default function OrderDialog({ isOpen, onClose, order }: OrderDialogProps
   const totalCost = formData.items.reduce((acc, item) => acc + (item.unitCostPrice_cents * item.quantity), 0);
   const netProfit = amountHT - totalCost;
 
+  const allDigital = formData.items.length > 0 && formData.items.every(i => i.productType === 'service');
+
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -194,11 +196,15 @@ export default function OrderDialog({ isOpen, onClose, order }: OrderDialogProps
       let finalSupplierId = item.supplierId;
       if (item.supplierId && !suppliers.find(s => s.id === item.supplierId)) {
         // It's a new brand name, create the supplier
-        finalSupplierId = generateId();
-        addBusinessSupplier({
+        const createdSupplier = addBusinessSupplier({
           brandName: item.supplierId,
           phone: '',
         });
+        if (createdSupplier) {
+          finalSupplierId = createdSupplier.id;
+        } else {
+          finalSupplierId = generateId(); // fallback
+        }
       }
 
       if (item.saveToCatalog && item.productName) {
@@ -477,6 +483,7 @@ export default function OrderDialog({ isOpen, onClose, order }: OrderDialogProps
                                   isFree: isFree,
                                   categoryId: product.categoryId || currentItem.categoryId,
                                   supplierId: product.supplierId || currentItem.supplierId,
+                                  productType: product.type,
                                 };
                                 return { ...prev, items: newItems };
                               });
@@ -598,13 +605,13 @@ export default function OrderDialog({ isOpen, onClose, order }: OrderDialogProps
                                   min="0" 
                                   placeholder="0"
                                   data-testid={`order-item-${item.id}-selling-price`} 
-                                  value={item.unitSellingPrice_cents === 0 ? '' : item.unitSellingPrice_cents} 
+                                  value={item.unitSellingPrice_cents === 0 ? '' : fromCents(item.unitSellingPrice_cents)} 
                                   onChange={e => {
                                     const raw = e.target.value;
                                     const val = raw === '' ? 0 : (parseFloat(raw) || 0);
                                     setFormData(prev => {
                                       const newItems = [...prev.items];
-                                      newItems[index] = { ...newItems[index], unitSellingPrice_cents: val };
+                                      newItems[index] = { ...newItems[index], unitSellingPrice_cents: toCents(val) };
                                       return { ...prev, items: newItems };
                                     });
                                   }} 
@@ -617,13 +624,13 @@ export default function OrderDialog({ isOpen, onClose, order }: OrderDialogProps
                                   min="0" 
                                   placeholder="0"
                                   data-testid={`order-item-${item.id}-cost-price`} 
-                                  value={item.unitCostPrice_cents === 0 ? '' : item.unitCostPrice_cents} 
+                                  value={item.unitCostPrice_cents === 0 ? '' : fromCents(item.unitCostPrice_cents)} 
                                   onChange={e => {
                                     const raw = e.target.value;
                                     const val = raw === '' ? 0 : (parseFloat(raw) || 0);
                                     setFormData(prev => {
                                       const newItems = [...prev.items];
-                                      newItems[index] = { ...newItems[index], unitCostPrice_cents: val };
+                                      newItems[index] = { ...newItems[index], unitCostPrice_cents: toCents(val) };
                                       return { ...prev, items: newItems };
                                     });
                                   }} 
@@ -692,23 +699,25 @@ export default function OrderDialog({ isOpen, onClose, order }: OrderDialogProps
                     }} 
                   />
                 </div>
-                <div>
-                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase flex items-end h-5 mb-1">
-                    Frais de livraison (MAD)
-                  </label>
-                  <Input 
-                    type="number" 
-                    min="0" 
-                    placeholder="0"
-                    data-testid="order-shipping-fee" 
-                    value={formData.shippingFee_cents === 0 ? '' : formData.shippingFee_cents} 
-                    onChange={e => {
-                      const raw = e.target.value;
-                      const val = raw === '' ? 0 : (parseFloat(raw) || 0);
-                      setFormData({...formData, shippingFee_cents: val});
-                    }} 
-                  />
-                </div>
+                {!allDigital && (
+                  <div>
+                    <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase flex items-end h-5 mb-1">
+                      Frais de livraison (MAD)
+                    </label>
+                    <Input 
+                      type="number" 
+                      min="0" 
+                      placeholder="0"
+                      data-testid="order-shipping-fee" 
+                      value={formData.shippingFee_cents === 0 ? '' : fromCents(formData.shippingFee_cents)} 
+                      onChange={e => {
+                        const raw = e.target.value;
+                        const val = raw === '' ? 0 : (parseFloat(raw) || 0);
+                        setFormData({...formData, shippingFee_cents: toCents(val)});
+                      }} 
+                    />
+                  </div>
+                )}
               </div>
             </section>
 
@@ -813,11 +822,11 @@ export default function OrderDialog({ isOpen, onClose, order }: OrderDialogProps
                       max={amountTTC}
                       placeholder="0"
                       data-testid="order-advance-paid"
-                      value={formData.advancePaid_cents === 0 ? '' : formData.advancePaid_cents}
+                      value={formData.advancePaid_cents === 0 ? '' : fromCents(formData.advancePaid_cents)}
                       onChange={(e) => {
                         const raw = e.target.value;
                         const val = raw === '' ? 0 : (parseFloat(raw) || 0);
-                        setFormData({ ...formData, advancePaid_cents: Math.min(val, amountTTC) });
+                        setFormData({ ...formData, advancePaid_cents: Math.min(toCents(val), amountTTC) });
                       }}
                       className="text-base font-bold text-emerald-600 dark:text-emerald-400 h-11"
                     />
@@ -834,7 +843,7 @@ export default function OrderDialog({ isOpen, onClose, order }: OrderDialogProps
                         const raw = e.target.value;
                         const pct = raw === '' ? 0 : (parseFloat(raw) || 0);
                         const calculatedAmount = Math.min(amountTTC, (pct / 100) * amountTTC);
-                        setFormData({ ...formData, advancePaid_cents: Math.round(calculatedAmount * 100) / 100 });
+                        setFormData({ ...formData, advancePaid_cents: calculatedAmount });
                       }}
                       className="text-base font-bold text-emerald-600 dark:text-emerald-400 h-11"
                       iconRight={<Percent className="w-4 h-4 text-zinc-400" />}

@@ -1,15 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Building2, Phone, Mail, MapPin, Globe, Instagram, Facebook, Link as LinkIcon, User, Loader2, CheckCircle2, Package, Laptop } from 'lucide-react';
+import { X, Building2, Phone, Mail, MapPin, Globe, Instagram, Facebook, Link as LinkIcon, User, Loader2, CheckCircle2, Package, Laptop, Receipt } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import type { BusinessSupplier } from '@/types';
 import toast from 'react-hot-toast';
 import { Input } from '@/components/ui/Input';
 import { PhoneInput } from '@/components/ui/PhoneInput';
 import { CityInput } from '@/components/ui/CityInput';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/Select';
 import { AvatarUpload } from '@/components/ui/AvatarUpload';
+import { fromCents } from '@/lib/utils';
 
 interface SupplierDialogProps {
   isOpen: boolean;
@@ -39,9 +39,33 @@ const INITIAL_STATE = {
 export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDialogProps) {
   const addSupplier = useStore((s) => s.addBusinessSupplier);
   const updateSupplier = useStore((s) => s.updateBusinessSupplier);
+  const products = useStore((s) => s.businessProducts) || [];
+  const orders = useStore((s) => s.businessOrders) || [];
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState(INITIAL_STATE);
+
+  let totalPurchaseValue_cents = 0;
+  if (supplier) {
+    orders.forEach(order => {
+      const orderItems = (order.items && order.items.length > 0)
+        ? order.items
+        : order.productName
+        ? [{
+            id: 'legacy',
+            productName: order.productName,
+            quantity: order.quantity || 1,
+            unitCostPrice_cents: order.unitCostPrice_cents || 0,
+          }]
+        : [];
+      orderItems.forEach(item => {
+        const product = products.find(p => p.id === (item as any).productId);
+        if (product && product.supplierId === supplier.id) {
+          totalPurchaseValue_cents += ((item.unitCostPrice_cents || 0) * (item.quantity || 1));
+        }
+      });
+    });
+  }
 
   useEffect(() => {
     if (isOpen) {
@@ -183,66 +207,54 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
             <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white flex items-center justify-center">
               <Building2 className="w-5 h-5" />
             </div>
-            <h2 className="text-lg font-bold text-zinc-900 dark:text-white">
+            <h2 className="text-lg font-bold text-zinc-900 dark:text-white hidden sm:block">
               {supplier ? 'Modifier le fournisseur' : 'Nouveau fournisseur'}
             </h2>
           </div>
-          <button onClick={handleClose} className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">
-            <X className="w-5 h-5" />
-          </button>
+          
+          <div className="flex items-center gap-3">
+            <div className="flex bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl">
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, merchandiseType: 'physical' })}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  formData.merchandiseType === 'physical'
+                    ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-sm'
+                    : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+                }`}
+              >
+                <Package className="w-3.5 h-3.5" /> Physique
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, merchandiseType: 'digital' })}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  formData.merchandiseType === 'digital'
+                    ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-sm'
+                    : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+                }`}
+              >
+                <Laptop className="w-3.5 h-3.5" /> Digital
+              </button>
+            </div>
+            <button onClick={handleClose} className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-5">
           <form id="supplier-form" onSubmit={handleSubmit} className="space-y-6">
             
-            {/* Avatar and Type */}
-            <div className="mb-4 space-y-4">
+            {/* Avatar */}
+            <div className="mb-4">
               <AvatarUpload
                 value={formData.avatarUrl}
                 onChange={(url) => setFormData({ ...formData, avatarUrl: url })}
                 defaultIcon="building"
                 shape="rounded"
               />
-              
-              <div>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, merchandiseType: 'physical' })}
-                    className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
-                      formData.merchandiseType === 'physical'
-                        ? 'border-zinc-900 dark:border-white bg-zinc-50 dark:bg-zinc-800/50 text-zinc-900 dark:text-white ring-1 ring-zinc-900 dark:ring-white font-medium'
-                        : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700'
-                    }`}
-                  >
-                    <div className={`p-2 rounded-lg shrink-0 ${formData.merchandiseType === 'physical' ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'}`}>
-                      <Package className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold">Physique</div>
-                      <div className="text-[10px] text-zinc-500 dark:text-zinc-400">Marchandise, stock</div>
-                    </div>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, merchandiseType: 'digital' })}
-                    className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
-                      formData.merchandiseType === 'digital'
-                        ? 'border-zinc-900 dark:border-white bg-zinc-50 dark:bg-zinc-800/50 text-zinc-900 dark:text-white ring-1 ring-zinc-900 dark:ring-white font-medium'
-                        : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700'
-                    }`}
-                  >
-                    <div className={`p-2 rounded-lg shrink-0 ${formData.merchandiseType === 'digital' ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'}`}>
-                      <Laptop className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold">Digital / Service</div>
-                      <div className="text-[10px] text-zinc-500 dark:text-zinc-400">Prestation, virtuel</div>
-                    </div>
-                  </button>
-                </div>
-              </div>
             </div>
 
             {/* Brand Info */}
@@ -299,7 +311,7 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
                 <div>
                   <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">
                     Numéro Téléphone <span className="text-zinc-400 font-normal lowercase">(optionnel)</span>
@@ -313,14 +325,14 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">
-                    WhatsApp <span className="text-zinc-400 font-normal lowercase">(optionnel)</span>
-                  </label>
-                  <div className="space-y-2">
-                    <label className="flex items-center justify-between p-2.5 bg-zinc-50 dark:bg-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-700 cursor-pointer">
-                      <div className="text-xs font-medium text-zinc-900 dark:text-white">Identique au téléphone</div>
-                      <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${formData.isWhatsappSameAsPhone ? 'bg-zinc-900 dark:bg-white' : 'bg-zinc-300 dark:bg-zinc-600'}`}>
-                        <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white dark:bg-zinc-900 transition-transform ${formData.isWhatsappSameAsPhone ? 'translate-x-5' : 'translate-x-1'}`} />
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase">
+                      WhatsApp <span className="text-zinc-400 font-normal lowercase">(optionnel)</span>
+                    </label>
+                    <label className="flex items-center gap-1.5 cursor-pointer">
+                      <span className="text-[10px] font-medium text-zinc-500">Identique au tél.</span>
+                      <div className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors ${formData.isWhatsappSameAsPhone ? 'bg-zinc-900 dark:bg-white' : 'bg-zinc-300 dark:bg-zinc-600'}`}>
+                        <span className={`inline-block h-2.5 w-2.5 transform rounded-full bg-white dark:bg-zinc-900 transition-transform ${formData.isWhatsappSameAsPhone ? 'translate-x-4' : 'translate-x-0.5'}`} />
                       </div>
                       <input
                         type="checkbox"
@@ -329,15 +341,13 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
                         onChange={(e) => handleWhatsappToggle(e.target.checked)}
                       />
                     </label>
-                    {!formData.isWhatsappSameAsPhone && (
-                      <PhoneInput
-                        value={formData.whatsapp}
-                        onChange={(whatsapp) => setFormData({ ...formData, whatsapp })}
-                        placeholder="Ex: 6 00 00 00 00"
-                        enableCopy
-                      />
-                    )}
                   </div>
+                  <PhoneInput
+                    value={formData.isWhatsappSameAsPhone ? formData.phone : formData.whatsapp}
+                    onChange={(whatsapp) => !formData.isWhatsappSameAsPhone && setFormData({ ...formData, whatsapp })}
+                    placeholder="Ex: 6 00 00 00 00"
+                    enableCopy
+                  />
                 </div>
               </div>
 
@@ -453,6 +463,19 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
                 </div>
               </div>
             </div>
+
+            {/* Total Achats */}
+            {supplier && (
+              <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Total Achats (Est.)</label>
+                <Input
+                  type="text"
+                  disabled
+                  value={`${fromCents(totalPurchaseValue_cents).toFixed(2)} MAD`}
+                  className="bg-zinc-50 dark:bg-zinc-900/50 cursor-not-allowed text-zinc-900 dark:text-white font-bold"
+                />
+              </div>
+            )}
 
           </form>
         </div>

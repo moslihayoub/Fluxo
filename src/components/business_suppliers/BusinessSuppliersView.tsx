@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useStore } from '@/store/useStore';
-import { Plus, Phone, MessageCircle, Building2, Truck } from 'lucide-react';
+import { Plus, Phone, MessageCircle, Building2, Truck, Package, ShoppingBag, DollarSign } from 'lucide-react';
 import type { BusinessSupplier } from '@/types';
 import SupplierDialog from './SupplierDialog';
 import {
@@ -97,8 +97,15 @@ export default function BusinessSuppliersView() {
       }
     });
 
-    return { productCount, categoryCount, salesCount, totalPurchaseValue: fromCents(totalPurchaseValue_cents) };
+    return { productCount, categoryCount, salesCount, totalPurchaseValue: fromCents(totalPurchaseValue_cents), totalPurchaseValue_cents };
   };
+
+  const globalStats = suppliers.reduce((acc, s) => {
+    const stats = getSupplierStats(s.id);
+    acc.totalProducts += stats.productCount;
+    acc.totalPurchaseValue_cents += stats.totalPurchaseValue_cents;
+    return acc;
+  }, { totalProducts: 0, totalPurchaseValue_cents: 0 });
 
   return (
     <ScrollReveal className="w-full max-w-6xl mx-auto p-4 space-y-6">
@@ -117,6 +124,42 @@ export default function BusinessSuppliersView() {
             </button>
           </div>
         )}
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl shadow-sm hover:border-violet-500/30 transition-all">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center text-violet-600 dark:text-violet-400">
+              <Building2 className="w-5 h-5" />
+            </div>
+            <h3 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">Total Fournisseurs</h3>
+          </div>
+          <p className="text-2xl font-black text-zinc-900 dark:text-white">
+            {suppliers.length}
+          </p>
+        </div>
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl shadow-sm hover:border-blue-500/30 transition-all">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+              <Package className="w-5 h-5" />
+            </div>
+            <h3 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">Produits Sourcés</h3>
+          </div>
+          <p className="text-2xl font-black text-zinc-900 dark:text-white">
+            {globalStats.totalProducts}
+          </p>
+        </div>
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl shadow-sm hover:border-rose-500/30 transition-all">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center text-rose-600 dark:text-rose-400">
+              <DollarSign className="w-5 h-5" />
+            </div>
+            <h3 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">Total Achats (Est.)</h3>
+          </div>
+          <p className="text-2xl font-black text-rose-600 dark:text-rose-400">
+            {formatCurrency(fromCents(globalStats.totalPurchaseValue_cents))}
+          </p>
+        </div>
       </div>
 
       {filteredSuppliers.length > 0 ? (

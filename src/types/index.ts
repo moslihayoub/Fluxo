@@ -157,6 +157,7 @@ export interface BusinessClient {
   address?: string;
   city?: string;
   clientType?: 'perso' | 'pro';
+  brandName?: string; // Nom de la marque si pro
   
   // Nouveaux champs pour les règles commerciales
   isVip?: boolean; // Client spécifique/privilégié
@@ -180,6 +181,7 @@ export interface OrderItem {
   categoryId?: string; // Optional category ID
   supplierId?: string; // Optional supplier ID
   saveToCatalog?: boolean; // If true, saves product to global catalog
+  productType?: 'product' | 'service'; // Optional type indicator
 }
 
 export interface BusinessOrder {

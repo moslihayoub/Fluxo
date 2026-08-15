@@ -266,7 +266,11 @@ export default function ProductDialog({ product, onClose }: ProductDialogProps) 
                     onValueChange={(val) => setFormData({ ...formData, supplierId: val === 'none' ? '' : val })}
                   >
                     <SelectTrigger className="w-full h-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700">
-                      <SelectValue placeholder="Sélectionner un fournisseur..." />
+                      <SelectValue placeholder="Sélectionner un fournisseur...">
+                        {formData.supplierId && formData.supplierId !== 'none'
+                          ? suppliers.find(s => s.id === formData.supplierId)?.brandName || "Fournisseur inconnu"
+                          : "Sélectionner un fournisseur..."}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">Aucun fournisseur</SelectItem>

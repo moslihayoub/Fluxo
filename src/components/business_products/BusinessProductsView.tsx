@@ -139,6 +139,7 @@ export default function BusinessProductsView() {
                   <TableRow>
                     <TableHead className="w-[80px]">ID</TableHead>
                     <TableHead>Produit</TableHead>
+                    <TableHead>Fournisseur</TableHead>
                     <TableHead className="text-right">Prix (MAD)</TableHead>
                     <TableHead className="text-center">Statut</TableHead>
                     <TableHead className="text-right w-16">Actions</TableHead>
@@ -174,14 +175,18 @@ export default function BusinessProductsView() {
                                   {getCategoryName(product.categoryId)}
                                 </span>
                               )}
-                              {getSupplierName(product.supplierId) && (
-                                <span className="text-[10px] px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-400 font-medium">
-                                  Fournisseur: {getSupplierName(product.supplierId)}
-                                </span>
-                              )}
                             </div>
                           </div>
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        {getSupplierName(product.supplierId) ? (
+                          <span className="text-[11px] px-2.5 py-1 rounded-md bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-400 font-medium whitespace-nowrap">
+                            {getSupplierName(product.supplierId)}
+                          </span>
+                        ) : (
+                          <span className="text-zinc-400 dark:text-zinc-500">—</span>
+                        )}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="font-bold text-zinc-900 dark:text-white">

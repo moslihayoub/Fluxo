@@ -31,7 +31,7 @@ export interface BusinessSlice {
   updateBusinessClient: (id: string, updates: Partial<BusinessClient>) => void;
   deleteBusinessClient: (id: string) => void;
 
-  addBusinessSupplier: (supplier: Omit<BusinessSupplier, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => void;
+  addBusinessSupplier: (supplier: Omit<BusinessSupplier, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => BusinessSupplier | undefined;
   updateBusinessSupplier: (id: string, updates: Partial<BusinessSupplier>) => void;
   deleteBusinessSupplier: (id: string) => void;
 
@@ -143,10 +143,12 @@ export const createBusinessSlice: StateCreator<
     if (!parsed.success) {
       console.error(parsed.error);
       toast.error('Fournisseur invalide');
-      return;
+      return undefined;
     }
-    set((state) => ({ businessSuppliers: [...state.businessSuppliers, parsed.data] }));
-    if (uid) setDoc(doc(db, 'users', uid, 'businessSuppliers', parsed.data.id), cleanForFirebase(parsed.data)).catch(console.error);
+    set((state) => ({ businessSuppliers: [...state.businessSuppliers, newSupplier] }));
+    const uid_ = getUid();
+    if (uid_) setDoc(doc(db, 'users', uid_, 'businessSuppliers', newSupplier.id), newSupplier).catch(console.error);
+    return newSupplier;
   },
 
   updateBusinessSupplier: (id, updates) => {

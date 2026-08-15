@@ -110,9 +110,10 @@ export default function BusinessClientsView() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[80px]">ID</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Adresse</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Brand</TableHead>
+                  <TableHead>Responsable</TableHead>
+                  <TableHead>Tel</TableHead>
                   <TableHead className="text-right">CA Généré</TableHead>
                   <TableHead className="text-right w-16">Actions</TableHead>
                 </TableRow>
@@ -124,55 +125,45 @@ export default function BusinessClientsView() {
                       {client.id.slice(0, 8)}
                     </TableCell>
                     <TableCell>
+                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded ${
+                        client.clientType === 'pro' 
+                          ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400' 
+                          : 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-400'
+                      }`}>
+                        {client.clientType === 'pro' ? 'Pro' : 'Perso'}
+                      </span>
+                    </TableCell>
+                    <TableCell className="font-medium text-sm text-zinc-900 dark:text-white">
+                      {client.clientType === 'pro' && client.brandName ? client.brandName : '—'}
+                    </TableCell>
+                    <TableCell>
                       <div className="flex items-center gap-3">
                         {client.avatarUrl ? (
-                          <img src={client.avatarUrl} alt={client.name || 'Client'} className="w-8 h-8 rounded-full object-cover border border-zinc-200 dark:border-zinc-700" />
+                          <img src={client.avatarUrl} alt={client.name || 'Client'} className="w-8 h-8 rounded-full object-cover border border-zinc-200 dark:border-zinc-700 shrink-0" />
                         ) : (
-                          <div className="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 flex items-center justify-center text-sm font-bold">
+                          <div className="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 flex items-center justify-center text-sm font-bold shrink-0">
                             {(client.name || '?').charAt(0).toUpperCase()}
                           </div>
                         )}
                         <div>
-                          <h3 className="font-bold text-zinc-900 dark:text-white flex items-center gap-1.5 text-sm">
+                          <div className="font-bold text-zinc-900 dark:text-white text-sm flex items-center gap-1.5">
                             {client.name || 'Client Inconnu'}
-                            {client.clientType === 'pro' && (
-                              <span className="text-[9px] font-bold uppercase tracking-wider bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 px-1 py-0.5 rounded">Pro</span>
-                            )}
                             {client.isVip && <Star className="w-3 h-3 text-amber-500 fill-amber-500" />}
-                          </h3>
-                          {client.defaultDiscountRate && (
-                            <span className="inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-1 py-0.5 rounded mt-0.5">
-                              <Percent className="w-2.5 h-2.5" /> Promo {client.defaultDiscountRate}%
-                            </span>
-                          )}
+                          </div>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-1 text-xs text-zinc-600 dark:text-zinc-400">
                         <div className="flex items-center gap-1.5">
-                          <Phone className="w-3.5 h-3.5" /> <a href={`tel:${client.phone}`} className="hover:underline hover:text-violet-500">{client.phone}</a>
+                          <Phone className="w-3.5 h-3.5 shrink-0" /> <a href={`tel:${client.phone}`} className="hover:underline hover:text-violet-500">{client.phone}</a>
                         </div>
                         {client.email && (
                           <div className="flex items-center gap-1.5">
-                            <Mail className="w-3.5 h-3.5" /> <a href={`mailto:${client.email}`} className="hover:underline hover:text-violet-500 truncate max-w-[150px]">{client.email}</a>
+                            <Mail className="w-3.5 h-3.5 shrink-0" /> <a href={`mailto:${client.email}`} className="hover:underline hover:text-violet-500 truncate max-w-[150px]">{client.email}</a>
                           </div>
                         )}
                       </div>
-                    </TableCell>
-                    <TableCell className="text-xs text-zinc-600 dark:text-zinc-400 max-w-[200px] truncate">
-                        <div className="flex flex-col gap-1.5">
-                          {client.address && (
-                            <div className="flex items-center gap-1.5">
-                              <MapPin className="w-3.5 h-3.5 shrink-0" /> <span className="truncate">{client.address}</span>
-                            </div>
-                          )}
-                          {client.city && (
-                            <div className="flex items-center gap-1.5 text-zinc-500">
-                              <span className="truncate">{client.city}</span>
-                            </div>
-                          )}
-                        </div>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="font-black text-sm text-zinc-900 dark:text-white">
@@ -236,6 +227,9 @@ export default function BusinessClientsView() {
                           )}
                           {client.isVip && <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />}
                         </h3>
+                        {client.clientType === 'pro' && client.brandName && (
+                          <div className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 mt-0.5">{client.brandName}</div>
+                        )}
                         <span className="text-xs text-zinc-500 block mt-0.5">ID: {client.id.slice(0, 8)}</span>
                         {client.defaultDiscountRate && (
                           <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded mt-0.5">
@@ -277,14 +271,6 @@ export default function BusinessClientsView() {
                     {client.email && (
                       <div className="flex items-center gap-2">
                         <Mail className="w-4 h-4" /> <a href={`mailto:${client.email}`} className="hover:underline hover:text-violet-500 truncate">{client.email}</a>
-                      </div>
-                    )}
-                    {client.address && (
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-2">
-                          <MapPin className="w-4 h-4 shrink-0" /> <span className="truncate">{client.address}</span>
-                        </div>
-                        {client.city && <div className="pl-6 text-xs text-zinc-500">{client.city}</div>}
                       </div>
                     )}
                   </div>

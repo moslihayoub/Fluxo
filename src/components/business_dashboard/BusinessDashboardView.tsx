@@ -66,7 +66,9 @@ export default function BusinessDashboardView() {
   const clientDataMap = new Map<string, number>();
   orders.forEach(o => {
     const orderCA = Number(o.amountTTC_cents) || Number((o as any).totalAmount_cents) || Number((o as any).amountTTC) || 0;
-    clientDataMap.set(o.clientName || 'Client Divers', (clientDataMap.get(o.clientName || 'Client Divers') || 0) + orderCA);
+    const client = clients.find(c => c.id === o.clientId);
+    const displayName = client?.clientType === 'pro' && client.brandName ? client.brandName : (o.clientName || 'Client Divers');
+    clientDataMap.set(displayName, (clientDataMap.get(displayName) || 0) + orderCA);
   });
   const clientData = Array.from(clientDataMap.entries()).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value).slice(0, 5);
 
