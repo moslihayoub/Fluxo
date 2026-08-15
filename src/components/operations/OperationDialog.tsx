@@ -74,8 +74,10 @@ export default function OperationDialog({ operation, monthId, onClose }: Operati
       }
       parsedAmount = subAmounts.reduce((acc, curr) => acc + (Number(curr.value_cents) || 0), 0);
     } else {
-      if (isNaN(parsedAmount) || parsedAmount <= 0) {
-        setError('Le montant doit être un nombre positif.');
+      if (amount.trim() === '') {
+        parsedAmount = 0;
+      } else if (isNaN(parsedAmount) || parsedAmount < 0) {
+        setError('Le montant doit être un nombre positif ou nul.');
         return;
       }
     }
@@ -255,7 +257,7 @@ export default function OperationDialog({ operation, monthId, onClose }: Operati
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                {t('common.amount')} *
+                {t('common.amount')} <span className="text-zinc-400 font-normal lowercase">(optionnel)</span>
               </label>
               <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300 cursor-pointer">
                 <span className="font-medium text-xs">{t('ops.subAmounts')}</span>
