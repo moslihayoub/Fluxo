@@ -44,13 +44,21 @@ export default function AdminLogsView() {
         id: '1',
         timestamp: new Date().toLocaleTimeString('fr-FR'),
         level: 'success',
-        source: 'RELEASE_v1.8',
-        message: 'Mise à jour Phase 8 active : Standardisation UI 2-Cards, Refonte Sidebars "Détail..." & Date dans toutes les listes.',
-        details: { version: '1.8.0', date: '17/08/2026' }
+        source: 'RELEASE_v2.0',
+        message: 'Mise à jour Phase 11 active : Primitives Shadcn (Switch, Tooltip, Popover, Skeleton), 100% Tiroirs Latéraux et Suite 8 Skills Métier.',
+        details: { version: '2.0.0', date: '18/08/2026', phases: '9-10-11' }
       },
       {
         id: '2',
         timestamp: new Date(Date.now() - 300000).toLocaleTimeString('fr-FR'),
+        level: 'success',
+        source: 'SKILLS_SUITE',
+        message: '8 Skills Métier actifs : clean-code, security, shadcn-ui, methodology, pdf-engine, pwa-offline, analytics-charts, i18n-tax.',
+        details: { activeSkills: 8, zeroFloat: 'enforced' }
+      },
+      {
+        id: '3',
+        timestamp: new Date(Date.now() - 400000).toLocaleTimeString('fr-FR'),
         level: 'success',
         source: 'BOOTSTRAP',
         message: 'Application initialisée en Next.js 14 App Router (Zustand + Firestore Sync).',

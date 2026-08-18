@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import { 
   Layers, Cpu, Sparkles, Database, ShieldCheck, 
   GitBranch, Server, Zap, Compass, CheckCircle2,
-  Box, Smartphone, ArrowRight, Code, Terminal, Bot
+  Box, Smartphone, ArrowRight, Code, Terminal, Bot,
+  FileText, Globe
 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 
@@ -211,26 +212,38 @@ export default function AdminStackView() {
               </div>
             </div>
 
-            {/* Skills & Methodology details */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 bg-zinc-50 dark:bg-zinc-950 rounded-xl border border-zinc-200 dark:border-zinc-800">
-                <h4 className="font-bold text-zinc-900 dark:text-white text-sm mb-2 flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-violet-500" />
-                  Méthodologie Skills (`.agents/skills`)
-                </h4>
-                <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                  L'intelligence de développement repose sur le skill <code>methodology/SKILL.md</code>. Il impose des règles inviolables : vérification Chrome DevTools en temps réel, audits UXSpot MCP systématiques, et intégrité financière stricte sans régression.
-                </p>
-              </div>
-
-              <div className="p-4 bg-zinc-50 dark:bg-zinc-950 rounded-xl border border-zinc-200 dark:border-zinc-800">
-                <h4 className="font-bold text-zinc-900 dark:text-white text-sm mb-2 flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                  Sécurité & Clés API
-                </h4>
-                <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                  Les requêtes passent par une route serveur sécurisée <code>/api/finance-agent</code>. La clé <code>GEMINI_API_KEY</code> n'est jamais exposée côté client.
-                </p>
+            {/* Suite des 8 Skills Métier */}
+            <div className="mt-6">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-3">
+                Suite des 8 Skills d'Ingénierie & Métier (`.agents/skills/`)
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {[
+                  { name: 'methodology', icon: Compass, title: 'Workflow SDD & Comet', desc: 'Spec-Kit, routing SPA Zustand, smoke tests sur Comet.' },
+                  { name: 'shadcn-ui', icon: Box, title: 'Design System Open Code', desc: 'Base UI, primitives, thèmes Perso Noir / Pro Violet.' },
+                  { name: 'clean-code-architecture', icon: Code, title: 'Clean Code & Sémantique', desc: 'SOLID, découplage Zustand, HTML5/WCAG 2.1 AA, strict TS.' },
+                  { name: 'saas-security-integrity', icon: ShieldCheck, title: 'Sécurité & Intégrité', desc: 'Firestore rules isolées, validation Zod, garde-fous IA.' },
+                  { name: 'pdf-documents-engine', icon: FileText, title: 'Factures & Devis PDF', desc: 'Mentions légales ICE/RC/IF, sauts de page A4, WhatsApp.' },
+                  { name: 'pwa-offline-resilience', icon: Smartphone, title: 'PWA & Offline-First', desc: 'Service Worker (sw.js), Optimistic UI, file de sync locale.' },
+                  { name: 'financial-analytics-charts', icon: Layers, title: 'Dataviz & Marges Net', desc: 'Maths centimes, seuil de rentabilité, donuts Recharts.' },
+                  { name: 'i18n-localization-tax', icon: Globe, title: 'Fiscalité & Devises', desc: 'Régimes Auto-entrepreneur/Société, MAD/EUR/USD, FR/EN.' },
+                ].map(sk => {
+                  const Icon = sk.icon;
+                  return (
+                    <div key={sk.name} className="p-3 bg-zinc-50 dark:bg-zinc-950 rounded-xl border border-zinc-200 dark:border-zinc-800 flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <Icon className="w-3.5 h-3.5 text-violet-500" />
+                          <span className="font-bold text-xs text-zinc-900 dark:text-white truncate">{sk.title}</span>
+                        </div>
+                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-snug">{sk.desc}</p>
+                      </div>
+                      <span className="mt-2.5 font-mono text-[9px] text-zinc-400 dark:text-zinc-500">
+                        .{sk.name}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -330,10 +343,12 @@ export default function AdminStackView() {
 
             <div className="space-y-3">
               {[
-                { step: '1. Spécification & Contrat (Spec)', desc: 'Définition formelle des besoins dans STATUT.md et dans les schémas Zod avant tout développement.' },
-                { step: '2. Développement Structuré par Composants & Standards UI', desc: 'Maintien de standards stricts : Sélecteurs 2-Cards, Sidebars "Détail..." (50% desktop, rounded-l-3xl), colonnes Date après ID.' },
-                { step: '3. Audits UXSpot MCP & Accessibilité', desc: 'Vérification automatique des contrastes, des formulaires sans scroll excessif, et de l\'ergonomie mobile.' },
-                { step: '4. Validation End-to-End en Direct (Navigateur Comet & DevTools MCP)', desc: 'Chaque modification est testée en direct sur le navigateur Comet avec captures d\'écran et interactions réelles.' },
+                { step: '1. Constitution & Principes Immutables', desc: 'Respect absolu : Mobile-First PWA, Next.js SPA Zustand, Zéro-Float centimes et isolation Firestore.' },
+                { step: '2. Spécification & Contrat (specify)', desc: 'Définition formelle des besoins dans .spec/ et dans les schémas Zod (schemas.ts) avant tout code.' },
+                { step: '3. Cadrage UX & Accessibilité (UXSpot MCP)', desc: 'Glossaire financier, checklists ergonomiques tactiles (≥ 44px) et audit WCAG spot_check.' },
+                { step: '4. Développement & Standards UI (shadcn/ui)', desc: 'Primitives réactives, 100% tiroirs latéraux (rounded-l-3xl, 50%), sélecteurs 2-Cards et thèmes Perso/Pro.' },
+                { step: '5. Convergence E2E en Direct (Navigateur Comet)', desc: 'Exécution et vérification interactives avec chrome-devtools-mcp sur /Applications/Comet.app.' },
+                { step: '6. Protocole de Livraison & Déploiement Strict', desc: 'Build de production Next.js 14 certifié sans erreur et déploiement Vercel validé.' },
               ].map(s => (
                 <div key={s.step} className="p-3.5 bg-zinc-50 dark:bg-zinc-950 rounded-xl border border-zinc-200 dark:border-zinc-800 flex items-start gap-3">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
