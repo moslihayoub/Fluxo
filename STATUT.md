@@ -112,9 +112,39 @@
    - `npm run lint` & `npx tsc --noEmit` validés avec **0 erreur, 0 warning**.
    - Build de production Next.js 14 compilé et déployé sur `https://fluxofinance.vercel.app/`.
 
+### Phase 11 : Harmonisation Complète UI, Primitives Shadcn & 100% Tiroirs Latéraux (18 Août 2026) 🚀
+1. **Nouvelles Primitives Shadcn UI (`src/components/ui/`) :**
+   - `switch.tsx` : Interrupteur accessible (@base-ui/react) avec états thématisés Perso (Noir/Zinc) et Pro (Violet).
+   - `tooltip.tsx` : Infobulles contextuelles pour les termes fiscaux et légaux.
+   - `popover.tsx` : Popovers interactifs riches pour les filtres et sélecteurs complexes.
+   - `skeleton.tsx` : États de chargement fluides (shimmer) pour les listes et les cartes KPIs.
+2. **Élimination des Reliquats de `<select>` Natifs :**
+   - Migration de `AgentDialog.tsx` (Mois cible) et `BusinessImportDialog.tsx` (Mapping CSV) vers le composant Shadcn Web `Select.tsx`.
+3. **Harmonisation 100% Tiroirs Latéraux (Sidebar Drawers) :**
+   - Migration de `AgentDialog.tsx` et `BusinessImportDialog.tsx` du format modale centrale flottante vers le format standard de tiroir latéral glissant droit (`sm:w-[50%]`, `rounded-l-3xl`, header croix, footer d'actions).
+4. **Correction Thématique et Intégration Switch :**
+   - `ConfirmDialog.tsx` : Rétablissement du support complet du mode clair (`bg-white dark:bg-zinc-900`, `text-zinc-900 dark:text-white`).
+   - `BusinessSettingsView.tsx` : Remplacement du toggle manuel par le composant `Switch` shadcn.
+5. **Validation Globale & Compilation :**
+   - 0 erreur ESLint / TypeScript, `npm run build` Next.js 14 validé avec succès.
+
 ---
 
-## 📌 Dernières actions (17 Août 2026 — 2-Cards Selectors, Wording Particulier/Pro, Détail Sidebars, Date après ID & Feedback Portal)
+## 📌 Dernières actions (18 Août 2026 — Harmonisation UI, Primitives Shadcn & Tiroirs 100% Standardisés)
+
+### 1. Phase 11 : Primitives Shadcn & Standardisation UI Totale
+- **Nouvelles Primitives** : Création de `switch.tsx`, `tooltip.tsx`, `popover.tsx` et `skeleton.tsx`.
+- **Tiroirs Latéraux Unifiés** : `AgentDialog.tsx` et `BusinessImportDialog.tsx` migrés en tiroirs latéraux glissants droits standards (`sm:w-[50%]`, `rounded-l-3xl`).
+- **Zéro `<select>` Natif** : Remplacement des derniers menus natifs OS par `Select.tsx` dans l'Agent IA et l'import de ventes.
+- **Mode Clair ConfirmDialog** : Boîte de dialogue de confirmation réactive aux thèmes clair et sombre.
+- **Switch Paramètres** : Intégration de `Switch` pour la synchronisation Pro-Perso dans `BusinessSettingsView.tsx`.
+- **Architecture 8 Skills Métier** : `clean-code-architecture`, `saas-security-integrity`, `shadcn-ui`, `methodology`, `pdf-documents-engine`, `pwa-offline-resilience`, `financial-analytics-charts`, `i18n-localization-tax`.
+
+---
+
+## 📌 Actions Précédentes (18 Août 2026 — Suppression Onboarding, Unification Paramètres, UI FigJam v1.9)
+
+## 📌 Actions Précédentes (17 Août 2026 — 2-Cards Selectors, Wording Particulier/Pro, Détail Sidebars, Date après ID & Feedback Portal)
 
 ### 1. Composants 2 Cartes & Wording Particulier/Professionnel :
 - `ClientDialog.tsx` : Corps de formulaire enrichi avec le sélecteur 2 cartes `[ 👤 Particulier ] [ 🏢 Professionnel ]` (avec sous-titres descriptifs et couleurs dynamiques bleu/violet). Suppression du toggle d'en-tête.

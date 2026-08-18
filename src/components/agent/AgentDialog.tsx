@@ -5,6 +5,7 @@ import { X, Bot, Send, FileText, Loader2, CheckCircle2, AlertCircle, RefreshCw }
 import { useStore } from '@/store/useStore';
 import { formatCurrency, getMonthLabel } from '@/lib/utils';
 import type { ExtractedOperation, Kind } from '@/types';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/Select';
 
 interface AgentDialogProps {
   defaultMonthId: string;
@@ -182,36 +183,36 @@ export default function AgentDialog({ defaultMonthId, onClose }: AgentDialogProp
   const selectedCount = extractedOps.filter((op) => op.selected).length;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-xl shadow-2xl border border-zinc-200 dark:border-zinc-800 animate-scale-in flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-[110] flex items-center justify-center sm:block p-4 sm:p-0">
+      <div className="fixed inset-0 bg-zinc-950/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose} />
+      <div className="relative sm:fixed sm:inset-y-0 sm:right-0 z-10 bg-white dark:bg-zinc-900 w-full max-w-md sm:max-w-none sm:w-[50%] max-w-xl rounded-3xl sm:rounded-none sm:rounded-l-3xl shadow-xl overflow-hidden flex flex-col max-h-[90vh] sm:max-h-none sm:h-full animate-in fade-in sm:slide-in-from-right duration-300">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-zinc-100 dark:border-zinc-800">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
-              <Bot className="w-4 h-4 text-white" />
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-zinc-100 dark:border-zinc-800">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center text-violet-600 dark:text-violet-400">
+              <Bot className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-zinc-900 dark:text-white">Agent AI</h2>
-              <p className="text-xs text-zinc-400">Extraction automatique de relevés</p>
+              <h2 className="text-base font-bold text-zinc-900 dark:text-white">Agent AI (Relevés Bancaires)</h2>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">Extraction automatique de relevés</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
-            <X className="w-4 h-4" />
+          <button onClick={onClose} className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 rounded-full transition-colors">
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-5">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           {/* ── STEP: INPUT ── */}
           {step === 'input' && (
             <div className="space-y-4">
               {/* Tabs */}
-              <div className="flex rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-700 p-0.5 bg-zinc-50 dark:bg-zinc-800 gap-0.5">
+              <div className="flex rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 p-0.5 bg-zinc-50 dark:bg-zinc-800/50 gap-0.5">
                 {(['text', 'file'] as Tab[]).map((t) => (
                   <button
                     key={t}
                     onClick={() => { setTab(t); setError(''); }}
-                    className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${
+                    className={`flex-1 py-1.5 text-sm font-medium rounded-lg transition-all ${
                       tab === t
                         ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-sm'
                         : 'text-zinc-500 dark:text-zinc-400'
@@ -224,7 +225,7 @@ export default function AgentDialog({ defaultMonthId, onClose }: AgentDialogProp
 
               {tab === 'text' ? (
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
+                  <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase mb-1.5">
                     Collez votre relevé bancaire ou export CSV
                   </label>
                   <textarea
@@ -232,24 +233,24 @@ export default function AgentDialog({ defaultMonthId, onClose }: AgentDialogProp
                     onChange={(e) => { setTextInput(e.target.value); setError(''); }}
                     placeholder="01/01/2024 Virement client ABC +1500.00&#10;05/01/2024 Loyer -800.00&#10;10/01/2024 Facture Orange -45.99..."
                     rows={8}
-                    className="w-full px-3 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white text-sm font-mono placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white transition-shadow resize-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white text-sm font-mono placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500 transition-shadow resize-none"
                   />
                 </div>
               ) : (
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
+                  <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase mb-1.5">
                     Fichier CSV, TXT ou PDF
                   </label>
                   <div
                     onClick={() => fileRef.current?.click()}
-                    className="border-2 border-dashed border-zinc-200 dark:border-zinc-700 rounded-xl p-8 text-center cursor-pointer hover:border-zinc-400 dark:hover:border-zinc-500 transition-colors"
+                    className="border-2 border-dashed border-zinc-200 dark:border-zinc-700 rounded-2xl p-8 text-center cursor-pointer hover:border-violet-500 transition-colors bg-zinc-50 dark:bg-zinc-800/30"
                   >
                     <input ref={fileRef} type="file" accept=".csv,.txt,.pdf" onChange={handleFile} className="hidden" />
                     <FileText className="w-8 h-8 text-zinc-400 mx-auto mb-2" />
                     {fileName ? (
                       <p className="text-sm font-medium text-zinc-900 dark:text-white">{fileName}</p>
                     ) : (
-                      <p className="text-sm text-zinc-500 dark:text-zinc-400">Cliquez pour sélectionner</p>
+                      <p className="text-sm text-zinc-500 dark:text-zinc-400">Cliquez pour sélectionner un fichier</p>
                     )}
                   </div>
                 </div>
@@ -257,26 +258,23 @@ export default function AgentDialog({ defaultMonthId, onClose }: AgentDialogProp
 
               {/* Month selector */}
               <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
+                <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase mb-1.5">
                   Mois cible
                 </label>
-                <select
-                  value={targetMonthId}
-                  onChange={(e) => setTargetMonthId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white transition-shadow"
-                >
-                  {activeMonths.length === 0 ? (
-                    <option value="">Aucun mois actif disponible</option>
-                  ) : (
-                    activeMonths.map((m) => (
-                      <option key={m.id} value={m.id}>{getMonthLabel(m)}</option>
-                    ))
-                  )}
-                </select>
+                <Select value={targetMonthId} onValueChange={setTargetMonthId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner un mois actif..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {activeMonths.map((m) => (
+                      <SelectItem key={m.id} value={m.id}>{getMonthLabel(m)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               {error && (
-                <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg px-3 py-2">
+                <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl px-3.5 py-2.5">
                   <AlertCircle className="w-4 h-4 flex-shrink-0" />
                   {error}
                 </div>

@@ -6,6 +6,7 @@ import { useStore } from '@/store/useStore';
 import { generateId } from '@/lib/utils';
 import type { BusinessOrder } from '@/types';
 import toast from 'react-hot-toast';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/Select';
 
 interface ImportDialogProps {
   onClose: () => void;
@@ -213,16 +214,22 @@ export default function BusinessImportDialog({ onClose }: ImportDialogProps) {
                       {field.label}
                       {field.required && <span className="text-rose-500">*</span>}
                     </label>
-                    <select
-                      value={mapping[field.key]}
-                      onChange={(e) => handleMappingChange(field.key, e.target.value)}
-                      className="bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-900 dark:text-white w-full sm:w-48 focus:outline-none focus:ring-2 focus:ring-violet-500"
-                    >
-                      <option value="">-- Ignorer / Sélectionner --</option>
-                      {csvHeaders.map(h => (
-                        <option key={h} value={h}>{h}</option>
-                      ))}
-                    </select>
+                    <div className="w-full sm:w-56">
+                      <Select
+                        value={mapping[field.key]}
+                        onValueChange={(val) => handleMappingChange(field.key, val)}
+                      >
+                        <SelectTrigger className="h-9 text-xs">
+                          <SelectValue placeholder="-- Choisir colonne --" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">-- Ignorer --</SelectItem>
+                          {csvHeaders.map(h => (
+                            <SelectItem key={h} value={h}>{h}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 ))}
               </div>

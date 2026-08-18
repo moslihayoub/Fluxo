@@ -13,6 +13,7 @@ import { PhoneInput } from '@/components/ui/PhoneInput';
 import { CityInput } from '@/components/ui/CityInput';
 import { CountrySelect } from '@/components/ui/CountrySelect';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/Select';
+import { Switch } from '@/components/ui/switch';
 import { ScrollReveal } from '@/components/ui/Animation';
 import { AvatarUpload } from '@/components/ui/AvatarUpload';
 import AdminLogsView from '@/components/admin/AdminLogsView';
@@ -292,30 +293,18 @@ export default function BusinessSettingsView() {
                     </p>
                   </div>
                   
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={linkProGainsToPerso}
-                    onClick={() => {
-                      const nextVal = !linkProGainsToPerso;
-                      setLinkProGainsToPerso(nextVal);
+                  <Switch
+                    checked={linkProGainsToPerso}
+                    onCheckedChange={(checked) => {
+                      setLinkProGainsToPerso(checked);
                       toast.success(
-                        nextVal 
+                        checked 
                           ? 'Synchronisation Pro vers Perso activée' 
                           : 'Synchronisation Pro vers Perso désactivée'
                       );
                     }}
-                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-violet-600 focus:ring-offset-2 ${
-                      linkProGainsToPerso ? 'bg-violet-600' : 'bg-zinc-300 dark:bg-zinc-700'
-                    }`}
-                  >
-                    <span
-                      aria-hidden="true"
-                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                        linkProGainsToPerso ? 'translate-x-5' : 'translate-x-0'
-                      }`}
-                    />
-                  </button>
+                    variant="pro"
+                  />
                 </div>
               </div>
 
