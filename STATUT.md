@@ -1,9 +1,9 @@
 # 📊 STATUT & HISTORIQUE DU PROJET — Fluxo (Charges & Encaissements)
 
-**Date & Heure :** 17 Août 2026  
+**Date & Heure :** 18 Août 2026  
 **Application :** Fluxo (Charges & Encaissements)  
 **URL Live :** `https://fluxofinance.vercel.app/`  
-**Environnement :** Next.js 14 (App Router), TypeScript, Tailwind CSS, Zustand, Firebase (Auth/Firestore), Recharts, Gemini 2.0 Flash, PWA, Spec-Kit (SDD), UXSpot MCP.
+**Environnement :** Next.js 14 (App Router), TypeScript, Tailwind CSS, Zustand, Firebase (Auth/Firestore), Recharts, Gemini 2.0 Flash, PWA, Spec-Kit (SDD), UXSpot MCP, shadcn/ui.
 
 ---
 
@@ -81,6 +81,36 @@
    - Sélecteur segmenté dual-pill ergonomique `[ 👤 Perso ] [ 🏢 Pro ]`.
 6. **Bénéfice Pro Sync :**
    - Synchronisation à la demande dans l'espace Perso sans lignes fantômes forcées.
+
+### Phase 9 : Suppression Totale de l'Onboarding & Unification Paramètres (18 Août 2026) ⚡
+1. **Accès Immédiat sans Blocage :**
+   - Suppression définitive de `OnboardingView.tsx` et du flag `hasCompletedOnboarding`.
+   - L'utilisateur accède instantanément à l'espace sans étape préliminaire forcée.
+2. **Refonte des Paramètres "Fiscalité & Identifiants" :**
+   - Regroupement des informations légales (ICE, SIRET, IF, RC, CNSS) au sein de la section unifiée **"Fiscalité & Identifiants"** dans `BusinessSettingsView.tsx`.
+   - L'utilisateur configure librement son mode de vente (TVA / Hors TVA), son pays, sa devise et ses taux de taxe sans friction.
+3. **Synchronisation Bénéfice Pro vers Perso :**
+   - Toggle d'activation direct dans les paramètres Pro (`syncProfitToPerso`).
+   - Insertion propre dans les catégories Perso avec badge en surbrillance épuré **Bénéfice Pro**.
+
+### Phase 10 : Raffinements UI FigJam, Déploiement v1.9 & Intégration Skill shadcn/ui (18 Août 2026) 🎨
+1. **Homogénéisation Thématique & Couleurs (Perso = Noir / Pro = Violet) :**
+   - Espace Perso : Boutons d'actions et tiroirs en Noir/Zinc (`bg-zinc-900 text-white dark:bg-white dark:text-zinc-900`).
+   - Espace Pro : Boutons d'actions, tiroirs et badges en Violet (`bg-violet-600 hover:bg-violet-700 text-white shadow-sm`).
+2. **Standardisation des Tiroirs Latéraux (Drawers / Sheets) :**
+   - `OperationDialog.tsx` & `CategoriesView.tsx` : Remplacement des popups modales centrales par des tiroirs glissants depuis la droite (`w-full sm:w-[50%] max-w-xl`).
+   - `OrderDialog.tsx` : Épuration du CTA secondaire d'ajout d'article et footer standardisé.
+   - `SupplierDialog.tsx` & `BusinessSuppliersView.tsx` : Avatars unifiés en forme circulaire (`rounded-full` et `shape="circle"`), colonne `Catégories` dédiée dans le tableau.
+   - `FeeDialog.tsx` & `BusinessFeesView.tsx` : Dropdowns étendus à 100% de la largeur des inputs (`w-full`) et footer d'actions violet.
+3. **Résolution des Chevauchements Graphiques (Pro Dashboard) :**
+   - Conversion des graphiques Top Produits et Répartition des Frais en **Donuts épurés** (`innerRadius={45} outerRadius={75}`).
+   - Suppression des labels de tranches imbriqués, intégration d'une légende inférieure et `CustomTooltip`.
+4. **Intégration du Skill Officiel `shadcn/ui` :**
+   - Création de `.agents/skills/shadcn-ui/SKILL.md` (règles Open Code, composition, base-nova, tokens CSS variables).
+   - Intégration dans la méthodologie `.agents/skills/methodology/SKILL.md` (Section 7).
+5. **Validation & Déploiement Live :**
+   - `npm run lint` & `npx tsc --noEmit` validés avec **0 erreur, 0 warning**.
+   - Build de production Next.js 14 compilé et déployé sur `https://fluxofinance.vercel.app/`.
 
 ---
 
