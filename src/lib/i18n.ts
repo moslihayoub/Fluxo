@@ -129,7 +129,7 @@ export const translations = {
     'ops.notes': 'Notes (optionnel)',
     'ops.notesPlaceholder': 'Informations complémentaires...',
     'ops.new': 'Nouvelle opération',
-    'ops.edit': 'Modifier l\'opération',
+    'ops.edit': 'Détail de l\'opération',
     'ops.subAmounts': 'Détailler',
     'ops.addSubAmount': 'Ajouter un sous-montant',
     'ops.subLabel': 'Libellé (ex: Frais)',

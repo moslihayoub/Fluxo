@@ -128,8 +128,8 @@ export default function ProductDialog({ product, onClose }: ProductDialogProps) 
               </div>
               <h2 className="text-lg font-bold text-zinc-900 dark:text-white">
                 {product 
-                  ? (formData.type === 'service' ? 'Modifier le service' : 'Modifier le produit')
-                  : (formData.type === 'service' ? 'Nouveau service / Digital' : 'Nouveau produit physique')}
+                  ? (formData.type === 'service' ? 'Détail du service' : 'Détail du produit')
+                  : (formData.type === 'service' ? 'Nouveau service / Digital' : 'Nouveau produit')}
               </h2>
             </div>
             <button
@@ -170,16 +170,16 @@ export default function ProductDialog({ product, onClose }: ProductDialogProps) 
                       onClick={() => setFormData({ ...formData, type: 'product' })}
                       className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
                         formData.type === 'product'
-                          ? 'border-zinc-900 dark:border-white bg-zinc-50 dark:bg-zinc-800/50 text-zinc-900 dark:text-white ring-1 ring-zinc-900 dark:ring-white font-medium'
+                          ? 'border-blue-600 dark:border-blue-500 bg-blue-50/80 dark:bg-blue-950/30 text-blue-950 dark:text-blue-100 ring-1 ring-blue-500/30 font-medium shadow-xs'
                           : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700'
                       }`}
                     >
-                      <div className={`p-2 rounded-lg shrink-0 ${formData.type === 'product' ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'}`}>
+                      <div className={`p-2 rounded-lg shrink-0 transition-colors ${formData.type === 'product' ? 'bg-blue-600 text-white shadow-sm' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'}`}>
                         <Package className="w-4 h-4" />
                       </div>
                       <div>
-                        <div className="text-xs font-bold">Produit Physique</div>
-                        <div className="text-[10px] text-zinc-500 dark:text-zinc-400">Marchandise, stock</div>
+                        <div className={`text-xs font-bold ${formData.type === 'product' ? 'text-blue-900 dark:text-blue-200' : ''}`}>Produit Physique</div>
+                        <div className={`text-[10px] ${formData.type === 'product' ? 'text-blue-700/80 dark:text-blue-300/80' : 'text-zinc-500 dark:text-zinc-400'}`}>Marchandise, stock</div>
                       </div>
                     </button>
 
@@ -188,16 +188,16 @@ export default function ProductDialog({ product, onClose }: ProductDialogProps) 
                       onClick={() => setFormData({ ...formData, type: 'service' })}
                       className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
                         formData.type === 'service'
-                          ? 'border-zinc-900 dark:border-white bg-zinc-50 dark:bg-zinc-800/50 text-zinc-900 dark:text-white ring-1 ring-zinc-900 dark:ring-white font-medium'
+                          ? 'border-violet-600 dark:border-violet-500 bg-violet-50/80 dark:bg-violet-950/30 text-violet-950 dark:text-violet-100 ring-1 ring-violet-500/30 font-medium shadow-xs'
                           : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700'
                       }`}
                     >
-                      <div className={`p-2 rounded-lg shrink-0 ${formData.type === 'service' ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'}`}>
+                      <div className={`p-2 rounded-lg shrink-0 transition-colors ${formData.type === 'service' ? 'bg-violet-600 text-white shadow-sm' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'}`}>
                         <Laptop className="w-4 h-4" />
                       </div>
                       <div>
-                        <div className="text-xs font-bold">Digital / Service</div>
-                        <div className="text-[10px] text-zinc-500 dark:text-zinc-400">Prestation, virtuel</div>
+                        <div className={`text-xs font-bold ${formData.type === 'service' ? 'text-violet-900 dark:text-violet-200' : ''}`}>Digital / Service</div>
+                        <div className={`text-[10px] ${formData.type === 'service' ? 'text-violet-700/80 dark:text-violet-300/80' : 'text-zinc-500 dark:text-zinc-400'}`}>Prestation, virtuel</div>
                       </div>
                     </button>
                   </div>

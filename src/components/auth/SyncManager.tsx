@@ -5,7 +5,7 @@ import { useAuth } from './AuthProvider';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query, writeBatch, doc } from 'firebase/firestore';
 import { useStore } from '@/store/useStore';
-import type { Month, Operation, OperationType, BusinessClient, BusinessCategory, BusinessProduct, BusinessOrder, BusinessFee, BusinessSettings, WorkspaceMode, BusinessProfileType, BusinessSupplier } from '@/types';
+import type { Month, Operation, OperationType, BusinessClient, BusinessCategory, BusinessProduct, BusinessOrder, BusinessFee, BusinessSettings, WorkspaceMode, BusinessSupplier } from '@/types';
 
 export default function SyncManager({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
@@ -34,8 +34,7 @@ export default function SyncManager({ children }: { children: React.ReactNode })
 
       batch.set(doc(db, 'users', uid, 'businessSettings', 'main'), state.businessSettings);
       batch.set(doc(db, 'users', uid, 'profile', 'main'), { 
-        workspaceMode: state.workspaceMode, 
-        businessProfileType: state.businessProfileType 
+        workspaceMode: state.workspaceMode
       });
 
       batch.commit().then(() => {
@@ -96,7 +95,6 @@ export default function SyncManager({ children }: { children: React.ReactNode })
         const data = doc.data();
         useStore.setState({ 
           workspaceMode: data.workspaceMode as WorkspaceMode | null,
-          businessProfileType: data.businessProfileType as BusinessProfileType | null 
         });
       }
     }));

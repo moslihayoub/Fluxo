@@ -180,7 +180,7 @@ export default function ImportDialog({ monthId, onClose }: ImportDialogProps) {
                         <td className={`px-2 py-1.5 text-right font-mono tabular-nums font-medium ${
                           row.kind === 'encaissement' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
                         }`}>
-                          {row.kind === 'encaissement' ? '+' : '−'}{new Intl.NumberFormat('fr-MA', { style: 'currency', currency: 'MAD' }).format(fromCents(row.amount_cents))}
+                          {row.kind === 'encaissement' ? '+' : '−'}{formatCurrency(row.amount_cents)}
                         </td>
                       </tr>
                     ))}

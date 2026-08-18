@@ -48,6 +48,7 @@ export interface Operation {
   updatedAt: string;
   userId: string;
   notes?: string;
+  isProProfitSync?: boolean;
   workspaceMode?: WorkspaceMode; // 'business' or 'personal' (fallback to personal if missing)
 }
 
@@ -85,7 +86,7 @@ export interface AgentResponse {
 // Business Pro Domain Types
 // ============================================================
 export type WorkspaceMode = 'personal' | 'business';
-export type BusinessProfileType = 'freelance' | 'company';
+
 export type TaxMode = 'HT' | 'TVA';
 export type PaymentStatus = 'paid' | 'partial' | 'unpaid';
 
@@ -180,6 +181,7 @@ export interface OrderItem {
   isFree?: boolean; // If this specific item was given for free
   categoryId?: string; // Optional category ID
   supplierId?: string; // Optional supplier ID
+  supplierMode?: 'existing' | 'new';
   saveToCatalog?: boolean; // If true, saves product to global catalog
   productType?: 'product' | 'service'; // Optional type indicator
 }
@@ -240,6 +242,7 @@ export interface BusinessFee {
   amount_cents: number;
   category: string;
   supplierName?: string; // Nom du fournisseur
+  supplierId?: string;
   createdAt: string;
   updatedAt: string;
   userId: string;
@@ -308,7 +311,7 @@ export interface AppState {
 
   // UI state
   workspaceMode: WorkspaceMode | null;
-  businessProfileType: BusinessProfileType | null;
+
   activeMonthId: string | null;
   activeView: ActiveView | string;
   filter: 'all' | 'encaissement' | 'decaissement';
@@ -341,7 +344,7 @@ export interface AppState {
   
   // Business Actions
   setWorkspaceMode: (mode: WorkspaceMode | null) => void;
-  setBusinessProfileType: (profile: BusinessProfileType | null) => void;
+
   addBusinessClient: (client: Omit<BusinessClient, 'id' | 'createdAt' | 'totalSpent' | 'totalPending'>) => void;
   updateBusinessClient: (id: string, updates: Partial<Omit<BusinessClient, 'id' | 'createdAt'>>) => void;
   deleteBusinessClient: (id: string) => void;

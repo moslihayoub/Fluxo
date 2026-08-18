@@ -294,9 +294,10 @@ export default function AdminStackView() {
                 { name: 'operations', label: 'Opérations Perso', liveCount: store.operations.length, desc: 'Type entrée/sortie, montant_cents, catégorie, notes, sous-montants.' },
                 { name: 'operationTypes', label: 'Catégories Perso', liveCount: store.operationTypes.length, desc: 'Nom, type (encaissement/décaissement), icône, montant par défaut.' },
                 { name: 'businessOrders', label: 'Commandes Pro', liveCount: store.businessOrders.length, desc: 'Articles (items), quantité, coût, prix vente, statut paiement, TVA, marge.' },
-                { name: 'businessClients', label: 'Clients Pro', liveCount: store.businessClients.length, desc: 'Nom, téléphone, email, total dépensé, statut VIP, historique.' },
+                { name: 'businessClients', label: 'Clients Pro', liveCount: store.businessClients.length, desc: 'Nom, téléphone, email, total dépensé, statut VIP, type Particulier/Pro.' },
                 { name: 'businessProducts', label: 'Catalogue Produits', liveCount: store.businessProducts.length, desc: 'Produits physiques/services, prix référence, liaison fournisseur & catégorie.' },
-                { name: 'businessSuppliers', label: 'Fournisseurs', liveCount: store.businessSuppliers.length, desc: 'Marque, contact, volume d\'achats cumulé, marchandises liées.' },
+                { name: 'businessSuppliers', label: 'Fournisseurs', liveCount: store.businessSuppliers.length, desc: 'Marque, contact, type marchandise Physique/Digital, marchandises liées.' },
+                { name: 'businessFees', label: 'Frais & Dépenses Pro', liveCount: store.businessFees.length, desc: 'Libellé, montant centimes, catégorie, liaison fournisseur, date.' },
                 { name: 'businessCategories', label: 'Catégories Pro', liveCount: store.businessCategories.length, desc: 'Hiérarchie parent/enfant (Catégorie principale & Sous-catégories).' },
                 { name: 'businessSettings', label: 'Paramètres Fiscaux', liveCount: 1, desc: 'Profil société/indépendant, taux TVA, taux IR, logo, coordonnées.' },
               ].map(col => (
@@ -330,9 +331,9 @@ export default function AdminStackView() {
             <div className="space-y-3">
               {[
                 { step: '1. Spécification & Contrat (Spec)', desc: 'Définition formelle des besoins dans STATUT.md et dans les schémas Zod avant tout développement.' },
-                { step: '2. Développement Structuré par Composants', desc: 'Maintien d\'une hiérarchie claire : Atoms (UI) ➔ Organismes métiers ➔ Hub de Vues unifiées.' },
+                { step: '2. Développement Structuré par Composants & Standards UI', desc: 'Maintien de standards stricts : Sélecteurs 2-Cards, Sidebars "Détail..." (50% desktop, rounded-l-3xl), colonnes Date après ID.' },
                 { step: '3. Audits UXSpot MCP & Accessibilité', desc: 'Vérification automatique des contrastes, des formulaires sans scroll excessif, et de l\'ergonomie mobile.' },
-                { step: '4. Validation End-to-End en Direct (Chrome DevTools)', desc: 'Chaque modification est testée en direct dans le navigateur réel avec captures d\'écran et interactions réelles.' },
+                { step: '4. Validation End-to-End en Direct (Navigateur Comet & DevTools MCP)', desc: 'Chaque modification est testée en direct sur le navigateur Comet avec captures d\'écran et interactions réelles.' },
               ].map(s => (
                 <div key={s.step} className="p-3.5 bg-zinc-50 dark:bg-zinc-950 rounded-xl border border-zinc-200 dark:border-zinc-800 flex items-start gap-3">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />

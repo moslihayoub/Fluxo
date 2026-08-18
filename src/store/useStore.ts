@@ -29,7 +29,6 @@ const _useStore = create<StoreState>()(
       activeView: state.activeView,
       filter: state.filter,
       workspaceMode: state.workspaceMode,
-      businessProfileType: state.businessProfileType,
       businessClients: state.businessClients,
       businessSuppliers: state.businessSuppliers,
       businessCategories: state.businessCategories,

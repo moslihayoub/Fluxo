@@ -166,7 +166,7 @@ export default function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModal
       (products || []).forEach((prod) => {
         const prodNorm = `${prod.name} ${prod.type}`.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         if (prodNorm.includes(query)) {
-          const price = formatCurrency(fromCents(prod.defaultPrice_cents) || 0);
+          const price = formatCurrency(prod.defaultPrice_cents || 0);
           results.push({
             id: `product-${prod.id}`,
             title: prod.name,
@@ -190,7 +190,7 @@ export default function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModal
           .replace(/[\u0300-\u036f]/g, '');
 
         if (opNorm.includes(query)) {
-          const amount = formatCurrency(fromCents(op.amount_cents) || 0);
+          const amount = formatCurrency(op.amount_cents || 0);
           results.push({
             id: `op-${op.id}`,
             title: op.label,

@@ -162,40 +162,14 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
             <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white flex items-center justify-center">
               <User className="w-5 h-5" />
             </div>
-            <h2 className="text-lg font-bold text-zinc-900 dark:text-white hidden sm:block">
-              {client ? 'Modifier le client' : 'Nouveau client'}
+            <h2 className="text-lg font-bold text-zinc-900 dark:text-white">
+              {client ? 'Détail du client' : 'Nouveau client'}
             </h2>
           </div>
           
-          <div className="flex items-center gap-3">
-            <div className="flex bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl">
-              <button
-                type="button"
-                onClick={() => setFormData({ ...formData, clientType: 'perso' })}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  formData.clientType === 'perso'
-                    ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-sm'
-                    : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
-                }`}
-              >
-                <User className="w-3.5 h-3.5" /> Perso
-              </button>
-              <button
-                type="button"
-                onClick={() => setFormData({ ...formData, clientType: 'pro' })}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  formData.clientType === 'pro'
-                    ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-sm'
-                    : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
-                }`}
-              >
-                <Building2 className="w-3.5 h-3.5" /> Pro
-              </button>
-            </div>
-            <button onClick={handleClose} className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+          <button onClick={handleClose} className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Content */}
@@ -212,12 +186,56 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
               />
             </div>
 
+            {/* Type de client (2-card selection) */}
+            <div>
+              <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">
+                Type de client *
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, clientType: 'perso' })}
+                  className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
+                    formData.clientType === 'perso'
+                      ? 'border-blue-600 dark:border-blue-500 bg-blue-50/80 dark:bg-blue-950/30 text-blue-950 dark:text-blue-100 ring-1 ring-blue-500/30 font-medium shadow-xs'
+                      : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700'
+                  }`}
+                >
+                  <div className={`p-2 rounded-lg shrink-0 transition-colors ${formData.clientType === 'perso' ? 'bg-blue-600 text-white shadow-sm' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'}`}>
+                    <User className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className={`text-xs font-bold ${formData.clientType === 'perso' ? 'text-blue-900 dark:text-blue-200' : ''}`}>Particulier</div>
+                    <div className={`text-[10px] ${formData.clientType === 'perso' ? 'text-blue-700/80 dark:text-blue-300/80' : 'text-zinc-500 dark:text-zinc-400'}`}>Client individuel, perso</div>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, clientType: 'pro' })}
+                  className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
+                    formData.clientType === 'pro'
+                      ? 'border-violet-600 dark:border-violet-500 bg-violet-50/80 dark:bg-violet-950/30 text-violet-950 dark:text-violet-100 ring-1 ring-violet-500/30 font-medium shadow-xs'
+                      : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700'
+                  }`}
+                >
+                  <div className={`p-2 rounded-lg shrink-0 transition-colors ${formData.clientType === 'pro' ? 'bg-violet-600 text-white shadow-sm' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'}`}>
+                    <Building2 className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className={`text-xs font-bold ${formData.clientType === 'pro' ? 'text-violet-900 dark:text-violet-200' : ''}`}>Professionnel</div>
+                    <div className={`text-[10px] ${formData.clientType === 'pro' ? 'text-violet-700/80 dark:text-violet-300/80' : 'text-zinc-500 dark:text-zinc-400'}`}>Entreprise, marque, société</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
             {/* Client Info */}
             <div className="space-y-4 pt-2 border-t border-zinc-100 dark:border-zinc-800">
               {formData.clientType === 'pro' && (
                 <div>
                   <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">
-                    Informations Marque
+                    Marque
                   </label>
                   <Input
                     type="text"
@@ -298,22 +316,23 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
                 </div>
               </div>
 
-              <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">
-                  Email <span className="text-zinc-400 font-normal lowercase">(optionnel)</span>
-                </label>
-                <Input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="Ex: email@domaine.com"
-                  iconLeft={<Mail className="w-4 h-4" />}
-                  enableCopy
-                />
-              </div>
+              {/* Email & Ville sur la même ligne */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">
+                    Email <span className="text-zinc-400 font-normal lowercase">(optionnel)</span>
+                  </label>
+                  <Input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="Ex: email@domaine.com"
+                    iconLeft={<Mail className="w-4 h-4" />}
+                    enableCopy
+                  />
+                </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="sm:col-span-2">
+                <div>
                   <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">
                     Ville <span className="text-zinc-400 font-normal lowercase">(optionnel)</span>
                   </label>
@@ -346,19 +365,30 @@ export default function ClientDialog({ isOpen, onClose, client }: ClientDialogPr
             <div className="space-y-4">
               <h3 className="text-sm font-bold text-zinc-900 dark:text-white">Avantages Client</h3>
               
-              <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-200 dark:border-zinc-700/60">
+              {/* Carte VIP avec couleur active */}
+              <div className={`flex items-center justify-between p-3.5 rounded-xl border transition-all ${
+                formData.isVip
+                  ? 'bg-amber-500/10 border-amber-500/30 text-amber-900 dark:text-amber-300 shadow-sm'
+                  : 'bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700/60'
+              }`}>
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white">
-                    <Star className="w-5 h-5" />
+                  <div className={`p-2.5 rounded-lg transition-colors ${
+                    formData.isVip
+                      ? 'bg-amber-500 text-white shadow-sm'
+                      : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white'
+                  }`}>
+                    <Star className={`w-5 h-5 ${formData.isVip ? 'fill-white text-white' : ''}`} />
                   </div>
                   <div>
-                    <div className="font-bold text-zinc-900 dark:text-white text-sm">Client VIP</div>
-                    <div className="text-xs text-zinc-500">Badge de fidélité spécial</div>
+                    <div className={`font-bold text-sm ${formData.isVip ? 'text-amber-700 dark:text-amber-400' : 'text-zinc-900 dark:text-white'}`}>
+                      Client VIP
+                    </div>
+                    <div className="text-xs text-zinc-500">Badge de fidélité spécial et avantages</div>
                   </div>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" className="sr-only peer" checked={formData.isVip} onChange={e => setFormData({...formData, isVip: e.target.checked})} />
-                  <div className="relative w-11 h-6 bg-zinc-300 peer-focus:outline-none rounded-full peer dark:bg-zinc-600 peer-checked:after:translate-x-full peer-checked:after:border-zinc-900 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-zinc-900 after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-zinc-900 dark:peer-checked:bg-white dark:peer-checked:after:border-white"></div>
+                  <div className="relative w-11 h-6 bg-zinc-300 peer-focus:outline-none rounded-full peer dark:bg-zinc-600 peer-checked:after:translate-x-full peer-checked:after:border-amber-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-zinc-900 after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-amber-500 dark:peer-checked:bg-amber-500 dark:peer-checked:after:border-white"></div>
                 </label>
               </div>
 

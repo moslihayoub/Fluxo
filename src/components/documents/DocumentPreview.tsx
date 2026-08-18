@@ -109,8 +109,8 @@ export function DocumentPreview({ order, documentType }: DocumentPreviewProps) {
                   <div className="font-medium text-zinc-900">{item.productName}</div>
                 </td>
                 <td className="py-4 px-2 text-center text-zinc-600">{item.quantity}</td>
-                <td className="py-4 px-2 text-right text-zinc-600">{formatCurrency(fromCents(item.unitSellingPrice_cents || 0) || 0)}</td>
-                <td className="py-4 px-2 text-right font-medium">{formatCurrency((item.quantity || 1) * (fromCents(item.unitSellingPrice_cents || 0) || 0))}</td>
+                <td className="py-4 px-2 text-right text-zinc-600">{formatCurrency(item.unitSellingPrice_cents || 0)}</td>
+                <td className="py-4 px-2 text-right font-medium">{formatCurrency((item.quantity || 1) * (item.unitSellingPrice_cents || 0))}</td>
               </tr>
             ))}
             {order.extraFees?.map((fee, idx) => (
@@ -119,8 +119,8 @@ export function DocumentPreview({ order, documentType }: DocumentPreviewProps) {
                   <FileText className="w-3.5 h-3.5" /> Frais: {fee.label}
                 </td>
                 <td className="py-3 px-2 text-center text-zinc-600">1</td>
-                <td className="py-3 px-2 text-right text-zinc-600">{formatCurrency(fromCents(fee.amount_cents) || 0)}</td>
-                <td className="py-3 px-2 text-right text-zinc-600">{formatCurrency(fromCents(fee.amount_cents) || 0)}</td>
+                <td className="py-3 px-2 text-right text-zinc-600">{formatCurrency(fee.amount_cents || 0)}</td>
+                <td className="py-3 px-2 text-right text-zinc-600">{formatCurrency(fee.amount_cents || 0)}</td>
               </tr>
             ))}
             {order.shippingFee_cents && order.shippingFee_cents > 0 && (
@@ -129,8 +129,8 @@ export function DocumentPreview({ order, documentType }: DocumentPreviewProps) {
                   <span className="font-medium text-zinc-900">Frais de livraison</span>
                 </td>
                 <td className="py-3 px-2 text-right text-zinc-600">1</td>
-                <td className="py-3 px-2 text-right text-zinc-600">{formatCurrency(fromCents(order.shippingFee_cents) || 0)}</td>
-                <td className="py-3 px-2 text-right text-zinc-600">{formatCurrency(fromCents(order.shippingFee_cents) || 0)}</td>
+                <td className="py-3 px-2 text-right text-zinc-600">{formatCurrency(order.shippingFee_cents || 0)}</td>
+                <td className="py-3 px-2 text-right text-zinc-600">{formatCurrency(order.shippingFee_cents || 0)}</td>
               </tr>
             )}
           </tbody>
@@ -162,7 +162,7 @@ export function DocumentPreview({ order, documentType }: DocumentPreviewProps) {
             {order.discountAmount_cents && order.discountAmount_cents > 0 ? (
               <div className="flex justify-between text-rose-600 mb-2">
                 <span>Remise</span>
-                <span>-{formatCurrency(fromCents(order.discountAmount_cents) || 0)}</span>
+                <span>-{formatCurrency(order.discountAmount_cents || 0)}</span>
               </div>
             ) : null}
 
@@ -170,17 +170,17 @@ export function DocumentPreview({ order, documentType }: DocumentPreviewProps) {
               <>
                 <div className="flex justify-between mb-2 text-zinc-600">
                 <span>Total HT</span>
-                <span className="font-medium">{formatCurrency(fromCents(order.amountHT_cents) || 0)}</span>
+                <span className="font-medium">{formatCurrency(order.amountHT_cents || 0)}</span>
               </div>
               <div className="flex justify-between mb-2 text-zinc-600">
                 <span>TVA (20%)</span>
-                <span>{formatCurrency(fromCents(order.amountTVA_cents) || 0)}</span>
+                <span>{formatCurrency(order.amountTVA_cents || 0)}</span>
                 </div>
               </>
             ) : (
               <div className="flex justify-between mb-2 text-zinc-600">
                 <span>Total</span>
-                <span className="font-medium">{formatCurrency(fromCents(order.amountHT_cents) || 0)}</span>
+                <span className="font-medium">{formatCurrency(order.amountHT_cents || 0)}</span>
               </div>
             )}
             
@@ -193,7 +193,7 @@ export function DocumentPreview({ order, documentType }: DocumentPreviewProps) {
               <>
                 <div className="flex justify-between text-lg font-bold text-zinc-900 mb-4">
               <span>Net à payer</span>
-              <span>{formatCurrency(fromCents(order.amountTTC_cents) || 0)}</span>
+              <span>{formatCurrency(order.amountTTC_cents || 0)}</span>
                 </div>
                 <div className="flex justify-between items-center text-zinc-900 font-medium">
                   <span>Reste à payer</span>

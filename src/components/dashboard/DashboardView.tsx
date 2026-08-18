@@ -86,52 +86,12 @@ export default function DashboardView() {
   const { months, operations: allOperations, operationTypes, language, businessOrders, businessClients, businessSuppliers, workspaceMode, linkProGainsToPerso } = useStore();
   
   const operations = useMemo(() => {
-    let ops = allOperations.filter(op => 
+    return allOperations.filter(op => 
       workspaceMode === 'business' 
         ? op.workspaceMode === 'business' 
         : (op.workspaceMode === 'personal' || !op.workspaceMode)
     );
-
-    if (workspaceMode !== 'business' && linkProGainsToPerso) {
-      months.forEach(m => {
-        const proOps = allOperations.filter(op => op.workspaceMode === 'business' && op.monthId === m.id);
-        const proIncomes = proOps.filter(o => o.kind === 'encaissement').reduce((acc, o) => acc + (o.amount_cents || 0), 0);
-        const proExpenses = proOps.filter(o => o.kind === 'decaissement').reduce((acc, o) => acc + (o.amount_cents || 0), 0);
-        
-        let proSales = 0;
-        let proCosts = 0;
-        (businessOrders || []).forEach(o => {
-          const d = new Date(o.date);
-          if (d.getMonth() + 1 === m.month && d.getFullYear() === m.year) {
-            proSales += o.amountTTC_cents || 0;
-            const itemsCost = (o.items || []).reduce((acc, item) => acc + ((item.unitCostPrice_cents || 0) * (item.quantity || 1)), 0);
-            const legacyCost = (o.unitCostPrice_cents || 0) * (o.quantity || 1);
-            proCosts += (o.items && o.items.length > 0) ? itemsCost : legacyCost;
-          }
-        });
-
-        const monthGains = (proIncomes + proSales) - (proExpenses + proCosts);
-
-        if (monthGains > 0) {
-          ops.push({
-            id: `pro-gains-${m.id}`,
-            monthId: m.id,
-            label: 'Bénéfices Activité Pro',
-            operationTypeLabel: 'Revenus Pro',
-            kind: 'encaissement',
-            amount_cents: monthGains,
-            createdAt: new Date(m.year, m.month - 1, 28).toISOString(),
-            updatedAt: new Date().toISOString(),
-            userId: 'auto',
-            workspaceMode: 'personal',
-            notes: 'Généré automatiquement'
-          });
-        }
-      });
-    }
-
-    return ops;
-  }, [allOperations, workspaceMode, linkProGainsToPerso, months, businessOrders]);
+  }, [allOperations, workspaceMode]);
   const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(language, key);
   
   const [timeRange, setTimeRange] = useState<'1m'|'3m'|'6m'|'12m'|'all'>('1m');
@@ -171,9 +131,9 @@ export default function DashboardView() {
       .filter((op) => op.kind === 'decaissement')
       .reduce((s, op) => s + (op.amount_cents || 0), 0);
     return {
-      soldeGlobal: fromCents(totalEncaissement_cents - totalDecaissement_cents),
-      totalEncaissement: fromCents(totalEncaissement_cents),
-      totalDecaissement: fromCents(totalDecaissement_cents),
+      soldeGlobal: totalEncaissement_cents - totalDecaissement_cents,
+      totalEncaissement: totalEncaissement_cents,
+      totalDecaissement: totalDecaissement_cents,
       totalOps: filteredOperations.length,
     };
   }, [filteredOperations]);
@@ -195,8 +155,8 @@ export default function DashboardView() {
     });
 
     return {
-      totalSales: fromCents(totalSales_cents),
-      totalCosts: fromCents(totalCosts_cents),
+      totalSales: totalSales_cents,
+      totalCosts: totalCosts_cents,
       clientsCount: (businessClients || []).length,
       suppliersCount: (businessSuppliers || []).length,
     };
@@ -212,9 +172,9 @@ export default function DashboardView() {
         return {
           monthId: m.id,
           monthLabel: `${MONTH_NAMES[m.month - 1].slice(0, 3)} ${m.year}`,
-          totalEncaissement: fromCents(t.totalEncaissement),
-          totalDecaissement: fromCents(t.totalDecaissement),
-          solde: fromCents(t.solde),
+          totalEncaissement: t.totalEncaissement,
+          totalDecaissement: t.totalDecaissement,
+          solde: t.solde,
         };
       });
   }, [filteredMonths, operations]);
@@ -228,7 +188,7 @@ export default function DashboardView() {
         map.set(key, { label: key, totalAmount: 0, count: 0 });
       }
       const entry = map.get(key)!;
-      entry.totalAmount += fromCents(op.amount_cents) || 0;
+      entry.totalAmount += op.amount_cents || 0;
       entry.count++;
     }
     return Array.from(map.values())
@@ -387,9 +347,9 @@ export default function DashboardView() {
               <XAxis dataKey="monthLabel" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
               <YAxis
                 tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
-                tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
+                tickFormatter={(v) => `${(v / 100000).toFixed(0)}k`}
               />
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'currentColor', opacity: 0.1 }} />
               <Legend
                 formatter={(val) => (
                   <span className="text-xs text-zinc-600 dark:text-zinc-400">{val}</span>
@@ -441,9 +401,9 @@ export default function DashboardView() {
               />
               <YAxis
                 tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
-                tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
+                tickFormatter={(v) => `${(v / 100000).toFixed(0)}k`}
               />
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'currentColor', opacity: 0.1 }} />
               <Bar dataKey="totalAmount" name={t('common.total')} radius={[4, 4, 0, 0]}>
                 {typeChartData.map((_, i) => (
                   <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />

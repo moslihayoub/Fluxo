@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useStore } from '@/store/useStore';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { Image as ImageIcon, Plus, Trash2, Building2, Globe, Calculator, FileText, Settings2, CreditCard, Database, Terminal, Layers, Mail, MapPin, Phone } from 'lucide-react';
+import { Image as ImageIcon, Plus, Trash2, Building2, Globe, Calculator, Scale, FileText, Settings2, CreditCard, Database, Terminal, Layers, Mail, MapPin, Phone } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { generateId } from '@/lib/utils';
 import { COUNTRIES, CURRENCIES } from '@/lib/data';
@@ -21,7 +21,7 @@ import AdminStackView from '@/components/admin/AdminStackView';
 type Tab = 'profile' | 'localization' | 'fiscality' | 'documents' | 'advanced' | 'logs' | 'stack';
 
 export default function BusinessSettingsView() {
-  const { businessSettings, setBusinessSettings, businessProfileType, linkProGainsToPerso, setLinkProGainsToPerso, workspaceMode } = useStore();
+  const { businessSettings, setBusinessSettings, linkProGainsToPerso, setLinkProGainsToPerso, workspaceMode } = useStore();
   const isPersonal = workspaceMode === 'personal';
   
   const [activeTab, setActiveTab] = useState<Tab>(isPersonal ? 'localization' : 'profile');
@@ -148,7 +148,7 @@ export default function BusinessSettingsView() {
     ] : []),
     { id: 'localization', label: 'Pays & Devises', icon: Globe },
     ...(!isPersonal ? [
-      { id: 'fiscality', label: 'Fiscalité & Taxes', icon: Calculator },
+      { id: 'fiscality', label: 'Fiscalité & Légal', icon: Scale },
       { id: 'documents', label: 'Documents & Paiements', icon: FileText },
     ] : []),
     ...(isAdmin ? [
@@ -272,40 +272,50 @@ export default function BusinessSettingsView() {
                   </div>
                 </div>
               </div>
-
-              <div className="space-y-4">
-                <h2 className="text-lg font-semibold text-zinc-900 dark:text-white border-b border-zinc-100 dark:border-zinc-800 pb-2">Informations légales (ICE, SIRET...)</h2>
-                <div className="space-y-3">
-                  {identifiers.map(ident => (
-                    <div key={ident.id} className="flex items-center gap-3">
-                      <div className="w-1/3">
-                        <Input type="text" value={ident.label} onChange={e => handleUpdateIdentifier(ident.id, 'label', e.target.value)} placeholder="Ex: ICE" className="font-medium" />
-                      </div>
-                      <div className="flex-1">
-                        <Input type="text" value={ident.value} onChange={e => handleUpdateIdentifier(ident.id, 'value', e.target.value)} placeholder="000123456789000" className="font-mono" />
-                      </div>
-                      <button onClick={() => handleRemoveIdentifier(ident.id)} className="p-2 text-zinc-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors shrink-0">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-                  <button onClick={handleAddIdentifier} className="flex items-center gap-2 px-4 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white rounded-lg text-sm font-medium hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">
-                    <Plus className="w-4 h-4" /> Ajouter un identifiant
-                  </button>
-                </div>
-              </div>
               
               <div className="space-y-4">
                 <h2 className="text-lg font-semibold text-zinc-900 dark:text-white border-b border-zinc-100 dark:border-zinc-800 pb-2">Intégration avec l'espace Personnel</h2>
-                <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl">
-                  <div>
-                    <h3 className="text-sm font-medium text-zinc-900 dark:text-white">Lier les bénéfices Pro au Perso</h3>
-                    <p className="text-xs text-zinc-500">Ajoute automatiquement le profit net de l'activité Pro comme revenu dans votre tableau de bord Perso.</p>
+                <div className="p-4 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl flex items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-medium text-zinc-900 dark:text-white">Synchronisation des bénéfices Pro vers Perso</h3>
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                        linkProGainsToPerso 
+                          ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300' 
+                          : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
+                      }`}>
+                        {linkProGainsToPerso ? 'Actif' : 'Inactif'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-zinc-500 leading-relaxed max-w-xl">
+                      Permet d'injecter automatiquement ou de synchroniser les bénéfices nets réels (Ventes - Frais) générés dans l'espace Professionnel directement dans votre tableau de bord et vos bilans de trésorerie Personnels.
+                    </p>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" className="sr-only peer" checked={linkProGainsToPerso} onChange={(e) => setLinkProGainsToPerso(e.target.checked)} />
-                    <div className="relative w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-violet-600"></div>
-                  </label>
+                  
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={linkProGainsToPerso}
+                    onClick={() => {
+                      const nextVal = !linkProGainsToPerso;
+                      setLinkProGainsToPerso(nextVal);
+                      toast.success(
+                        nextVal 
+                          ? 'Synchronisation Pro vers Perso activée' 
+                          : 'Synchronisation Pro vers Perso désactivée'
+                      );
+                    }}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-violet-600 focus:ring-offset-2 ${
+                      linkProGainsToPerso ? 'bg-violet-600' : 'bg-zinc-300 dark:bg-zinc-700'
+                    }`}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                        linkProGainsToPerso ? 'translate-x-5' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
                 </div>
               </div>
 
@@ -352,12 +362,27 @@ export default function BusinessSettingsView() {
           {/* TAB: FISCALITY */}
           {activeTab === 'fiscality' && (
             <ScrollReveal className="space-y-8">
-              <div className="bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 p-4 rounded-xl text-sm border border-blue-100 dark:border-blue-900/30">
-                <p className="font-medium mb-1">Information fiscale : {businessProfileType === 'freelance' ? 'Auto-entrepreneur' : 'Société'}</p>
-                {businessProfileType === 'freelance' 
-                  ? "En tant qu'auto-entrepreneur (selon la loi marocaine), vous êtes hors champ de la TVA (0%). Vous payez un Impôt sur le Revenu (IR) basé sur votre chiffre d'affaires : 0.5% pour le commerce et 1% pour les services."
-                  : "En tant que société, vous devez facturer la TVA à vos clients et déclarer votre TVA."
-                }
+              <div className="space-y-4">
+                <h2 className="text-lg font-semibold text-zinc-900 dark:text-white border-b border-zinc-100 dark:border-zinc-800 pb-2">Informations légales (ICE, SIRET...)</h2>
+                <p className="text-sm text-zinc-500">Identifiants officiels et fiscaux de votre entreprise qui apparaîtront sur vos factures et devis.</p>
+                <div className="space-y-3">
+                  {identifiers.map(ident => (
+                    <div key={ident.id} className="flex items-center gap-3">
+                      <div className="w-1/3">
+                        <Input type="text" value={ident.label} onChange={e => handleUpdateIdentifier(ident.id, 'label', e.target.value)} placeholder="Ex: ICE" className="font-medium" />
+                      </div>
+                      <div className="flex-1">
+                        <Input type="text" value={ident.value} onChange={e => handleUpdateIdentifier(ident.id, 'value', e.target.value)} placeholder="000123456789000" className="font-mono" />
+                      </div>
+                      <button onClick={() => handleRemoveIdentifier(ident.id)} className="p-2 text-zinc-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors shrink-0">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                  <button onClick={handleAddIdentifier} className="flex items-center gap-2 px-4 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white rounded-lg text-sm font-medium hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">
+                    <Plus className="w-4 h-4" /> Ajouter un identifiant
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-4">
@@ -368,7 +393,6 @@ export default function BusinessSettingsView() {
                     <Select 
                       value={defaultTaxMode} 
                       onValueChange={(val) => setDefaultTaxMode(val as TaxMode)} 
-                      disabled={businessProfileType === 'freelance'}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Choisir le régime..." />
@@ -386,7 +410,7 @@ export default function BusinessSettingsView() {
                       type="number" 
                       value={defaultTaxRate} 
                       onChange={e => setDefaultTaxRate(Number(e.target.value))} 
-                      disabled={businessProfileType === 'freelance' || defaultTaxMode === 'HT'}
+                      disabled={defaultTaxMode === 'HT'}
                     />
                   </div>
                 </div>

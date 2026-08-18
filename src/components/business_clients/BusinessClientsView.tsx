@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useStore } from '@/store/useStore';
-import { Plus, Phone, MessageCircle, Mail, MapPin, Edit2, Trash2, Star, Percent, Users, Download } from 'lucide-react';
+import { Plus, Phone, MessageCircle, Mail, MapPin, Edit2, Trash2, Star, Percent, Users, Download, Building2 } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 import type { BusinessClient } from '@/types';
 import ClientDialog from './ClientDialog';
 import { exportToCSV } from '@/lib/exportUtils';
@@ -29,10 +30,19 @@ import { MoreHorizontal } from 'lucide-react';
 import { ScrollReveal } from '@/components/ui/Animation';
 export default function BusinessClientsView() {
   const clients = useStore((s) => s.businessClients) || [];
+  const businessOrders = useStore((s) => s.businessOrders) || [];
   const globalSearch = useStore((s) => s.globalSearch);
   const deleteClient = useStore((s) => s.deleteBusinessClient);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<BusinessClient | null>(null);
+
+  const getClientTotalSalesCents = (clientId: string, clientTotalSpent?: number) => {
+    const clientOrders = (businessOrders || []).filter(o => o.clientId === clientId);
+    if (clientOrders.length > 0) {
+      return clientOrders.reduce((sum, o) => sum + (Number(o.amountTTC_cents) || 0), 0);
+    }
+    return clientTotalSpent || 0;
+  };
 
   const filteredClients = clients.filter(c => {
     const s = globalSearch.toLowerCase();
@@ -53,19 +63,15 @@ export default function BusinessClientsView() {
     setIsDialogOpen(true);
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-MA', { style: 'currency', currency: 'MAD' }).format(amount);
-  };
-
   const handleExport = () => {
-    const headers = ['Nom', 'Email', 'Téléphone', 'Adresse', 'Total Dépensé (MAD)', 'Reste à Payer (MAD)', 'Client VIP', 'Réduction Par Défaut (%)'];
+    const headers = ['Nom', 'Email', 'Téléphone', 'Adresse', 'Total Ventes / CA (MAD)', 'Reste à Payer (MAD)', 'Client VIP', 'Réduction Par Défaut (%)'];
     const data = filteredClients.map(c => [
       c.name || 'Client Sans Nom',
       c.email || '',
       c.phone || '',
       c.address || '',
-      c.totalSpent_cents,
-      c.totalPending_cents,
+      (getClientTotalSalesCents(c.id, c.totalSpent_cents) / 100).toFixed(2),
+      (c.totalPending_cents / 100).toFixed(2),
       c.isVip ? 'Oui' : 'Non',
       c.defaultDiscountRate || 0
     ]);
@@ -76,7 +82,7 @@ export default function BusinessClientsView() {
     <ScrollReveal className="w-full max-w-6xl mx-auto p-4 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white tracking-tight">Clients & CRM</h1>
+          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white tracking-tight">Clients</h1>
           <p className="text-sm text-zinc-500">Gérez vos clients, leurs avantages et coordonnez vos ventes.</p>
         </div>
         {clients.length > 0 && (
@@ -110,8 +116,9 @@ export default function BusinessClientsView() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[80px]">ID</TableHead>
+                  <TableHead>Date</TableHead>
                   <TableHead>Type</TableHead>
-                  <TableHead>Brand</TableHead>
+                  <TableHead>Marque</TableHead>
                   <TableHead>Responsable</TableHead>
                   <TableHead>Tel</TableHead>
                   <TableHead className="text-right">CA Généré</TableHead>
@@ -124,17 +131,25 @@ export default function BusinessClientsView() {
                     <TableCell className="font-mono text-xs text-zinc-500">
                       {client.id.slice(0, 8)}
                     </TableCell>
+                    <TableCell className="text-xs text-zinc-500 whitespace-nowrap">
+                      {client.createdAt ? new Date(client.createdAt).toLocaleDateString('fr-MA', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'}
+                    </TableCell>
                     <TableCell>
                       <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded ${
                         client.clientType === 'pro' 
                           ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400' 
-                          : 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-400'
+                          : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
                       }`}>
-                        {client.clientType === 'pro' ? 'Pro' : 'Perso'}
+                        {client.clientType === 'pro' ? 'Professionnel' : 'Particulier'}
                       </span>
                     </TableCell>
                     <TableCell className="font-medium text-sm text-zinc-900 dark:text-white">
-                      {client.clientType === 'pro' && client.brandName ? client.brandName : '—'}
+                      {client.clientType === 'pro' && client.brandName ? (
+                        <div className="flex items-center gap-2">
+                          <Building2 className="w-4 h-4 text-violet-500" />
+                          {client.brandName}
+                        </div>
+                      ) : '—'}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-3">
@@ -148,7 +163,11 @@ export default function BusinessClientsView() {
                         <div>
                           <div className="font-bold text-zinc-900 dark:text-white text-sm flex items-center gap-1.5">
                             {client.name || 'Client Inconnu'}
-                            {client.isVip && <Star className="w-3 h-3 text-amber-500 fill-amber-500" />}
+                            {client.isVip && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded-full border border-amber-200 dark:border-amber-800/40">
+                                <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-500" /> VIP
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -167,7 +186,7 @@ export default function BusinessClientsView() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="font-black text-sm text-zinc-900 dark:text-white">
-                        {formatCurrency(client.totalSpent_cents)}
+                        {formatCurrency(getClientTotalSalesCents(client.id, client.totalSpent_cents))}
                       </div>
                       {client.totalPending_cents > 0 && (
                         <div className="text-[10px] font-bold text-rose-500 mt-0.5">
@@ -220,16 +239,15 @@ export default function BusinessClientsView() {
                         </div>
                       )}
                       <div>
-                        <h3 className="font-bold text-zinc-900 dark:text-white flex items-center gap-1.5 text-base">
-                          {client.name || 'Client Inconnu'}
-                          {client.clientType === 'pro' && (
-                            <span className="text-[10px] font-bold uppercase tracking-wider bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 px-1 py-0.5 rounded">Pro</span>
+                        <h4 className="font-medium text-zinc-900 dark:text-white flex items-center gap-2">
+                          {client.clientType === 'pro' && <Building2 className="w-4 h-4 text-violet-500" />}
+                          {client.clientType === 'pro' ? (client.brandName || client.name) : client.name}
+                          {client.isVip && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded-full border border-amber-200 dark:border-amber-800/40">
+                              <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-500" /> VIP
+                            </span>
                           )}
-                          {client.isVip && <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />}
-                        </h3>
-                        {client.clientType === 'pro' && client.brandName && (
-                          <div className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 mt-0.5">{client.brandName}</div>
-                        )}
+                        </h4>
                         <span className="text-xs text-zinc-500 block mt-0.5">ID: {client.id.slice(0, 8)}</span>
                         {client.defaultDiscountRate && (
                           <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded mt-0.5">
@@ -278,7 +296,9 @@ export default function BusinessClientsView() {
                   <div className="flex items-center justify-between pt-2">
                     <span className="text-xs text-zinc-500 font-medium">CA Généré</span>
                     <div className="text-right">
-                      <span className="font-bold text-zinc-900 dark:text-white">{formatCurrency(client.totalSpent_cents)}</span>
+                      <span className="font-bold text-zinc-900 dark:text-white">
+                        {formatCurrency(getClientTotalSalesCents(client.id, client.totalSpent_cents))}
+                      </span>
                       {client.totalPending_cents > 0 && (
                         <div className="text-[10px] font-semibold text-rose-500">Reste: {formatCurrency(client.totalPending_cents)}</div>
                       )}

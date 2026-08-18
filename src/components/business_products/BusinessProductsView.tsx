@@ -138,6 +138,7 @@ export default function BusinessProductsView() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[80px]">ID</TableHead>
+                    <TableHead>Date</TableHead>
                     <TableHead>Produit</TableHead>
                     <TableHead>Fournisseur</TableHead>
                     <TableHead className="text-right">Prix (MAD)</TableHead>
@@ -151,6 +152,9 @@ export default function BusinessProductsView() {
                       <TableCell className="font-mono text-xs text-zinc-500">
                         {product.id.slice(0, 8)}
                       </TableCell>
+                      <TableCell className="text-xs text-zinc-500 whitespace-nowrap">
+                        {product.createdAt ? new Date(product.createdAt).toLocaleDateString('fr-MA', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'}
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${product.isActive ? 'bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400'}`}>
@@ -161,12 +165,12 @@ export default function BusinessProductsView() {
                               <h4 className={`font-medium ${product.isActive ? 'text-zinc-900 dark:text-white' : 'text-zinc-500 dark:text-zinc-400'}`}>
                                 {product.name}
                               </h4>
-                              <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                              <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
                                 product.type === 'service'
-                                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                                  : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
+                                  ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400'
+                                  : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
                               }`}>
-                                {product.type === 'service' ? 'Digital / Service' : 'Produit physique'}
+                                {product.type === 'service' ? 'Digital / Service' : 'Physique'}
                               </span>
                             </div>
                             <div className="flex items-center gap-2 mt-0.5 flex-wrap">
@@ -190,7 +194,7 @@ export default function BusinessProductsView() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="font-bold text-zinc-900 dark:text-white">
-                          {formatCurrency(fromCents(product.defaultPrice_cents) || 0)}
+                          {formatCurrency(product.defaultPrice_cents || 0)}
                         </div>
                       </TableCell>
                       <TableCell className="text-center">
@@ -304,7 +308,7 @@ export default function BusinessProductsView() {
                         {product.type === 'service' ? 'Digital / Service' : 'Produit physique'}
                       </span>
                       <div className="font-bold text-zinc-900 dark:text-white">
-                        {formatCurrency(fromCents(product.defaultPrice_cents) || 0)}
+                        {formatCurrency(product.defaultPrice_cents || 0)}
                       </div>
                     </div>
                   </CardContent>

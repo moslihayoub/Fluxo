@@ -5,7 +5,7 @@ export const KindSchema = z.enum(['encaissement', 'decaissement']);
 export const WorkspaceModeSchema = z.enum(['personal', 'business']);
 export const TaxModeSchema = z.enum(['HT', 'TVA']);
 export const PaymentStatusSchema = z.enum(['paid', 'partial', 'unpaid']);
-export const BusinessProfileTypeSchema = z.enum(['freelance', 'company']);
+
 
 export const SubAmountSchema = z.object({
   id: z.string().min(1),

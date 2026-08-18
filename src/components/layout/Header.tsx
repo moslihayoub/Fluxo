@@ -1,6 +1,6 @@
 'use client';
 
-import { Sun, Moon, TrendingUp, BarChart2, Calendar, Tag, Globe, LogIn, LogOut, Monitor, ShoppingBag, Users, Receipt, Briefcase, User, Settings, Package, Search, Truck } from 'lucide-react';
+import { Sun, Moon, TrendingUp, BarChart2, Calendar, Tag, Globe, LogIn, LogOut, Monitor, ShoppingBag, Users, Receipt, Briefcase, User, Settings, Package, Search, Truck, Building2 } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { useStore } from '@/store/useStore';
 import { useAuth } from '@/components/auth/AuthProvider';
@@ -138,28 +138,48 @@ export default function Header() {
                 </button>
               )}
 
-              {/* Mode Switcher */}
+              {/* Mode Switcher (Perso / Pro Segmented Pill) */}
               {workspaceMode && (
-                <button
-                  onClick={() => {
-                    setIsProfileOpen(false);
-                    if (workspaceMode === 'personal') {
-                      setWorkspaceMode('business');
-                      setActiveView('dashboard');
-                    } else {
-                      setWorkspaceMode('personal');
-                      setActiveView('months');
-                    }
-                  }}
-                  className="flex items-center gap-1.5 p-1.5 px-3 rounded-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors border border-zinc-200 dark:border-zinc-700 ml-1"
-                  title="Basculer de mode"
-                >
-                  {workspaceMode === 'business' ? (
-                    <><Briefcase className="w-3.5 h-3.5" /> <span className="text-xs font-semibold hidden sm:block">Pro</span></>
-                  ) : (
-                    <><User className="w-3.5 h-3.5" /> <span className="text-xs font-semibold hidden sm:block">Perso</span></>
-                  )}
-                </button>
+                <div className="flex items-center bg-zinc-100 dark:bg-zinc-800/90 p-1 rounded-xl border border-zinc-200/80 dark:border-zinc-700/80 ml-1 shadow-xs">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsProfileOpen(false);
+                      if (workspaceMode !== 'personal') {
+                        setWorkspaceMode('personal');
+                        setActiveView('months');
+                      }
+                    }}
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                      workspaceMode === 'personal'
+                        ? 'bg-white dark:bg-zinc-900 text-blue-600 dark:text-blue-400 shadow-sm border border-zinc-200/60 dark:border-zinc-700/60'
+                        : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
+                    }`}
+                    title="Espace Personnel"
+                  >
+                    <User className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Perso</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsProfileOpen(false);
+                      if (workspaceMode !== 'business') {
+                        setWorkspaceMode('business');
+                        setActiveView('dashboard');
+                      }
+                    }}
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                      workspaceMode === 'business'
+                        ? 'bg-violet-600 text-white shadow-sm font-bold'
+                        : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
+                    }`}
+                    title="Espace Professionnel"
+                  >
+                    <Building2 className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Pro</span>
+                  </button>
+                </div>
               )}
 
               {/* Profile Avatar & Unified Dropdown (Regroups Settings, Theme & Language) */}

@@ -112,7 +112,7 @@ function OperationsTable({
                       ? 'text-emerald-600 dark:text-emerald-400'
                       : 'text-rose-600 dark:text-rose-400'
                   }`}>
-                    {op.kind === 'encaissement' ? '+' : '−'}{formatCurrency(fromCents(op.amount_cents) || 0)}
+                    {op.kind === 'encaissement' ? '+' : '−'}{formatCurrency(op.amount_cents || 0)}
                   </span>
                 </TableCell>
                 <TableCell className="text-right">
@@ -191,7 +191,7 @@ function OperationsTable({
                     ? 'text-emerald-600 dark:text-emerald-400'
                     : 'text-rose-600 dark:text-rose-400'
                 }`}>
-                  {op.kind === 'encaissement' ? '+' : '−'}{formatCurrency(fromCents(op.amount_cents) || 0)}
+                  {op.kind === 'encaissement' ? '+' : '−'}{formatCurrency(op.amount_cents || 0)}
                 </span>
               </div>
             </CardContent>
@@ -248,53 +248,12 @@ export default function OperationsView() {
   const currentMonth = months.find((m) => m.id === activeMonthId);
   
   const currentOperations = useMemo(() => {
-    let filtered = operations.filter((op) => 
+    return operations.filter((op) => 
       workspaceMode === 'business' 
         ? op.workspaceMode === 'business' 
         : (op.workspaceMode === 'personal' || !op.workspaceMode)
     );
-    
-    // Inject Pro profit into Perso
-    if (workspaceMode === 'personal' && linkProGainsToPerso && activeMonthId) {
-      const activeMonth = months.find(m => m.id === activeMonthId);
-      const proOps = operations.filter((op) => op.workspaceMode === 'business' && op.monthId === activeMonthId);
-      const proIncomes = proOps.filter(o => o.kind === 'encaissement').reduce((acc, o) => acc + (o.amount_cents || 0), 0);
-      const proExpenses = proOps.filter(o => o.kind === 'decaissement').reduce((acc, o) => acc + (o.amount_cents || 0), 0);
-      
-      let proSales = 0;
-      let proCosts = 0;
-      if (activeMonth) {
-        (businessOrders || []).forEach(o => {
-          const d = new Date(o.date);
-          if (d.getMonth() + 1 === activeMonth.month && d.getFullYear() === activeMonth.year) {
-            proSales += Number(o.amountTTC_cents) || 0;
-            const itemsCost = (o.items || []).reduce((acc, item) => acc + ((Number(item.unitCostPrice_cents) || 0) * (Number(item.quantity) || 1)), 0);
-            const legacyCost = (Number(o.unitCostPrice_cents) || 0) * (Number(o.quantity) || 1);
-            proCosts += (o.items && o.items.length > 0) ? itemsCost : legacyCost;
-          }
-        });
-      }
-
-      const proProfit = (proIncomes + proSales) - (proExpenses + proCosts);
-      
-      if (proProfit > 0) {
-        filtered.push({
-          id: 'virtual-pro-profit',
-          label: 'Bénéfice Pro (Auto)',
-          operationTypeId: 'pro-profit',
-          operationTypeLabel: 'Bénéfice Net Pro',
-          amount_cents: proProfit,
-          kind: 'encaissement',
-          workspaceMode: 'personal',
-          monthId: activeMonthId!,
-          date: new Date().toISOString(), // Fallback date
-          isVirtual: true,
-        } as unknown as Operation);
-      }
-    }
-    
-    return filtered;
-  }, [operations, workspaceMode, linkProGainsToPerso, activeMonthId, months, businessOrders]);
+  }, [operations, workspaceMode]);
 
   const monthOps = currentOperations
     .filter((op) => op.monthId === activeMonthId)
@@ -447,7 +406,7 @@ export default function OperationsView() {
                         {metrics.count} opération{metrics.count > 1 ? 's' : ''} ·{' '}
                         Solde&nbsp;
                         <span className={`font-mono ${metrics.solde >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500'}`}>
-                          {formatCurrency(fromCents(metrics.solde), true)}
+                          {formatCurrency(metrics.solde, true)}
                         </span>
                       </p>
                     )}

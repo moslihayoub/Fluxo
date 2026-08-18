@@ -42,9 +42,10 @@ export function formatAmount(amount: number): string {
   }).format(safe).replace(/[\u202f\u00a0]/g, ' ');
 }
 
-export function formatCurrency(amount: number, signed = false, currency = 'MAD'): string {
-  const safe = isNaN(amount) ? 0 : amount;
-  const absFormatted = formatAmount(Math.abs(safe));
+export function formatCurrency(amountCents: number, signed = false, currency = 'MAD'): string {
+  const safe = isNaN(amountCents) ? 0 : amountCents;
+  const inUnit = safe / 100;
+  const absFormatted = formatAmount(Math.abs(inUnit));
   const sign = safe < 0 ? '-' : signed ? '+' : '';
   return `${sign}${absFormatted} ${currency}`.trim();
 }

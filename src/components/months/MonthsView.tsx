@@ -115,50 +115,12 @@ function MonthCard({ month, isSelectionMode, isSelected, onSelect, onLongPress }
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
   const currentOperations = useMemo(() => {
-    let filtered = allOperations.filter(op => 
+    return allOperations.filter(op => 
       workspaceMode === 'business' 
         ? op.workspaceMode === 'business' 
         : (op.workspaceMode === 'personal' || !op.workspaceMode)
     );
-    
-    if (workspaceMode === 'personal' && linkProGainsToPerso) {
-      // For each month, compute pro profit and inject it if > 0
-      months.forEach(m => {
-        const proOps = allOperations.filter(op => op.workspaceMode === 'business' && op.monthId === m.id);
-        const proIncomes = proOps.filter(o => o.kind === 'encaissement').reduce((acc, o) => acc + (o.amount_cents || 0), 0);
-        const proExpenses = proOps.filter(o => o.kind === 'decaissement').reduce((acc, o) => acc + (o.amount_cents || 0), 0);
-        
-        let proSales = 0;
-        let proCosts = 0;
-        (businessOrders || []).forEach(o => {
-          const d = new Date(o.date);
-          if (d.getMonth() + 1 === m.month && d.getFullYear() === m.year) {
-            proSales += Number(o.amountTTC_cents) || 0;
-            const itemsCost = (o.items || []).reduce((acc, item) => acc + ((Number(item.unitCostPrice_cents) || 0) * (Number(item.quantity) || 1)), 0);
-            const legacyCost = (Number(o.unitCostPrice_cents) || 0) * (Number(o.quantity) || 1);
-            proCosts += (o.items && o.items.length > 0) ? itemsCost : legacyCost;
-          }
-        });
-
-        const proProfit = (proIncomes + proSales) - (proExpenses + proCosts);
-
-        if (proProfit > 0) {
-          filtered.push({
-            id: `virtual-pro-${m.id}`,
-            label: 'Bénéfice Pro (Auto)',
-            operationTypeId: 'pro-profit',
-            operationTypeLabel: 'Bénéfice Net Pro',
-            amount_cents: proProfit,
-            kind: 'encaissement',
-            workspaceMode: 'personal',
-            monthId: m.id,
-            date: new Date().toISOString(), // Fallback
-          } as unknown as Operation);
-        }
-      });
-    }
-    return filtered;
-  }, [allOperations, workspaceMode, linkProGainsToPerso, months, businessOrders]);
+  }, [allOperations, workspaceMode]);
 
   const metrics = computeMonthTotals(currentOperations, month.id);
 
@@ -225,7 +187,7 @@ function MonthCard({ month, isSelectionMode, isSelected, onSelect, onLongPress }
               ? 'text-red-600 dark:text-red-400'
               : 'text-zinc-900 dark:text-white'
           }`}>
-            {formatCurrency(fromCents(metrics.solde), true)}
+            {formatCurrency(metrics.solde, true)}
           </p>
           <p className="text-xs text-zinc-400">{metrics.count} op{metrics.count > 1 ? 's' : ''}</p>
         </div>
@@ -239,7 +201,7 @@ function MonthCard({ month, isSelectionMode, isSelected, onSelect, onLongPress }
             <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">{t('common.incomes')}</span>
           </div>
           <p className="text-sm font-semibold font-mono tabular-nums text-emerald-700 dark:text-emerald-300">
-            {formatCurrency(fromCents(metrics.totalEncaissement))}
+            {formatCurrency(metrics.totalEncaissement)}
           </p>
         </div>
         <div className="bg-rose-50 dark:bg-rose-900/20 rounded-lg p-2.5">
@@ -248,7 +210,7 @@ function MonthCard({ month, isSelectionMode, isSelected, onSelect, onLongPress }
             <span className="text-xs text-rose-600 dark:text-rose-400 font-medium">{t('common.expenses')}</span>
           </div>
           <p className="text-sm font-semibold font-mono tabular-nums text-rose-700 dark:text-rose-300">
-            {formatCurrency(fromCents(metrics.totalDecaissement))}
+            {formatCurrency(metrics.totalDecaissement)}
           </p>
         </div>
       </div>

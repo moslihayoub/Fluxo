@@ -42,34 +42,42 @@ export default function AdminLogsView() {
     const initialLogs: LogEntry[] = [
       {
         id: '1',
-        timestamp: new Date(Date.now() - 3600000).toLocaleTimeString('fr-FR'),
+        timestamp: new Date().toLocaleTimeString('fr-FR'),
         level: 'success',
-        source: 'BOOTSTRAP',
-        message: 'Application initialisée en Next.js 14 App Router (Zustand + Firestore Sync).',
-        details: { mode: currentState.workspaceMode, profile: currentState.businessProfileType }
+        source: 'RELEASE_v1.8',
+        message: 'Mise à jour Phase 8 active : Standardisation UI 2-Cards, Refonte Sidebars "Détail..." & Date dans toutes les listes.',
+        details: { version: '1.8.0', date: '17/08/2026' }
       },
       {
         id: '2',
-        timestamp: new Date(Date.now() - 1800000).toLocaleTimeString('fr-FR'),
+        timestamp: new Date(Date.now() - 300000).toLocaleTimeString('fr-FR'),
+        level: 'success',
+        source: 'BOOTSTRAP',
+        message: 'Application initialisée en Next.js 14 App Router (Zustand + Firestore Sync).',
+        details: { mode: currentState.workspaceMode }
+      },
+      {
+        id: '3',
+        timestamp: new Date(Date.now() - 600000).toLocaleTimeString('fr-FR'),
         level: 'info',
         source: 'FIRESTORE',
         message: user ? `Authentifié avec le compte : ${user.email} (UID: ${user.uid.slice(0, 8)}...)` : 'Session active en mode Invité (Local Storage persistant).',
         details: { user: user?.email || 'guest' }
       },
       {
-        id: '3',
+        id: '4',
         timestamp: new Date(Date.now() - 900000).toLocaleTimeString('fr-FR'),
         level: 'info',
         source: 'ZERO-FLOAT',
         message: 'Vérification intégrité centimes entiers réussie sur toutes les collections.',
-        details: { operations: currentState.operations.length, orders: currentState.businessOrders.length }
+        details: { operations: currentState.operations.length, orders: currentState.businessOrders.length, fees: currentState.businessFees.length }
       },
       {
-        id: '4',
-        timestamp: new Date(Date.now() - 300000).toLocaleTimeString('fr-FR'),
+        id: '5',
+        timestamp: new Date(Date.now() - 1200000).toLocaleTimeString('fr-FR'),
         level: 'success',
         source: 'STATE_HYDRATION',
-        message: `Hydratation du store Zustand complète (${currentState.months.length} mois, ${currentState.operations.length} opérations, ${currentState.businessOrders.length} ventes).`
+        message: `Hydratation du store Zustand complète (${currentState.months.length} mois, ${currentState.operations.length} opérations, ${currentState.businessOrders.length} ventes, ${currentState.businessFees.length} frais).`
       }
     ];
 
@@ -79,6 +87,8 @@ export default function AdminLogsView() {
     let prevOperationsCount = currentState.operations.length;
     let prevOrdersCount = currentState.businessOrders.length;
     let prevClientsCount = currentState.businessClients.length;
+    let prevFeesCount = currentState.businessFees.length;
+    let prevSuppliersCount = currentState.businessSuppliers.length;
 
     const unsubscribe = useStore.subscribe((state) => {
       // Re-measure storage size
@@ -119,6 +129,29 @@ export default function AdminLogsView() {
           level: 'info',
           source: 'CLIENTS_SYNC',
           message: `Mise à jour du fichier client (Total: ${state.businessClients.length}).`
+        }, ...prev]);
+      }
+
+      if (state.businessFees.length !== prevFeesCount) {
+        const diff = state.businessFees.length - prevFeesCount;
+        prevFeesCount = state.businessFees.length;
+        setLogs(prev => [{
+          id: Date.now().toString(),
+          timestamp: new Date().toLocaleTimeString('fr-FR'),
+          level: 'warn',
+          source: 'FEES_MUTATION',
+          message: diff > 0 ? `+${diff} nouveau(x) frais/dépense(s) enregistré(s) (Total: ${state.businessFees.length}).` : `Frais supprimé (Reste: ${state.businessFees.length}).`
+        }, ...prev]);
+      }
+
+      if (state.businessSuppliers.length !== prevSuppliersCount) {
+        prevSuppliersCount = state.businessSuppliers.length;
+        setLogs(prev => [{
+          id: Date.now().toString(),
+          timestamp: new Date().toLocaleTimeString('fr-FR'),
+          level: 'info',
+          source: 'SUPPLIERS_SYNC',
+          message: `Mise à jour des fournisseurs (Total: ${state.businessSuppliers.length}).`
         }, ...prev]);
       }
     });

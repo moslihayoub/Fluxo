@@ -1,6 +1,6 @@
 # 📊 STATUT & HISTORIQUE DU PROJET — Fluxo (Charges & Encaissements)
 
-**Date & Heure :** 14 Août 2026  
+**Date & Heure :** 17 Août 2026  
 **Application :** Fluxo (Charges & Encaissements)  
 **URL Live :** `https://fluxofinance.vercel.app/`  
 **Environnement :** Next.js 14 (App Router), TypeScript, Tailwind CSS, Zustand, Firebase (Auth/Firestore), Recharts, Gemini 2.0 Flash, PWA, Spec-Kit (SDD), UXSpot MCP.
@@ -64,6 +64,44 @@
    - Pipeline de l'Agent IA (prompts multimodaux, parsing Zod, skills).
    - Cartographie des relations de la base de données Firestore.
    - Méthodologie SDD (Spec-Driven Development) & GitHub Spec-Kit.
+
+### Phase 8 : Standardisation UI 2-Cards, Refonte Sidebars & Intégration Date (17 Août 2026) 💎
+1. **Sélecteur Visuel 2 Cartes (Clients & Fournisseurs) :**
+   - Remplacement des switchs de header par un sélecteur à 2 cartes interactives placé dans le formulaire sous l'avatar/logo.
+   - Client : **Particulier** (`User`, bleu) / **Professionnel** (`Building2`, violet).
+   - Fournisseur : **Physique** (`Package`, bleu) / **Digital** (`Laptop`, violet).
+2. **Harmonisation des Titres en "Détail..." :**
+   - Remplacement de "Modifier..." par **"Détail..."** sur tous les tiroirs (`Détail du client`, `Détail du fournisseur`, `Détail du produit`, `Détail du service`, `Détail du frais`, `Détail de la vente`, `Détail de l'opération`).
+3. **Optimisation des Tableaux Métier :**
+   - Suppression de la colonne redondante "Total Achat" sur la page Fournisseurs.
+   - Ajout systématique de la colonne **Date** immédiatement après la colonne **ID** sur toutes les tables (Clients, Fournisseurs, Produits, Frais/Dépenses, Ventes).
+4. **Correction et Standardisation Sidebar Feedback :**
+   - Refonte de `FeedbackWidget.tsx` avec `createPortal` pour adopter le layout sidebar standardisé (`rounded-l-3xl`, z-[120], fond flouté, header avec croix et footer d'actions).
+5. **Harmonisation Header Mode Switcher :**
+   - Sélecteur segmenté dual-pill ergonomique `[ 👤 Perso ] [ 🏢 Pro ]`.
+6. **Bénéfice Pro Sync :**
+   - Synchronisation à la demande dans l'espace Perso sans lignes fantômes forcées.
+
+---
+
+## 📌 Dernières actions (17 Août 2026 — 2-Cards Selectors, Wording Particulier/Pro, Détail Sidebars, Date après ID & Feedback Portal)
+
+### 1. Composants 2 Cartes & Wording Particulier/Professionnel :
+- `ClientDialog.tsx` : Corps de formulaire enrichi avec le sélecteur 2 cartes `[ 👤 Particulier ] [ 🏢 Professionnel ]` (avec sous-titres descriptifs et couleurs dynamiques bleu/violet). Suppression du toggle d'en-tête.
+- `SupplierDialog.tsx` : Corps de formulaire enrichi avec le sélecteur 2 cartes `[ 📦 Physique ] [ 💻 Digital ]`. Suppression du toggle d'en-tête.
+- Wording et badges mis à jour en "Particulier" et "Professionnel" dans les tableaux et vues.
+
+### 2. Renommage des Modales en "Détail..." :
+- Tous les tiroirs d'édition utilisent désormais le préfixe **Détail** (`Détail du client`, `Détail du fournisseur`, `Détail du produit`, `Détail du service`, `Détail du frais`, `Détail de la vente`, `Détail de l'opération`, `i18n.ts`).
+
+### 3. Allègement du Tableau Fournisseurs :
+- Retrait de la colonne `TOTAL ACHAT` du tableau `BusinessSuppliersView.tsx` pour éliminer la redondance avec la carte KPI du haut.
+
+### 4. Insertion de la Colonne Date après l'ID :
+- Insertion de la colonne `Date` (date de création) immédiatement après `ID` dans tous les tableaux Pro (`BusinessClientsView`, `BusinessSuppliersView`, `BusinessProductsView`, `BusinessFeesView`, `BusinessOrdersView`).
+
+### 5. Correction Sidebar Feedback avec React Portal :
+- `FeedbackWidget.tsx` : Intégration de `createPortal(..., document.body)` et harmonisation des classes CSS (`z-[120]`, `w-[50%]`, `rounded-l-3xl`, header épuré) pour garantir un affichage en tiroir latéral droit parfait, sans être bloqué par le stacking context du footer.
 
 
 ---

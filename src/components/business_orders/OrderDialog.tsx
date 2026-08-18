@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, ShoppingBag, User, DollarSign, Percent, Info, MapPin, Phone, Truck, FileText, CheckCircle2, ChevronRight } from 'lucide-react';
+import { X, ShoppingBag, User, DollarSign, Percent, Info, MapPin, Phone, Truck, FileText, CheckCircle2, ChevronRight, Plus } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import type { BusinessOrder, PaymentStatus, OrderItem } from '@/types';
-import { generateId, fromCents, toCents } from '@/lib/utils';
+import { generateId, fromCents, toCents , formatCurrency } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import { Combobox } from '@/components/ui/Combobox';
 import { Input } from '@/components/ui/Input';
@@ -33,12 +33,11 @@ export default function OrderDialog({ isOpen, onClose, order }: OrderDialogProps
   const clients = useStore((s) => s.businessClients);
   const suppliers = useStore((s) => s.businessSuppliers) || [];
   const products = useStore((s) => s.businessProducts) || [];
-  const businessProfileType = useStore((s) => s.businessProfileType);
   const businessSettings = useStore((s) => s.businessSettings);
   const setBusinessSettings = useStore((s) => s.setBusinessSettings);
   const customPaymentMethods = useStore((s) => s.businessSettings.customPaymentMethods || []);
 
-  const clientOptions = clients.map(c => ({ id: c.id, label: `${c.name} ${c.isVip ? '⭐' : ''} ${c.phone ? `(${c.phone})` : ''}`.trim(), client: c }));
+  const clientOptions = clients.map(c => ({ id: c.id, label: c.clientType === 'pro' ? `🏢 ${c.brandName || c.name} ${c.isVip ? '⭐' : ''}`.trim() : `${c.name} ${c.isVip ? '⭐' : ''} ${c.phone ? `(${c.phone})` : ''}`.trim(), client: c }));
   const supplierOptions = suppliers.map(s => ({ id: s.id, label: s.brandName, supplier: s }));
   const productOptions = products.filter(p => p.isActive).map(p => ({ id: p.id, label: p.name, product: p }));
 
@@ -102,6 +101,7 @@ export default function OrderDialog({ isOpen, onClose, order }: OrderDialogProps
             unitCostPrice_cents: 0,
             unitSellingPrice_cents: 0,
             isFree: false,
+            supplierMode: 'existing',
           }],
           discountRate: 0,
           shippingFee_cents: 0,
@@ -117,8 +117,8 @@ export default function OrderDialog({ isOpen, onClose, order }: OrderDialogProps
   // (Logic moved directly to Combobox onChange for simplicity and closures)
 
   // Calculations
-  const taxMode = (businessProfileType === 'company' ? 'TVA' : 'HT') as 'TVA' | 'HT';
-  const taxRate = taxMode === 'TVA' ? 20 : 0;
+  const taxMode = businessSettings?.defaultTaxMode || 'HT';
+  const taxRate = taxMode === 'TVA' ? (businessSettings?.defaultTaxRate || 20) : 0;
   
   const subtotalBeforeDiscount = formData.items.reduce((acc, item) => {
     const basePrice = item.isFree ? 0 : item.unitSellingPrice_cents;
@@ -272,9 +272,7 @@ export default function OrderDialog({ isOpen, onClose, order }: OrderDialogProps
     onClose();
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-MA', { style: 'currency', currency: 'MAD' }).format(amount);
-  };
+  // Using global formatCurrency imported from @/lib/utils
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center sm:block p-4 sm:p-0">
@@ -293,7 +291,7 @@ export default function OrderDialog({ isOpen, onClose, order }: OrderDialogProps
           <h2 className="text-xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
             <div className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
               <ShoppingBag className="w-5 h-5 text-zinc-900 dark:text-white" />
-            </div>{order ? 'Modifier la vente' : 'Nouvelle Vente'}
+            </div>{order ? 'Détail de la vente' : 'Nouvelle Vente'}
           </h2>
           <button onClick={onClose} className="p-2 bg-zinc-200 dark:bg-zinc-800 rounded-full text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">
             <X className="w-5 h-5" />
@@ -437,9 +435,9 @@ export default function OrderDialog({ isOpen, onClose, order }: OrderDialogProps
                     ...formData,
                     items: [...formData.items, { id: generateId(), productName: '', quantity: 1, unitCostPrice_cents: 0, unitSellingPrice_cents: 0, isFree: false }]
                   })}
-                  className="text-xs font-semibold px-3 py-1.5 bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400 rounded-lg hover:bg-violet-200 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white rounded-lg text-xs font-semibold hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
                 >
-                  + Ajouter un article
+                  <Plus className="w-3.5 h-3.5" /> Ajouter un article
                 </button>
               </div>
               
@@ -549,25 +547,78 @@ export default function OrderDialog({ isOpen, onClose, order }: OrderDialogProps
                         />
                       </div>
 
+                      
                       {/* 4. Fournisseur (Au dessous de la catégorie) */}
                       <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800/60">
-                        <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">
+                        <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-3">
                           Fournisseur (Optionnel)
                         </label>
-                        <Combobox
-                          options={supplierOptions}
-                          value={item.supplierId || ''}
-                          onChange={(val, opt) => {
-                            setFormData(prev => {
-                              const newItems = [...prev.items];
-                              newItems[index] = { ...newItems[index], supplierId: opt ? opt.id : val };
-                              return { ...prev, items: newItems };
-                            });
-                          }}
-                          placeholder="Saisir ou choisir un fournisseur"
-                          allowCustom={true}
-                          customLabel="Nouveau fournisseur :"
-                        />
+                        
+                        <div className="flex bg-zinc-100 dark:bg-zinc-800/80 p-1 rounded-xl w-fit mb-4 border border-zinc-200 dark:border-zinc-700/50">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFormData(prev => {
+                                const newItems = [...prev.items];
+                                newItems[index] = { ...newItems[index], supplierMode: 'existing', supplierId: '' };
+                                return { ...prev, items: newItems };
+                              });
+                            }}
+                            className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${(!item.supplierMode || item.supplierMode === 'existing') ? "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-sm border border-zinc-200/50 dark:border-zinc-700/50" : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white"}`}
+                          >
+                            Existant
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFormData(prev => {
+                                const newItems = [...prev.items];
+                                newItems[index] = { ...newItems[index], supplierMode: 'new', supplierId: '' };
+                                return { ...prev, items: newItems };
+                              });
+                            }}
+                            className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${item.supplierMode === 'new' ? "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-sm border border-zinc-200/50 dark:border-zinc-700/50" : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white"}`}
+                          >
+                            Nouveau
+                          </button>
+                        </div>
+
+                        {(!item.supplierMode || item.supplierMode === 'existing') ? (
+                          <Select
+                            value={item.supplierId || ''}
+                            onValueChange={(val) => {
+                              setFormData(prev => {
+                                const newItems = [...prev.items];
+                                newItems[index] = { ...newItems[index], supplierId: val };
+                                return { ...prev, items: newItems };
+                              });
+                            }}
+                          >
+                            <SelectTrigger className="w-full h-11 bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 rounded-xl">
+                              <SelectValue placeholder="Sélectionner un fournisseur existant" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 rounded-xl">
+                              {supplierOptions.map(opt => (
+                                <SelectItem key={opt.id} value={opt.id} className="cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800">
+                                  {opt.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Input
+                            type="text"
+                            placeholder="Nom du nouveau fournisseur"
+                            value={item.supplierId || ''}
+                            onChange={(e) => {
+                              setFormData(prev => {
+                                const newItems = [...prev.items];
+                                newItems[index] = { ...newItems[index], supplierId: e.target.value };
+                                return { ...prev, items: newItems };
+                              });
+                            }}
+                          />
+                        )}
                       </div>
 
                       {/* 4. Quantité, Prix de vente, Prix de revient et Article gratuit sur la même rangée */}
@@ -893,11 +944,11 @@ export default function OrderDialog({ isOpen, onClose, order }: OrderDialogProps
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex justify-end gap-3">
+        <div className="p-4 border-t border-zinc-100 dark:border-zinc-800 flex justify-end gap-3 bg-zinc-50 dark:bg-zinc-800/40">
           <button
             type="button"
             onClick={onClose}
-            className="px-6 py-2.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-xl font-medium hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+            className="px-6 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-xl font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
           >
             Annuler
           </button>
@@ -911,7 +962,7 @@ export default function OrderDialog({ isOpen, onClose, order }: OrderDialogProps
                 form.requestSubmit();
               }
             }}
-            className="px-6 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-violet-500/25 flex items-center justify-center gap-2"
+            className="px-6 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-bold transition-all shadow-sm flex items-center justify-center gap-2"
           >
             <CheckCircle2 className="w-5 h-5" />
             {order ? 'Enregistrer' : 'Valider la vente'}

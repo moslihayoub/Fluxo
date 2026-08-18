@@ -1,5 +1,5 @@
 import { StateCreator } from 'zustand';
-import type { ActiveView, WorkspaceMode, BusinessProfileType } from '@/types';
+import type { ActiveView, WorkspaceMode } from '@/types';
 import type { StoreState } from '../useStore';
 
 export interface UiSlice {
@@ -11,7 +11,7 @@ export interface UiSlice {
   globalSearch: string;
   isSearchModalOpen: boolean;
   workspaceMode: WorkspaceMode | null;
-  businessProfileType: BusinessProfileType | null;
+
   linkProGainsToPerso: boolean;
   
   setActiveView: (view: ActiveView) => void;
@@ -22,7 +22,7 @@ export interface UiSlice {
   setGlobalSearch: (search: string) => void;
   setIsSearchModalOpen: (isOpen: boolean) => void;
   setWorkspaceMode: (mode: WorkspaceMode | null) => void;
-  setBusinessProfileType: (type: BusinessProfileType | null) => void;
+
   setLinkProGainsToPerso: (link: boolean) => void;
 }
 
@@ -40,7 +40,7 @@ export const createUiSlice: StateCreator<
   globalSearch: '',
   isSearchModalOpen: false,
   workspaceMode: null,
-  businessProfileType: null,
+
   linkProGainsToPerso: false,
 
   setActiveView: (view) => set({ activeView: view }),
@@ -51,6 +51,6 @@ export const createUiSlice: StateCreator<
   setGlobalSearch: (globalSearch) => set({ globalSearch }),
   setIsSearchModalOpen: (isSearchModalOpen) => set({ isSearchModalOpen }),
   setWorkspaceMode: (mode) => set({ workspaceMode: mode }),
-  setBusinessProfileType: (type) => set({ businessProfileType: type }),
+
   setLinkProGainsToPerso: (link) => set({ linkProGainsToPerso: link }),
 });

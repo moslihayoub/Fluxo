@@ -61,11 +61,11 @@ export default function BusinessDashboard({
     const netProfit = totalSales - totalTVA - totalCosts - totalFees;
 
     return {
-      sales: fromCents(totalSales),
-      costs: fromCents(totalCosts),
-      fees: fromCents(totalFees),
-      tva: fromCents(totalTVA),
-      netProfit: fromCents(netProfit),
+      sales: totalSales,
+      costs: totalCosts,
+      fees: totalFees,
+      tva: totalTVA,
+      netProfit: netProfit,
       margin: totalSales > 0 ? (netProfit / totalSales) * 100 : 0
     };
   }, [monthOrders, monthFees]);
@@ -114,10 +114,10 @@ export default function BusinessDashboard({
         return {
           monthId: m.id,
           monthLabel: `${MONTH_NAMES[m.month - 1].slice(0, 3)} ${m.year}`,
-          sales: fromCents(sales),
-          costs: fromCents(costs),
-          fees: fromCents(fees),
-          profit: fromCents(sales - costs - fees)
+          sales: sales,
+          costs: costs,
+          fees: fees,
+          profit: sales - costs - fees
         };
       });
   }, [filteredMonths, businessOrders, businessFees]);
@@ -143,7 +143,7 @@ export default function BusinessDashboard({
     });
 
     return Array.from(map.entries())
-      .map(([name, amount_cents]) => ({ name, amount: fromCents(amount_cents) }))
+      .map(([name, amount_cents]) => ({ name, amount: amount_cents }))
       .sort((a, b) => b.amount - a.amount)
       .slice(0, 5); // Top 5
   }, [monthOrders, monthFees]);
@@ -228,9 +228,9 @@ export default function BusinessDashboard({
               <XAxis dataKey="monthLabel" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
               <YAxis
                 tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
-                tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
+                tickFormatter={(v) => `${(v / 100000).toFixed(0)}k`}
               />
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'currentColor', opacity: 0.1 }} />
               <Legend
                 formatter={(val) => (
                   <span className="text-xs text-zinc-600 dark:text-zinc-400">{val}</span>
@@ -282,9 +282,9 @@ export default function BusinessDashboard({
               />
               <YAxis
                 tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
-                tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
+                tickFormatter={(v) => `${(v / 100000).toFixed(0)}k`}
               />
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'currentColor', opacity: 0.1 }} />
               <Bar dataKey="amount" name="Total Dépensé" radius={[4, 4, 0, 0]}>
                 {supplierChartData.map((_, i) => (
                   <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />

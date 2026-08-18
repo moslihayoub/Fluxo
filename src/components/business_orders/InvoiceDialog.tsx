@@ -3,6 +3,7 @@
 import { useStore } from '@/store/useStore';
 import type { BusinessOrder } from '@/types';
 import { X, Printer, MessageCircle, FileText, ChevronDown } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { useEffect, useRef, useState } from 'react';
@@ -15,7 +16,7 @@ interface InvoiceDialogProps {
 }
 
 export default function InvoiceDialog({ isOpen, onClose, order }: InvoiceDialogProps) {
-  const { businessSettings, businessProfileType } = useStore();
+  const { businessSettings } = useStore();
   const [documentType, setDocumentType] = useState<'invoice' | 'delivery' | 'order'>('invoice');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
@@ -36,10 +37,7 @@ export default function InvoiceDialog({ isOpen, onClose, order }: InvoiceDialogP
 
   if (!isOpen || !order) return null;
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-MA', { style: 'currency', currency: businessSettings.currency || 'MAD' }).format(amount);
-  };
-
+  // Using global formatCurrency imported from @/lib/utils
   const handlePrint = () => {
     window.print();
   };
@@ -84,12 +82,12 @@ export default function InvoiceDialog({ isOpen, onClose, order }: InvoiceDialogP
       ? order.items.map(i => `- ${i.quantity}x ${i.productName}`).join('\n')
       : `- ${order.quantity}x ${order.productName}`;
     const body = `Voici le détail de votre ${getDocTitle()} (${order.orderNumber}):\n${itemList}`;
-    const pricing = `\nTotal: ${formatCurrency(order.amountTTC_cents)}`;
+    const pricing = `\nTotal: ${formatCurrency(order.amountTTC_cents, false, businessSettings.currency || 'MAD')}`;
     
     let balanceStr = "";
     if (documentType === 'invoice') {
       if (order.remainingBalance_cents > 0) {
-        balanceStr = `\nAvance reçue: ${formatCurrency(order.advancePaid_cents)}\nReste à payer: ${formatCurrency(order.remainingBalance_cents)}`;
+        balanceStr = `\nAvance reçue: ${formatCurrency(order.advancePaid_cents, false, businessSettings.currency || 'MAD')}\nReste à payer: ${formatCurrency(order.remainingBalance_cents, false, businessSettings.currency || 'MAD')}`;
       } else if (order.advancePaid_cents > 0 && order.remainingBalance_cents === 0) {
         balanceStr = `\nPayé en totalité.`;
       }

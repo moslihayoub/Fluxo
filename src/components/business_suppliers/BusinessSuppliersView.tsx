@@ -118,7 +118,7 @@ export default function BusinessSuppliersView() {
           <div className="flex items-center gap-2">
             <button
               onClick={handleAdd}
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg font-medium hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-colors shadow-sm"
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-medium transition-colors shadow-sm"
             >
               <Plus className="w-4 h-4" /> Ajouter un fournisseur
             </button>
@@ -157,7 +157,7 @@ export default function BusinessSuppliersView() {
             <h3 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">Total Achats (Est.)</h3>
           </div>
           <p className="text-2xl font-black text-rose-600 dark:text-rose-400">
-            {formatCurrency(fromCents(globalStats.totalPurchaseValue_cents))}
+            {formatCurrency(globalStats.totalPurchaseValue_cents)}
           </p>
         </div>
       </div>
@@ -170,12 +170,13 @@ export default function BusinessSuppliersView() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[100px]">ID</TableHead>
+                  <TableHead>Date</TableHead>
                   <TableHead>Marque</TableHead>
                   <TableHead>Contact</TableHead>
                   <TableHead>Marchandise</TableHead>
+                  <TableHead className="text-center">Catégories</TableHead>
                   <TableHead className="text-center">Produits</TableHead>
                   <TableHead className="text-center">Ventes (Nb)</TableHead>
-                  <TableHead className="text-right">Total Achat</TableHead>
                   <TableHead className="text-right w-16">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -187,12 +188,15 @@ export default function BusinessSuppliersView() {
                       <TableCell className="font-mono text-xs text-zinc-500">
                         {supplier.id.slice(0, 8)}
                       </TableCell>
+                      <TableCell className="text-xs text-zinc-500 whitespace-nowrap">
+                        {supplier.createdAt ? new Date(supplier.createdAt).toLocaleDateString('fr-MA', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'}
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-3">
                           {supplier.avatarUrl ? (
-                            <img src={supplier.avatarUrl} alt={supplier.brandName} className="w-8 h-8 rounded-lg object-cover border border-zinc-200 dark:border-zinc-700" />
+                            <img src={supplier.avatarUrl} alt={supplier.brandName} className="w-8 h-8 rounded-full object-cover border border-zinc-200 dark:border-zinc-700 shrink-0" />
                           ) : (
-                            <div className="w-8 h-8 rounded-lg bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 flex items-center justify-center text-sm font-bold">
+                            <div className="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 flex items-center justify-center text-sm font-bold shrink-0">
                               <Building2 className="w-4 h-4" />
                             </div>
                           )}
@@ -223,23 +227,22 @@ export default function BusinessSuppliersView() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <span className="text-xs font-medium bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded text-zinc-700 dark:text-zinc-300">
-                          {supplier.merchandiseType || 'Non spécifié'}
+                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded ${
+                          supplier.merchandiseType === 'digital'
+                            ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400'
+                            : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                        }`}>
+                          {supplier.merchandiseType === 'digital' ? 'Digital' : 'Physique'}
                         </span>
                       </TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex flex-col items-center justify-center">
-                          <span className="text-sm font-bold text-zinc-900 dark:text-white">{stats.productCount}</span>
-                          <span className="text-[10px] text-zinc-500">{stats.categoryCount} cat.</span>
-                        </div>
+                      <TableCell className="text-center font-medium text-zinc-900 dark:text-white">
+                        {stats.categoryCount}
+                      </TableCell>
+                      <TableCell className="text-center font-bold text-zinc-900 dark:text-white">
+                        {stats.productCount}
                       </TableCell>
                       <TableCell className="text-center font-medium text-zinc-900 dark:text-white">
                         {stats.salesCount}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="font-black text-sm text-zinc-900 dark:text-white">
-                          {formatCurrency(stats.totalPurchaseValue)}
-                        </div>
                       </TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
@@ -278,9 +281,9 @@ export default function BusinessSuppliersView() {
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
                         {supplier.avatarUrl ? (
-                          <img src={supplier.avatarUrl} alt={supplier.brandName} className="w-10 h-10 rounded-xl object-cover border border-zinc-200 dark:border-zinc-700" />
+                          <img src={supplier.avatarUrl} alt={supplier.brandName} className="w-10 h-10 rounded-full object-cover border border-zinc-200 dark:border-zinc-700 shrink-0" />
                         ) : (
-                          <div className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 flex items-center justify-center text-lg font-bold">
+                          <div className="w-10 h-10 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 flex items-center justify-center text-lg font-bold shrink-0">
                             <Building2 className="w-5 h-5" />
                           </div>
                         )}

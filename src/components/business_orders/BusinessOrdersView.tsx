@@ -180,11 +180,11 @@ export default function BusinessOrdersView() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="font-black text-sm text-zinc-900 dark:text-white">
-                        {formatCurrency(fromCents(order.amountTTC_cents || (order as any).totalAmount_cents || 0))}
+                        {formatCurrency(order.amountTTC_cents || (order as any).totalAmount_cents || 0)}
                       </div>
                       {Boolean(order.remainingBalance_cents && order.remainingBalance_cents > 0) && (
                         <div className="text-xs font-bold text-rose-500">
-                          Reste: {formatCurrency(fromCents(order.remainingBalance_cents))}
+                          Reste: {formatCurrency(order.remainingBalance_cents)}
                         </div>
                       )}
                     </TableCell>
@@ -286,11 +286,11 @@ export default function BusinessOrdersView() {
                   <div className="flex items-center justify-between pt-3 border-t border-zinc-100 dark:border-zinc-800">
                     <div>
                       <div className="font-black text-lg text-zinc-900 dark:text-white">
-                        {formatCurrency(fromCents(order.amountTTC_cents || (order as any).totalAmount_cents || 0))}
+                        {formatCurrency(order.amountTTC_cents || (order as any).totalAmount_cents || 0)}
                       </div>
                       {Boolean(order.remainingBalance_cents && order.remainingBalance_cents > 0) && (
                         <div className="text-xs font-bold text-rose-500">
-                          Reste: {formatCurrency(fromCents(order.remainingBalance_cents))}
+                          Reste: {formatCurrency(order.remainingBalance_cents)}
                         </div>
                       )}
                     </div>

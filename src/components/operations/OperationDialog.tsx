@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { X, TrendingUp, TrendingDown, Tag, Plus, Trash2, CheckCircle2 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
-import { generateId, fromCents, toCents } from '@/lib/utils';
+import { generateId, fromCents, toCents, cn } from '@/lib/utils';
 import type { Operation, SubAmount } from '@/types';
 import { getTranslation } from '@/lib/i18n';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/Select';
@@ -15,13 +15,18 @@ interface OperationDialogProps {
 }
 
 export default function OperationDialog({ operation, monthId, onClose }: OperationDialogProps) {
-  const { operationTypes, addOperation, updateOperation, addOperationType, language } = useStore();
+  const { operationTypes, addOperation, updateOperation, addOperationType, language, businessOrders, businessFees, months } = useStore();
   const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(language, key);
 
   const [amount, setAmount] = useState(operation ? (fromCents(operation.amount_cents) || 0).toString() : '');
   const [kind, setKind] = useState<'encaissement' | 'decaissement'>(operation?.kind ?? 'encaissement');
-  const [operationTypeLabel, setOperationTypeLabel] = useState(operation?.operationTypeLabel ?? '');
-  const [operationTypeId, setOperationTypeId] = useState(operation?.operationTypeId ?? '');
+  const [isProProfitSync, setIsProProfitSync] = useState(operation?.isProProfitSync ?? false);
+  const [operationTypeLabel, setOperationTypeLabel] = useState(
+    operation?.operationTypeLabel ?? (operation?.isProProfitSync ? 'Bénéfice Pro' : '')
+  );
+  const [operationTypeId, setOperationTypeId] = useState(
+    operation?.isProProfitSync ? '__pro_profit__' : (operation?.operationTypeId ?? '')
+  );
   const [notes, setNotes] = useState(operation?.notes ?? '');
   const [newTypeLabel, setNewTypeLabel] = useState('');
   const [addToList, setAddToList] = useState(true);
@@ -32,14 +37,47 @@ export default function OperationDialog({ operation, monthId, onClose }: Operati
 
   const isEditing = !!operation;
 
+  // Calcul du bénéfice Pro (pour le mois ciblé si données présentes, ou global)
+  const targetMonth = (months || []).find(m => m.id === monthId);
+  let targetOrders = businessOrders || [];
+  let targetFees = businessFees || [];
+  if (targetMonth) {
+    const mOrders = targetOrders.filter(o => {
+      const d = new Date(o.date);
+      return d.getMonth() + 1 === targetMonth.month && d.getFullYear() === targetMonth.year;
+    });
+    const mFees = targetFees.filter(f => {
+      const d = new Date(f.date);
+      return d.getMonth() + 1 === targetMonth.month && d.getFullYear() === targetMonth.year;
+    });
+    if (mOrders.length > 0 || mFees.length > 0) {
+      targetOrders = mOrders;
+      targetFees = mFees;
+    }
+  }
+
+  const totalProRevenue = targetOrders.reduce((sum, order) => sum + (order.amountTTC_cents || 0), 0);
+  const totalProCosts = targetOrders.reduce((sum, order) => sum + (order.items || []).reduce((itemSum, item) => itemSum + ((item.unitCostPrice_cents || 0) * (item.quantity || 1)), 0), 0);
+  const totalProFees = targetFees.reduce((sum, fee) => sum + (fee.amount_cents || 0), 0);
+  const totalProProfitCents = Math.max(0, totalProRevenue - totalProCosts - totalProFees);
+
   const handleTypeSelect = (value: string) => {
     if (value === '__new__') {
       setIsNewType(true);
+      setIsProProfitSync(false);
       setOperationTypeId('');
       setOperationTypeLabel('');
+    } else if (value === '__pro_profit__') {
+      setIsNewType(false);
+      setIsProProfitSync(true);
+      setHasSubAmounts(false);
+      setOperationTypeId('__pro_profit__');
+      setOperationTypeLabel('Bénéfice Pro');
+      setAmount((fromCents(totalProProfitCents) || 0).toString());
     } else {
       const found = operationTypes.find((ot) => ot.id === value);
       setIsNewType(false);
+      setIsProProfitSync(false);
       setOperationTypeId(found?.id ?? '');
       setOperationTypeLabel(found?.label ?? '');
       
@@ -82,8 +120,8 @@ export default function OperationDialog({ operation, monthId, onClose }: Operati
       }
     }
 
-    let finalTypeId = operationTypeId;
-    let finalTypeLabel = operationTypeLabel;
+    let finalTypeId = operationTypeId === '__pro_profit__' ? undefined : operationTypeId;
+    let finalTypeLabel = isProProfitSync ? (operationTypeLabel || 'Bénéfice Pro') : operationTypeLabel;
 
     if (isNewType) {
       if (!newTypeLabel.trim()) { setError('Saisissez un libellé de catégorie.'); return; }
@@ -105,9 +143,10 @@ export default function OperationDialog({ operation, monthId, onClose }: Operati
       operationTypeId: finalTypeId || undefined,
       operationTypeLabel: finalTypeLabel,
       kind,
-      amount_cents: parsedAmount,
+      amount_cents: isProProfitSync ? totalProProfitCents : parsedAmount,
       subAmounts: hasSubAmounts ? subAmounts : undefined,
       notes: notes.trim() || undefined,
+      isProProfitSync,
     };
 
     if (isEditing && operation) {
@@ -177,7 +216,15 @@ export default function OperationDialog({ operation, monthId, onClose }: Operati
               </button>
               <button
                 type="button"
-                onClick={() => setKind('decaissement')}
+                onClick={() => {
+                  setKind('decaissement');
+                  if (isProProfitSync) {
+                    setIsProProfitSync(false);
+                    setOperationTypeId('');
+                    setOperationTypeLabel('');
+                    setAmount('');
+                  }
+                }}
                 className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
                   kind === 'decaissement'
                     ? 'border-rose-600 bg-rose-50/50 dark:bg-rose-950/20 text-rose-900 dark:text-rose-300 ring-1 ring-rose-500/20 font-medium'
@@ -213,10 +260,19 @@ export default function OperationDialog({ operation, monthId, onClose }: Operati
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
+                {/* Option spéciale Bénéfice Pro pour les entrées */}
+                {kind === 'encaissement' && (
+                  <SelectItem 
+                    value="__pro_profit__" 
+                    className="text-violet-600 dark:text-violet-400 font-semibold bg-violet-50/60 dark:bg-violet-950/30 focus:bg-violet-100 dark:focus:bg-violet-900/40 focus:text-violet-700 dark:focus:text-violet-300"
+                  >
+                    Bénéfice Pro
+                  </SelectItem>
+                )}
                 {operationTypes.map((ot) => (
                   <SelectItem key={ot.id} value={ot.id}>{ot.label}</SelectItem>
                 ))}
-                {operationTypeId && !isNewType && !operationTypes.some(ot => ot.id === operationTypeId) && (
+                {operationTypeId && !isNewType && operationTypeId !== '__pro_profit__' && !operationTypes.some(ot => ot.id === operationTypeId) && (
                   <SelectItem value={operationTypeId}>{operationTypeLabel || operationTypeId}</SelectItem>
                 )}
                 <SelectItem value="__new__">+ {t('cat.new')}</SelectItem>
@@ -255,18 +311,26 @@ export default function OperationDialog({ operation, monthId, onClose }: Operati
 
           {/* 3. Montant */}
           <div>
-            <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center justify-between mb-2">
               <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                 {t('common.amount')} <span className="text-zinc-400 font-normal lowercase">(optionnel)</span>
               </label>
-              <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300 cursor-pointer">
+              <label className={cn(
+                "flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300",
+                isProProfitSync ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
+              )}>
                 <span className="font-medium text-xs">{t('ops.subAmounts')}</span>
                 <div className="relative inline-flex items-center">
                   <input
                     type="checkbox"
                     className="sr-only peer"
                     checked={hasSubAmounts}
-                    onChange={(e) => setHasSubAmounts(e.target.checked)}
+                    onChange={(e) => {
+                      if (!isProProfitSync) {
+                        setHasSubAmounts(e.target.checked);
+                      }
+                    }}
+                    disabled={isProProfitSync}
                   />
                   <div className="relative w-9 h-5 bg-zinc-300 peer-focus:outline-none rounded-full peer dark:bg-zinc-600 peer-checked:after:translate-x-full peer-checked:after:border-zinc-900 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-zinc-900 after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-zinc-600 peer-checked:bg-zinc-900 dark:peer-checked:bg-white dark:peer-checked:after:border-white"></div>
                 </div>
@@ -279,11 +343,15 @@ export default function OperationDialog({ operation, monthId, onClose }: Operati
                   type="number"
                   min="0.01"
                   step="0.01"
-                  value={amount}
+                  value={isProProfitSync ? (totalProProfitCents / 100).toFixed(2) : amount}
                   onChange={(e) => { setAmount(e.target.value); setError(''); }}
                   placeholder="0,00"
+                  disabled={isProProfitSync}
                   data-testid="operation-price-input"
-                  className="w-full px-3 py-2 pr-16 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white text-sm font-mono placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white transition-shadow"
+                  className={cn(
+                    "w-full px-3 py-2 pr-16 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white text-sm font-mono placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white transition-shadow",
+                    isProProfitSync && "opacity-80 bg-zinc-50 dark:bg-zinc-900/50 text-violet-700 dark:text-violet-400 font-bold"
+                  )}
                 />
                 <span className="absolute right-3 top-2.5 text-xs font-semibold text-zinc-400 dark:text-zinc-500">
                   DH
@@ -383,11 +451,7 @@ export default function OperationDialog({ operation, monthId, onClose }: Operati
             type="submit"
             form="operation-form"
             data-testid="operation-submit-btn"
-            className={`px-6 py-2.5 text-white rounded-xl font-bold transition-colors shadow-sm flex items-center gap-2 ${
-              kind === 'encaissement' 
-                ? 'bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600' 
-                : 'bg-rose-600 hover:bg-rose-700 dark:bg-rose-500 dark:hover:bg-rose-600'
-            }`}
+            className="px-6 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-900 rounded-xl font-bold transition-colors shadow-sm flex items-center gap-2"
           >
             {isEditing ? <><CheckCircle2 className="w-4 h-4" /> {t('common.edit')}</> : <><Plus className="w-4 h-4" /> {t('common.add')}</>}
           </button>

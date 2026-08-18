@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useStore } from '@/store/useStore';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { TrendingUp, DollarSign, AlertCircle, Download, FileSpreadsheet, Users, ShoppingBag, Edit2, Plus, Upload } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell, PieChart, Pie, Legend } from 'recharts';
 import toast from 'react-hot-toast';
@@ -10,13 +11,12 @@ import OrderDialog from '@/components/business_orders/OrderDialog';
 import PayPalSupportCard from '@/components/widgets/PayPalSupportCard';
 import GuestWarningBanner from '@/components/widgets/GuestWarningBanner';
 import { ScrollReveal } from '@/components/ui/Animation';
-import { formatCurrency } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 
 export default function BusinessDashboardView() {
   const orders = useStore((s) => s.businessOrders);
+  const fees = useStore((s) => s.businessFees);
   const clients = useStore((s) => s.businessClients);
-  const businessProfileType = useStore((s) => s.businessProfileType);
-  const setBusinessProfileType = useStore((s) => s.setBusinessProfileType);
   const setActiveView = useStore((s) => s.setActiveView);
   const language = useStore((s) => s.language);
   
@@ -28,6 +28,30 @@ export default function BusinessDashboardView() {
   const totalProfit = orders.reduce((acc, order) => acc + (Number(order.netProfit_cents) || Number((order as any).profit_cents) || Number((order as any).profit) || 0), 0);
   const totalPending = orders.reduce((acc, order) => acc + (Number(order.remainingBalance_cents) || Number((order as any).remaining_cents) || Number((order as any).remainingBalance) || 0), 0);
   const totalOrdersCount = orders.length;
+
+  // --- Frais Metrics ---
+  const totalFees = fees.reduce((sum, f) => sum + f.amount_cents, 0);
+  
+  const feesByCategoryMap = new Map<string, number>();
+  fees.forEach(f => {
+    const val = feesByCategoryMap.get(f.category) || 0;
+    feesByCategoryMap.set(f.category, val + f.amount_cents);
+  });
+  const feesByCategory = Array.from(feesByCategoryMap.entries())
+    .map(([name, val]) => ({ name, value: val }))
+    .sort((a, b) => b.value - a.value);
+
+  const topSuppliersMap = new Map<string, number>();
+  fees.forEach(f => {
+    const supp = f.supplierName || 'Divers';
+    const val = topSuppliersMap.get(supp) || 0;
+    topSuppliersMap.set(supp, val + f.amount_cents);
+  });
+  const topSuppliersData = Array.from(topSuppliersMap.entries())
+    .map(([name, val]) => ({ name, value: val }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 5);
+
 
   // Chart data formatting
   const chartData = orders
@@ -136,18 +160,7 @@ export default function BusinessDashboardView() {
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white tracking-tight flex items-center gap-2">
             {language === 'fr' ? 'Tableau de Bord Pro' : 'Business Dashboard'}
-            {businessProfileType && (
-              <button 
-                onClick={() => setBusinessProfileType(null)}
-                className="text-[10px] sm:text-xs ml-2 px-2.5 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400 hover:bg-violet-200 dark:hover:bg-violet-900/50 transition-colors flex items-center gap-1.5 font-medium shadow-sm"
-                title={language === 'fr' ? 'Changer le type de profil Pro' : 'Change Pro profile type'}
-              >
-                {businessProfileType === 'freelance' 
-                  ? (language === 'fr' ? 'Indépendant' : 'Freelance') 
-                  : (language === 'fr' ? 'Entreprise' : 'Company')}
-                <Edit2 className="w-3 h-3" />
-              </button>
-            )}
+
           </h1>
           <p className="text-sm text-zinc-500 mt-1">
             {language === 'fr' ? 'Aperçu général de votre activité professionnelle.' : 'General overview of your business activity.'}
@@ -240,10 +253,10 @@ export default function BusinessDashboardView() {
               <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#3f3f46" opacity={0.2} />
                 <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#71717a' }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#71717a' }} tickFormatter={(val) => `${val} DH`} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#71717a' }} tickFormatter={(val) => `${(val / 100).toFixed(0)} DH`} />
                 <Tooltip 
                   contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '12px', color: '#fff' }} 
-                  formatter={(val: any) => [`${val} MAD`, '']}
+                  formatter={(val: any) => [formatCurrency(val), '']}
                 />
                 <Line type="monotone" dataKey="ca" name="CA" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, fill: '#3b82f6' }} activeDot={{ r: 6 }} />
                 <Line type="monotone" dataKey="profit" name="Bénéfice" stroke="#10b981" strokeWidth={3} dot={{ r: 4, fill: '#10b981' }} activeDot={{ r: 6 }} />
@@ -265,16 +278,13 @@ export default function BusinessDashboardView() {
             <div className="h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={productData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={(entry) => entry.name}>
+                  <Pie data={productData} dataKey="value" nameKey="name" cx="50%" cy="45%" innerRadius={45} outerRadius={75} paddingAngle={3}>
                     {productData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '12px', color: '#fff' }} 
-                    formatter={(val: any) => [`${val} MAD`, 'CA']}
-                  />
-                  <Legend />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend iconType="circle" wrapperStyle={{ paddingTop: '8px', fontSize: '12px' }} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -294,11 +304,8 @@ export default function BusinessDashboardView() {
                 <BarChart data={clientData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#3f3f46" opacity={0.2} />
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#71717a' }} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#71717a' }} tickFormatter={(val) => `${val} DH`} />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '12px', color: '#fff' }} 
-                    formatter={(val: any) => [`${val} MAD`, 'CA']}
-                  />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#71717a' }} tickFormatter={(val) => `${(val / 100).toFixed(0)} DH`} />
+                  <Tooltip content={<CustomTooltip />} />
                   <Bar dataKey="value" name="Chiffre d'Affaires" radius={[4, 4, 0, 0]}>
                     {clientData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
@@ -315,6 +322,78 @@ export default function BusinessDashboardView() {
         </div>
       </div>
 
+      
+      <hr className="border-zinc-200 dark:border-zinc-800 my-8" />
+      <div className="space-y-6 animate-in fade-in duration-300">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl shadow-sm hover:border-rose-500/30 transition-all">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center text-rose-600 dark:text-rose-400">
+                <DollarSign className="w-5 h-5" />
+              </div>
+              <h3 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">Total des Frais</h3>
+            </div>
+            <p className="text-2xl font-black text-rose-600 dark:text-rose-400">
+              {formatCurrency(totalFees, false, 'DH')}
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl shadow-sm">
+            <h2 className="text-lg font-bold text-zinc-900 dark:text-white mb-4">Répartition des Frais</h2>
+            {feesByCategory.length > 0 ? (
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={feesByCategory} dataKey="value" nameKey="name" cx="50%" cy="45%" innerRadius={45} outerRadius={75} paddingAngle={3}>
+                      {feesByCategory.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip content={<CustomTooltip />} />
+                    <Legend iconType="circle" wrapperStyle={{ paddingTop: '8px', fontSize: '12px' }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-64 w-full flex flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-900/50 rounded-xl border-2 border-dashed border-zinc-200 dark:border-zinc-800 text-zinc-400">
+                <p className="text-sm">Aucune donnée disponible.</p>
+              </div>
+            )}
+          </div>
+
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+            <h2 className="text-lg font-bold text-zinc-900 dark:text-white mb-4">Top Fournisseurs</h2>
+            <div className="flex-1 overflow-auto">
+              {topSuppliersData.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Fournisseur</TableHead>
+                      <TableHead className="text-right">Total Dépensé</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {topSuppliersData.map((supp, i) => (
+                      <TableRow key={i}>
+                        <TableCell className="font-medium text-zinc-900 dark:text-white">{supp.name}</TableCell>
+                        <TableCell className="text-right font-bold font-mono text-rose-500">
+                          {formatCurrency(supp.value, false, 'DH')}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div className="h-full w-full min-h-[200px] flex flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-900/50 rounded-xl border-2 border-dashed border-zinc-200 dark:border-zinc-800 text-zinc-400">
+                  <p className="text-sm">Aucune donnée disponible.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
       <PayPalSupportCard className="mt-8" />
       
       {showImportDialog && (

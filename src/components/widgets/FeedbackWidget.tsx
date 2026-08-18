@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { MessageSquarePlus, X, Send, CheckCircle2, Sparkles, Bug, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useStore } from '@/store/useStore';
@@ -113,22 +114,33 @@ export function FeedbackTriggerButton({ className = '', variant = 'default' }: {
     <>
       {renderTrigger()}
 
-      {isOpen && (
-        <div className="fixed inset-0 z-[120] flex sm:items-stretch sm:justify-end items-end p-0">
-          <div className="absolute inset-0 bg-zinc-950/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setIsOpen(false)} />
-          <div className="relative z-10 bg-white dark:bg-zinc-900 border-l border-t sm:border-t-0 border-zinc-200 dark:border-zinc-800 w-full sm:w-[450px] h-[90vh] sm:h-full rounded-t-3xl sm:rounded-none sm:rounded-l-3xl shadow-2xl flex flex-col animate-in slide-in-from-bottom sm:slide-in-from-right duration-300">
+      {isOpen && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[120] flex items-center justify-center sm:block p-4 sm:p-0">
+          <div 
+            className="absolute sm:fixed inset-0 bg-zinc-950/50 backdrop-blur-sm animate-in fade-in duration-200" 
+            onClick={() => setIsOpen(false)} 
+          />
+          <div className="relative sm:fixed sm:inset-y-0 sm:right-0 z-10 bg-white dark:bg-zinc-900 w-full max-w-md sm:max-w-none sm:w-[50%] rounded-3xl sm:rounded-none sm:rounded-l-3xl shadow-xl overflow-hidden flex flex-col max-h-[90vh] sm:max-h-none sm:h-full animate-in fade-in sm:slide-in-from-right duration-300">
             
-            <div className="flex-shrink-0 flex items-center justify-between p-5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 sm:rounded-tl-3xl rounded-tl-3xl rounded-tr-3xl sm:rounded-tr-none">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-zinc-100 dark:border-zinc-800">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 flex items-center justify-center">
                   <MessageSquarePlus className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-zinc-900 dark:text-white">{t('feedback.title')}</h3>
-                  <p className="text-xs text-zinc-500">{t('feedback.subtitle')}</p>
+                  <h2 className="text-lg font-bold text-zinc-900 dark:text-white">
+                    {t('feedback.title')}
+                  </h2>
+                  <p className="text-xs text-zinc-500">
+                    {t('feedback.subtitle')}
+                  </p>
                 </div>
               </div>
-              <button onClick={() => setIsOpen(false)} className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors">
+              <button 
+                onClick={() => setIsOpen(false)} 
+                className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -260,7 +272,8 @@ export function FeedbackTriggerButton({ className = '', variant = 'default' }: {
             )}
 
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

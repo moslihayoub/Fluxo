@@ -20,7 +20,7 @@ export default function MobileNav() {
   const setLanguage = useStore((s) => s.setLanguage);
   const workspaceMode = useStore((s) => s.workspaceMode);
   const setWorkspaceMode = useStore((s) => s.setWorkspaceMode);
-  const setBusinessProfileType = useStore((s) => s.setBusinessProfileType);
+
   const setIsSearchModalOpen = useStore((s) => s.setIsSearchModalOpen);
   const { theme, setTheme } = useTheme();
   const { user } = useAuth();
@@ -220,7 +220,7 @@ export default function MobileNav() {
                     <button
                       onClick={() => {
                         setWorkspaceMode('business');
-                        if (!useStore.getState().businessProfileType) setBusinessProfileType('freelance');
+
                         setActiveView('dashboard');
                         setIsOpen(false);
                       }}

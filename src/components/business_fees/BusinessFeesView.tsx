@@ -17,9 +17,17 @@ import {
   CardContent,
 } from "@/components/ui/card"
 import { ScrollReveal } from '@/components/ui/Animation';
+import FeeDialog from './FeeDialog';
+import type { BusinessFee } from '@/types';
+import { useState } from 'react';
+
 export default function BusinessFeesView() {
   const fees = useStore((s) => s.businessFees);
   const globalSearch = useStore((s) => s.globalSearch);
+  const language = useStore((s) => s.language);
+  
+  const [isFeeDialogOpen, setIsFeeDialogOpen] = useState(false);
+  const [selectedFee, setSelectedFee] = useState<BusinessFee | null>(null);
 
   const filteredFees = fees.filter(fee => {
     if (!globalSearch) return true;
@@ -27,15 +35,32 @@ export default function BusinessFeesView() {
     return fee.label.toLowerCase().includes(s) || fee.category.toLowerCase().includes(s);
   });
 
+  const handleEditFee = (fee: BusinessFee) => {
+    setSelectedFee(fee);
+    setIsFeeDialogOpen(true);
+  };
+
   return (
     <ScrollReveal className="w-full max-w-6xl mx-auto p-4 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-zinc-900 dark:text-white tracking-tight flex items-center gap-2">
-            Frais & Dépenses
+            {language === 'fr' ? 'Frais & Dépenses' : 'Expenses & Fees'}
           </h1>
-          <p className="text-sm text-zinc-500 mt-1">Gérez vos charges fixes et variables (loyer, marketing, abonnements...).</p>
+          <p className="text-sm text-zinc-500 mt-1">
+            {language === 'fr' ? 'Gérez vos charges fixes et variables (loyer, marketing, abonnements...).' : 'Manage your fixed and variable costs.'}
+          </p>
         </div>
+        
+        <button
+          onClick={() => {
+            setSelectedFee(null);
+            setIsFeeDialogOpen(true);
+          }}
+          className="flex items-center justify-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-medium transition-colors shadow-sm text-sm shrink-0"
+        >
+          <Plus className="w-4 h-4" /> {language === 'fr' ? 'Ajouter un Frais' : 'Add Expense'}
+        </button>
       </div>
 
       {filteredFees.length === 0 ? (
@@ -44,9 +69,18 @@ export default function BusinessFeesView() {
             <Receipt className="w-10 h-10 text-zinc-400 dark:text-zinc-500" />
           </div>
           <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">Aucun frais enregistré</h2>
-          <p className="text-zinc-500 dark:text-zinc-400 max-w-md mx-auto">
-            {globalSearch ? 'Aucun frais ne correspond à votre recherche.' : 'Les frais seront affichés ici une fois synchronisés ou implémentés.'}
+          <p className="text-zinc-500 dark:text-zinc-400 max-w-md mx-auto mb-6">
+            {globalSearch ? 'Aucun frais ne correspond à votre recherche.' : 'Enregistrez vos premières charges fixes ou variables pour suivre vos dépenses.'}
           </p>
+          <button
+            onClick={() => {
+              setSelectedFee(null);
+              setIsFeeDialogOpen(true);
+            }}
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-medium transition-colors shadow-sm text-sm"
+          >
+            <Plus className="w-4 h-4" /> {language === 'fr' ? 'Ajouter un Frais' : 'Add Expense'}
+          </button>
         </div>
       ) : (
         <>
@@ -55,16 +89,25 @@ export default function BusinessFeesView() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-[80px]">ID</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Libellé</TableHead>
+                  <TableHead>Fournisseur</TableHead>
                   <TableHead>Catégorie</TableHead>
                   <TableHead className="text-right">Montant</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredFees.map((fee) => (
-                  <TableRow key={fee.id} className="group cursor-default hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
-                    <TableCell className="text-zinc-500 text-sm">
+                  <TableRow 
+                    key={fee.id} 
+                    className="group cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                    onClick={() => handleEditFee(fee)}
+                  >
+                    <TableCell className="font-mono text-xs text-zinc-500">
+                      {fee.id.slice(0, 8)}
+                    </TableCell>
+                    <TableCell className="text-zinc-500 text-xs whitespace-nowrap">
                       {new Date(fee.date).toLocaleDateString('fr-MA')}
                     </TableCell>
                     <TableCell className="font-medium text-zinc-900 dark:text-white">
@@ -73,13 +116,16 @@ export default function BusinessFeesView() {
                         {fee.label}
                       </div>
                     </TableCell>
+                    <TableCell className="text-xs text-zinc-600 dark:text-zinc-400">
+                      {fee.supplierName || '—'}
+                    </TableCell>
                     <TableCell>
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200">
                         {fee.category}
                       </span>
                     </TableCell>
                     <TableCell className="text-right font-bold text-rose-600 dark:text-rose-400">
-                      -{formatCurrency(fromCents(fee.amount_cents))}
+                      -{formatCurrency(fee.amount_cents)}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -90,7 +136,7 @@ export default function BusinessFeesView() {
           {/* ── MOBILE LIST ── */}
           <div className="sm:hidden flex flex-col gap-3">
             {filteredFees.map((fee) => (
-              <Card key={fee.id}>
+              <Card key={fee.id} onClick={() => handleEditFee(fee)} className="cursor-pointer hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors">
                 <CardContent className="p-4 flex flex-col gap-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2">
@@ -113,7 +159,7 @@ export default function BusinessFeesView() {
 
                   <div className="flex items-center justify-between pt-3 border-t border-zinc-100 dark:border-zinc-800">
                     <span className="text-xs text-zinc-500 font-medium">Montant</span>
-                    <span className="font-bold text-rose-600 dark:text-rose-400">-{formatCurrency(fromCents(fee.amount_cents))}</span>
+                    <span className="font-bold text-rose-600 dark:text-rose-400">-{formatCurrency(fee.amount_cents)}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -121,6 +167,12 @@ export default function BusinessFeesView() {
           </div>
         </>
       )}
+
+      <FeeDialog
+        isOpen={isFeeDialogOpen}
+        onClose={() => setIsFeeDialogOpen(false)}
+        fee={selectedFee}
+      />
     </ScrollReveal>
   );
 }

@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useStore } from '@/store/useStore';
 import { useHydration } from '@/hooks/useHydration';
-import OnboardingView from '@/components/layout/OnboardingView';
+// import OnboardingView from '@/components/layout/OnboardingView';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 // ─── Lazy-loaded views (réduit le bundle initial de ~653 KB à ~200 KB) ────────
@@ -27,7 +27,7 @@ export default function Home() {
   const isHydrated = useHydration();
   const activeView = useStore((s) => s.activeView);
   const workspaceMode = useStore((s) => s.workspaceMode);
-  const businessProfileType = useStore((s) => s.businessProfileType);
+
 
   if (!isHydrated) {
     return (
@@ -37,8 +37,8 @@ export default function Home() {
     );
   }
 
-  if (!workspaceMode || (workspaceMode === 'business' && !businessProfileType)) {
-    return <OnboardingView />;
+  if (!workspaceMode) {
+    return null; // Or some generic loading/fallback if needed, but Onboarding is gone
   }
 
   return (

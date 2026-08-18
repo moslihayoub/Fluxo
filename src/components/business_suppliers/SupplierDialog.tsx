@@ -207,40 +207,14 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
             <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white flex items-center justify-center">
               <Building2 className="w-5 h-5" />
             </div>
-            <h2 className="text-lg font-bold text-zinc-900 dark:text-white hidden sm:block">
-              {supplier ? 'Modifier le fournisseur' : 'Nouveau fournisseur'}
+            <h2 className="text-lg font-bold text-zinc-900 dark:text-white">
+              {supplier ? 'Détail du fournisseur' : 'Nouveau fournisseur'}
             </h2>
           </div>
           
-          <div className="flex items-center gap-3">
-            <div className="flex bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl">
-              <button
-                type="button"
-                onClick={() => setFormData({ ...formData, merchandiseType: 'physical' })}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  formData.merchandiseType === 'physical'
-                    ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-sm'
-                    : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
-                }`}
-              >
-                <Package className="w-3.5 h-3.5" /> Physique
-              </button>
-              <button
-                type="button"
-                onClick={() => setFormData({ ...formData, merchandiseType: 'digital' })}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  formData.merchandiseType === 'digital'
-                    ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-sm'
-                    : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
-                }`}
-              >
-                <Laptop className="w-3.5 h-3.5" /> Digital
-              </button>
-            </div>
-            <button onClick={handleClose} className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+          <button onClick={handleClose} className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Content */}
@@ -253,19 +227,63 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
                 value={formData.avatarUrl}
                 onChange={(url) => setFormData({ ...formData, avatarUrl: url })}
                 defaultIcon="building"
-                shape="rounded"
+                shape="circle"
               />
             </div>
 
+            {/* Type de marchandise (2-card selection) */}
+            <div>
+              <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">
+                Type de marchandise *
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, merchandiseType: 'physical' })}
+                  className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
+                    formData.merchandiseType === 'physical'
+                      ? 'border-blue-600 dark:border-blue-500 bg-blue-50/80 dark:bg-blue-950/30 text-blue-950 dark:text-blue-100 ring-1 ring-blue-500/30 font-medium shadow-xs'
+                      : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700'
+                  }`}
+                >
+                  <div className={`p-2 rounded-lg shrink-0 transition-colors ${formData.merchandiseType === 'physical' ? 'bg-blue-600 text-white shadow-sm' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'}`}>
+                    <Package className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className={`text-xs font-bold ${formData.merchandiseType === 'physical' ? 'text-blue-900 dark:text-blue-200' : ''}`}>Physique</div>
+                    <div className={`text-[10px] ${formData.merchandiseType === 'physical' ? 'text-blue-700/80 dark:text-blue-300/80' : 'text-zinc-500 dark:text-zinc-400'}`}>Produits matériels, stock</div>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, merchandiseType: 'digital' })}
+                  className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
+                    formData.merchandiseType === 'digital'
+                      ? 'border-violet-600 dark:border-violet-500 bg-violet-50/80 dark:bg-violet-950/30 text-violet-950 dark:text-violet-100 ring-1 ring-violet-500/30 font-medium shadow-xs'
+                      : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700'
+                  }`}
+                >
+                  <div className={`p-2 rounded-lg shrink-0 transition-colors ${formData.merchandiseType === 'digital' ? 'bg-violet-600 text-white shadow-sm' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'}`}>
+                    <Laptop className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className={`text-xs font-bold ${formData.merchandiseType === 'digital' ? 'text-violet-900 dark:text-violet-200' : ''}`}>Digital</div>
+                    <div className={`text-[10px] ${formData.merchandiseType === 'digital' ? 'text-violet-700/80 dark:text-violet-300/80' : 'text-zinc-500 dark:text-zinc-400'}`}>Services, licences, digital</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
             {/* Brand Info */}
-            <div className="space-y-4">
+            <div className="space-y-4 pt-2 border-t border-zinc-100 dark:border-zinc-800">
               <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
                 <Building2 className="w-4 h-4 text-zinc-900 dark:text-white" />
                 Informations Marque
               </h3>
               
               <div>
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Nom de la Marque *</label>
+                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Marque *</label>
                 <Input
                   type="text"
                   required
@@ -463,19 +481,6 @@ export default function SupplierDialog({ isOpen, onClose, supplier }: SupplierDi
                 </div>
               </div>
             </div>
-
-            {/* Total Achats */}
-            {supplier && (
-              <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800">
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase block mb-1">Total Achats (Est.)</label>
-                <Input
-                  type="text"
-                  disabled
-                  value={`${fromCents(totalPurchaseValue_cents).toFixed(2)} MAD`}
-                  className="bg-zinc-50 dark:bg-zinc-900/50 cursor-not-allowed text-zinc-900 dark:text-white font-bold"
-                />
-              </div>
-            )}
 
           </form>
         </div>
