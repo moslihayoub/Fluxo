@@ -26,8 +26,7 @@ import { AnimatePresence } from 'framer-motion';
 export default function Home() {
   const isHydrated = useHydration();
   const activeView = useStore((s) => s.activeView);
-  const workspaceMode = useStore((s) => s.workspaceMode);
-
+  const workspaceMode = useStore((s) => s.workspaceMode) || 'personal';
 
   if (!isHydrated) {
     return (
@@ -35,10 +34,6 @@ export default function Home() {
         <div className="w-8 h-8 border-3 border-zinc-900 dark:border-white border-t-transparent rounded-full animate-spin" />
       </div>
     );
-  }
-
-  if (!workspaceMode) {
-    return null; // Or some generic loading/fallback if needed, but Onboarding is gone
   }
 
   return (

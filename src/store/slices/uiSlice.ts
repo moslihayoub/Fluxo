@@ -1,6 +1,17 @@
 import { StateCreator } from 'zustand';
 import type { ActiveView, WorkspaceMode } from '@/types';
 import type { StoreState } from '../useStore';
+import { db, auth } from '@/lib/firebase';
+import { doc, setDoc } from 'firebase/firestore';
+
+const getUid = () => auth.currentUser?.uid;
+
+const saveProfileSetting = (key: string, value: any) => {
+  const uid = getUid();
+  if (uid) {
+    setDoc(doc(db, 'users', uid, 'profile', 'main'), { [key]: value }, { merge: true }).catch(console.error);
+  }
+};
 
 export interface UiSlice {
   activeView: ActiveView;
@@ -39,18 +50,33 @@ export const createUiSlice: StateCreator<
   theme: 'system',
   globalSearch: '',
   isSearchModalOpen: false,
-  workspaceMode: null,
+  workspaceMode: 'personal',
 
   linkProGainsToPerso: false,
 
   setActiveView: (view) => set({ activeView: view }),
   setFilter: (filter) => set({ filter }),
-  setLanguage: (language) => set({ language }),
-  setCurrency: (currency) => set({ currency }),
-  setTheme: (theme) => set({ theme }),
+  setLanguage: (language) => {
+    set({ language });
+    saveProfileSetting('language', language);
+  },
+  setCurrency: (currency) => {
+    set({ currency });
+    saveProfileSetting('currency', currency);
+  },
+  setTheme: (theme) => {
+    set({ theme });
+    saveProfileSetting('theme', theme);
+  },
   setGlobalSearch: (globalSearch) => set({ globalSearch }),
   setIsSearchModalOpen: (isSearchModalOpen) => set({ isSearchModalOpen }),
-  setWorkspaceMode: (mode) => set({ workspaceMode: mode }),
+  setWorkspaceMode: (mode) => {
+    set({ workspaceMode: mode });
+    saveProfileSetting('workspaceMode', mode);
+  },
 
-  setLinkProGainsToPerso: (link) => set({ linkProGainsToPerso: link }),
+  setLinkProGainsToPerso: (link) => {
+    set({ linkProGainsToPerso: link });
+    saveProfileSetting('linkProGainsToPerso', link);
+  },
 });

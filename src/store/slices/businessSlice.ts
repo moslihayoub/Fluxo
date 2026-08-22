@@ -145,10 +145,10 @@ export const createBusinessSlice: StateCreator<
       toast.error('Fournisseur invalide');
       return undefined;
     }
-    set((state) => ({ businessSuppliers: [...state.businessSuppliers, newSupplier] }));
+    set((state) => ({ businessSuppliers: [...state.businessSuppliers, parsed.data] }));
     const uid_ = getUid();
-    if (uid_) setDoc(doc(db, 'users', uid_, 'businessSuppliers', newSupplier.id), newSupplier).catch(console.error);
-    return newSupplier;
+    if (uid_) setDoc(doc(db, 'users', uid_, 'businessSuppliers', parsed.data.id), cleanForFirebase(parsed.data)).catch(console.error);
+    return parsed.data;
   },
 
   updateBusinessSupplier: (id, updates) => {

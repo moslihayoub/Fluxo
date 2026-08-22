@@ -34,7 +34,11 @@ export default function SyncManager({ children }: { children: React.ReactNode })
 
       batch.set(doc(db, 'users', uid, 'businessSettings', 'main'), state.businessSettings);
       batch.set(doc(db, 'users', uid, 'profile', 'main'), { 
-        workspaceMode: state.workspaceMode
+        workspaceMode: state.workspaceMode,
+        linkProGainsToPerso: state.linkProGainsToPerso,
+        language: state.language,
+        currency: state.currency,
+        theme: state.theme,
       });
 
       batch.commit().then(() => {
@@ -93,9 +97,13 @@ export default function SyncManager({ children }: { children: React.ReactNode })
     unsubs.push(onSnapshot(doc(db, 'users', uid, 'profile', 'main'), (doc) => {
       if (doc.exists()) {
         const data = doc.data();
-        useStore.setState({ 
-          workspaceMode: data.workspaceMode as WorkspaceMode | null,
-        });
+        useStore.setState((state) => ({ 
+          workspaceMode: (data.workspaceMode as WorkspaceMode) ?? state.workspaceMode,
+          linkProGainsToPerso: data.linkProGainsToPerso !== undefined ? Boolean(data.linkProGainsToPerso) : state.linkProGainsToPerso,
+          language: data.language || state.language,
+          currency: data.currency || state.currency,
+          theme: data.theme || state.theme,
+        }));
       }
     }));
 
