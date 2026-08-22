@@ -140,7 +140,7 @@ export default function Header() {
 
               {/* Mode Switcher (Perso / Pro Segmented Pill) */}
               {workspaceMode && (
-                <div className="flex items-center bg-zinc-100 dark:bg-zinc-800/90 p-1 rounded-xl border border-zinc-200/80 dark:border-zinc-700/80 ml-1 shadow-xs">
+                <div className="flex items-center bg-zinc-100 dark:bg-zinc-800/90 p-0.5 sm:p-1 rounded-xl border border-zinc-200/80 dark:border-zinc-700/80 ml-1 shadow-xs">
                   <button
                     type="button"
                     onClick={() => {
@@ -150,7 +150,7 @@ export default function Header() {
                         setActiveView('months');
                       }
                     }}
-                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                    className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
                       workspaceMode === 'personal'
                         ? 'bg-white dark:bg-zinc-900 text-blue-600 dark:text-blue-400 shadow-sm border border-zinc-200/60 dark:border-zinc-700/60'
                         : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
@@ -158,7 +158,7 @@ export default function Header() {
                     title="Espace Personnel"
                   >
                     <User className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Perso</span>
+                    <span>Perso</span>
                   </button>
                   <button
                     type="button"
@@ -169,7 +169,7 @@ export default function Header() {
                         setActiveView('dashboard');
                       }
                     }}
-                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                    className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
                       workspaceMode === 'business'
                         ? 'bg-violet-600 text-white shadow-sm font-bold'
                         : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
@@ -177,7 +177,7 @@ export default function Header() {
                     title="Espace Professionnel"
                   >
                     <Building2 className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Pro</span>
+                    <span>Pro</span>
                   </button>
                 </div>
               )}

@@ -80,13 +80,45 @@ export default function MobileNav() {
           </span>
         </div>
 
+        {/* Mode Switcher Pill in Mobile Bottom Bar */}
+        <div className="flex items-center bg-zinc-100 dark:bg-zinc-800 p-0.5 rounded-lg border border-zinc-200 dark:border-zinc-700">
+          <button
+            onClick={() => {
+              setWorkspaceMode('personal');
+              setActiveView('months');
+            }}
+            className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-bold transition-all ${
+              workspaceMode === 'personal'
+                ? 'bg-white dark:bg-zinc-900 text-blue-600 dark:text-blue-400 shadow-xs'
+                : 'text-zinc-500'
+            }`}
+          >
+            <User className="w-3.5 h-3.5" />
+            <span>Perso</span>
+          </button>
+          <button
+            onClick={() => {
+              setWorkspaceMode('business');
+              setActiveView('dashboard');
+            }}
+            className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-bold transition-all ${
+              workspaceMode === 'business'
+                ? 'bg-violet-600 text-white shadow-xs'
+                : 'text-zinc-500'
+            }`}
+          >
+            <Briefcase className="w-3.5 h-3.5" />
+            <span>Pro</span>
+          </button>
+        </div>
+
         <div className="flex items-center gap-2">
           {workspaceMode === 'business' && (
             <button
               onClick={() => setIsSearchModalOpen(true)}
               className="p-2 text-zinc-900 dark:text-white"
             >
-              <Search className="w-6 h-6" />
+              <Search className="w-5 h-5" />
             </button>
           )}
           {/* Burger Menu Button */}
