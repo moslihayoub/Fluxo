@@ -20,7 +20,11 @@ const storeCreator = (...args: Parameters<typeof createUiSlice>) => ({
 const _useStore = create<StoreState>()(
   persist(storeCreator, {
     name: 'charges-encaissements-store',
-    storage: typeof window !== 'undefined' ? createJSONStorage(() => localStorage) : undefined,
+    onRehydrateStorage: () => (state) => {
+      if (state && (!state.workspaceMode || (state.workspaceMode !== 'business' && state.workspaceMode !== 'personal'))) {
+        state.workspaceMode = 'personal';
+      }
+    },
     partialize: (state) => ({
       months: state.months,
       operations: state.operations,
@@ -28,7 +32,7 @@ const _useStore = create<StoreState>()(
       activeMonthId: state.activeMonthId,
       activeView: state.activeView,
       filter: state.filter,
-      workspaceMode: state.workspaceMode,
+      workspaceMode: state.workspaceMode === 'business' ? 'business' : 'personal',
       businessClients: state.businessClients,
       businessSuppliers: state.businessSuppliers,
       businessCategories: state.businessCategories,

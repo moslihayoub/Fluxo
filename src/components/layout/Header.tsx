@@ -15,7 +15,8 @@ export default function Header() {
   const { theme, setTheme } = useTheme();
   const activeView = useStore((s) => s.activeView);
   const setActiveView = useStore((s) => s.setActiveView);
-  const workspaceMode = useStore((s) => s.workspaceMode);
+  const rawWorkspaceMode = useStore((s) => s.workspaceMode);
+  const workspaceMode = rawWorkspaceMode === 'business' ? 'business' : 'personal';
   const setWorkspaceMode = useStore((s) => s.setWorkspaceMode);
   const language = useStore((s) => s.language);
   const setLanguage = useStore((s) => s.setLanguage);
@@ -139,48 +140,46 @@ export default function Header() {
               )}
 
               {/* Mode Switcher (Perso / Pro Segmented Pill) */}
-              {workspaceMode && (
-                <div className="flex items-center bg-zinc-100 dark:bg-zinc-800/90 p-0.5 sm:p-1 rounded-xl border border-zinc-200/80 dark:border-zinc-700/80 ml-1 shadow-xs">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsProfileOpen(false);
-                      if (workspaceMode !== 'personal') {
-                        setWorkspaceMode('personal');
-                        setActiveView('months');
-                      }
-                    }}
-                    className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
-                      workspaceMode === 'personal'
-                        ? 'bg-white dark:bg-zinc-900 text-blue-600 dark:text-blue-400 shadow-sm border border-zinc-200/60 dark:border-zinc-700/60'
-                        : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
-                    }`}
-                    title="Espace Personnel"
-                  >
-                    <User className="w-3.5 h-3.5" />
-                    <span>Perso</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsProfileOpen(false);
-                      if (workspaceMode !== 'business') {
-                        setWorkspaceMode('business');
-                        setActiveView('dashboard');
-                      }
-                    }}
-                    className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
-                      workspaceMode === 'business'
-                        ? 'bg-violet-600 text-white shadow-sm font-bold'
-                        : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
-                    }`}
-                    title="Espace Professionnel"
-                  >
-                    <Building2 className="w-3.5 h-3.5" />
-                    <span>Pro</span>
-                  </button>
-                </div>
-              )}
+              <div className="flex items-center bg-zinc-100 dark:bg-zinc-800/90 p-0.5 sm:p-1 rounded-xl border border-zinc-200/80 dark:border-zinc-700/80 ml-1 shadow-xs">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsProfileOpen(false);
+                    if (workspaceMode !== 'personal') {
+                      setWorkspaceMode('personal');
+                      setActiveView('months');
+                    }
+                  }}
+                  className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                    workspaceMode === 'personal'
+                      ? 'bg-white dark:bg-zinc-900 text-blue-600 dark:text-blue-400 shadow-sm border border-zinc-200/60 dark:border-zinc-700/60'
+                      : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
+                  }`}
+                  title="Espace Personnel"
+                >
+                  <User className="w-3.5 h-3.5" />
+                  <span>Perso</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsProfileOpen(false);
+                    if (workspaceMode !== 'business') {
+                      setWorkspaceMode('business');
+                      setActiveView('dashboard');
+                    }
+                  }}
+                  className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                    workspaceMode === 'business'
+                      ? 'bg-violet-600 text-white shadow-sm font-bold'
+                      : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
+                  }`}
+                  title="Espace Professionnel"
+                >
+                  <Building2 className="w-3.5 h-3.5" />
+                  <span>Pro</span>
+                </button>
+              </div>
 
               {/* Profile Avatar & Unified Dropdown (Regroups Settings, Theme & Language) */}
               <div className="relative ml-1" ref={profileRef}>

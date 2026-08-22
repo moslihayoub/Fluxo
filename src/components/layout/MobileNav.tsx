@@ -18,7 +18,8 @@ export default function MobileNav() {
   const setActiveView = useStore((s) => s.setActiveView);
   const language = useStore((s) => s.language);
   const setLanguage = useStore((s) => s.setLanguage);
-  const workspaceMode = useStore((s) => s.workspaceMode);
+  const rawWorkspaceMode = useStore((s) => s.workspaceMode);
+  const workspaceMode = rawWorkspaceMode === 'business' ? 'business' : 'personal';
   const setWorkspaceMode = useStore((s) => s.setWorkspaceMode);
 
   const setIsSearchModalOpen = useStore((s) => s.setIsSearchModalOpen);
@@ -232,37 +233,35 @@ export default function MobileNav() {
               </div>
 
               {/* Mode */}
-              {workspaceMode && (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 text-zinc-700 dark:text-zinc-300">
-                    {workspaceMode === 'business' ? <Briefcase className="w-5 h-5" /> : <User className="w-5 h-5" />}
-                    <span className="font-medium">Mode</span>
-                  </div>
-                  <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-lg p-1">
-                    <button
-                      onClick={() => {
-                        setWorkspaceMode('personal');
-                        setActiveView('months');
-                        setIsOpen(false);
-                      }}
-                      className={`px-3 py-1 text-sm font-medium rounded-md ${workspaceMode === 'personal' ? 'bg-white dark:bg-zinc-900 shadow-sm text-blue-600 dark:text-blue-400' : 'text-zinc-500'}`}
-                    >
-                      Perso
-                    </button>
-                    <button
-                      onClick={() => {
-                        setWorkspaceMode('business');
-
-                        setActiveView('dashboard');
-                        setIsOpen(false);
-                      }}
-                      className={`px-3 py-1 text-sm font-medium rounded-md ${workspaceMode === 'business' ? 'bg-white dark:bg-zinc-900 shadow-sm text-violet-600 dark:text-violet-400' : 'text-zinc-500'}`}
-                    >
-                      Pro
-                    </button>
-                  </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 text-zinc-700 dark:text-zinc-300">
+                  {workspaceMode === 'business' ? <Briefcase className="w-5 h-5" /> : <User className="w-5 h-5" />}
+                  <span className="font-medium">Mode</span>
                 </div>
-              )}
+                <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-lg p-1">
+                  <button
+                    onClick={() => {
+                      setWorkspaceMode('personal');
+                      setActiveView('months');
+                      setIsOpen(false);
+                    }}
+                    className={`px-3 py-1 text-sm font-medium rounded-md ${workspaceMode === 'personal' ? 'bg-white dark:bg-zinc-900 shadow-sm text-blue-600 dark:text-blue-400' : 'text-zinc-500'}`}
+                  >
+                    Perso
+                  </button>
+                  <button
+                    onClick={() => {
+                      setWorkspaceMode('business');
+
+                      setActiveView('dashboard');
+                      setIsOpen(false);
+                    }}
+                    className={`px-3 py-1 text-sm font-medium rounded-md ${workspaceMode === 'business' ? 'bg-white dark:bg-zinc-900 shadow-sm text-violet-600 dark:text-violet-400' : 'text-zinc-500'}`}
+                  >
+                    Pro
+                  </button>
+                </div>
+              </div>
             </div>
 
             <hr className="border-zinc-200 dark:border-zinc-800" />
