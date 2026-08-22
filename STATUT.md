@@ -112,25 +112,29 @@
    - `npm run lint` & `npx tsc --noEmit` validés avec **0 erreur, 0 warning**.
    - Build de production Next.js 14 compilé et déployé sur `https://fluxofinance.vercel.app/`.
 
-### Phase 11 : Harmonisation Complète UI, Primitives Shadcn & 100% Tiroirs Latéraux (18 Août 2026) 🚀
-1. **Nouvelles Primitives Shadcn UI (`src/components/ui/`) :**
-   - `switch.tsx` : Interrupteur accessible (@base-ui/react) avec états thématisés Perso (Noir/Zinc) et Pro (Violet).
-   - `tooltip.tsx` : Infobulles contextuelles pour les termes fiscaux et légaux.
-   - `popover.tsx` : Popovers interactifs riches pour les filtres et sélecteurs complexes.
-   - `skeleton.tsx` : États de chargement fluides (shimmer) pour les listes et les cartes KPIs.
-2. **Élimination des Reliquats de `<select>` Natifs :**
-   - Migration de `AgentDialog.tsx` (Mois cible) et `BusinessImportDialog.tsx` (Mapping CSV) vers le composant Shadcn Web `Select.tsx`.
-3. **Harmonisation 100% Tiroirs Latéraux (Sidebar Drawers) :**
-   - Migration de `AgentDialog.tsx` et `BusinessImportDialog.tsx` du format modale centrale flottante vers le format standard de tiroir latéral glissant droit (`sm:w-[50%]`, `rounded-l-3xl`, header croix, footer d'actions).
-4. **Correction Thématique et Intégration Switch :**
-   - `ConfirmDialog.tsx` : Rétablissement du support complet du mode clair (`bg-white dark:bg-zinc-900`, `text-zinc-900 dark:text-white`).
-   - `BusinessSettingsView.tsx` : Remplacement du toggle manuel par le composant `Switch` shadcn.
-5. **Validation Globale & Compilation :**
-   - 0 erreur ESLint / TypeScript, `npm run build` Next.js 14 validé avec succès.
+### Phase 12 : Résolution Critique de la Page Blanche & Initialisation Workspace (22 Août 2026) 🛡️
+1. **Origine du problème identifiée :**
+   - À la suite de la suppression de l'écran d'onboarding (`OnboardingView`), `src/app/page.tsx` contenait encore un garde `if (!workspaceMode) return null;`.
+   - L'état initial `workspaceMode` dans `uiSlice.ts` étant initialisé à `null`, tout nouvel utilisateur ou utilisateur avec cache vidé recevait un rendu vide (`null`), provoquant l'écran blanc.
+2. **Correction & Sécurisation :**
+   - Initialisation par défaut de `workspaceMode: 'personal'` dans `uiSlice.ts`.
+   - Suppression du `return null` bloquant dans `src/app/page.tsx` avec fallback automatique `useStore((s) => s.workspaceMode) || 'personal'`.
+   - Synchronisation bidirectionnelle des préférences utilisateur (`workspaceMode`, `linkProGainsToPerso`, `theme`, `language`, `currency`) sur Firestore `users/{uid}/profile/main`.
+3. **Validation & Déploiement :**
+   - 0 erreur ESLint / TypeScript, build validé et déployé sur `https://fluxofinance.vercel.app/`.
 
 ---
 
-## 📌 Dernières actions (18 Août 2026 — Harmonisation UI, Primitives Shadcn & Tiroirs 100% Standardisés)
+## 📌 Dernières actions (22 Août 2026 — Correction Écran Blanc & Initialisation Workspace)
+
+### 1. Phase 12 : Élimination Définitive de l'Écran Blanc
+- **Initialisation Immédiate** : `workspaceMode` démarre directement en mode `'personal'`.
+- **Rendu Garanti** : Suppression du blocage `return null` dans `src/app/page.tsx`.
+- **Persistance Profil Cloud** : Préférences enregistrées en temps réel sur Firestore (`users/{uid}/profile/main`).
+
+---
+
+## 📌 Actions Précédentes (18 Août 2026 — Harmonisation UI, Primitives Shadcn & Tiroirs 100% Standardisés)
 
 ### 1. Phase 11 : Primitives Shadcn & Standardisation UI Totale
 - **Nouvelles Primitives** : Création de `switch.tsx`, `tooltip.tsx`, `popover.tsx` et `skeleton.tsx`.
