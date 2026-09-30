@@ -15,6 +15,7 @@ export type ActiveView =
   | 'business_products'
   | 'business_orders'
   | 'business_suppliers'
+  | 'business_stock'
   | 'business_fees'
   | 'business_settings'
   | 'new_sale';
@@ -130,6 +131,33 @@ export interface BusinessSupplier {
   userId: string;
 }
 
+
+export type StockNature = 'raw_material' | 'finished_product' | 'consumable';
+
+export interface BusinessMaterial {
+  id: string;
+  name: string;
+  nature: StockNature;
+  unit: string; // 'g', 'kg', 'm', 'pièce', 'ml'
+  stockQuantity: number;
+  minQuantityAlert: number;
+  unitCostPrice_cents: number;
+  hasConversion?: boolean;
+  capacityPerUnit?: number; // ex: 1000
+  consumptionUnit?: string; // ex: 'g'
+  supplierId?: string;
+  createdAt: string;
+  updatedAt: string;
+  userId: string;
+}
+
+
+export interface BOMItem {
+  materialId: string;
+  quantity: number;
+}
+
+
 export interface BusinessProduct {
   id: string;
   name: string;
@@ -141,6 +169,15 @@ export interface BusinessProduct {
   isActive: boolean;
   isFree?: boolean; // NOUVEAU: si c'est gratuit globalement
   discountRate?: number; // NOUVEAU: % promotion globale
+  isManufactured?: boolean; // if true, uses BOM
+  bom?: BOMItem[];
+  machinePower_W?: number;
+  productionTime_h?: number;
+  electricityCost_cents?: number;
+  otherDirectCosts_cents?: number;
+  stockQuantity?: number; // For finished products
+  minQuantityAlert?: number;
+
   createdAt: string;
   updatedAt: string;
   userId: string;
@@ -174,6 +211,7 @@ export interface BusinessClient {
 
 export interface OrderItem {
   id: string; // Unique ID for the item in the cart
+  productId?: string;
   productName: string;
   quantity: number;
   unitCostPrice_cents: number;
@@ -257,6 +295,7 @@ export interface LegalIdentifier {
 export interface BusinessSettings {
   // 1. Profil & Entreprise
   companyName: string;
+  electricityPricePerKwh_cents?: number;
   address: string;
   city?: string;
   country?: string;

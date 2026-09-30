@@ -66,11 +66,12 @@ function SelectContent({
         align={align}
         side={side}
         sideOffset={sideOffset}
+        style={{ width: "var(--anchor-width)" }}
       >
         <SelectPrimitive.Popup
           data-slot="select-content"
           className={cn(
-            "z-[9999] max-h-60 min-w-36 overflow-x-hidden overflow-y-auto rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-1.5 text-zinc-900 dark:text-zinc-100 shadow-2xl outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+            "z-[9999] max-h-60 w-full overflow-x-hidden overflow-y-auto rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-1.5 text-zinc-900 dark:text-zinc-100 shadow-2xl outline-none data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
             className
           )}
           {...props}

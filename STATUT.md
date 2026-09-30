@@ -1,9 +1,9 @@
 # 📊 STATUT & HISTORIQUE DU PROJET — Fluxo (Charges & Encaissements)
 
-**Date & Heure :** 18 Août 2026  
+**Date & Heure :** 28 Août 2026  
 **Application :** Fluxo (Charges & Encaissements)  
 **URL Live :** `https://fluxofinance.vercel.app/`  
-**Environnement :** Next.js 14 (App Router), TypeScript, Tailwind CSS, Zustand, Firebase (Auth/Firestore), Recharts, Gemini 2.0 Flash, PWA, Spec-Kit (SDD), UXSpot MCP, shadcn/ui.
+**Environnement :** Next.js 14 (App Router), TypeScript, Tailwind CSS, Zustand, Firebase (Auth/Firestore), Recharts, Gemini 2.0 Flash, PWA, Spec-Kit (SDD), UXSpot MCP, TestSprite CLI, shadcn/ui.
 
 ---
 
@@ -123,11 +123,93 @@
 3. **Validation & Déploiement :**
    - 0 erreur ESLint / TypeScript, build validé et déployé sur `https://fluxofinance.vercel.app/`.
 
+### Phase 13 : Optimisation Navigation & Affichage Inconditionnel Switcher Perso/Pro (22 Août 2026) 🧭
+1. **Affichage Inconditionnel du Switcher Desktop & Mobile :**
+   - Suppression des conditions bloquantes `{workspaceMode && ...}` dans `Header.tsx` et `MobileNav.tsx`.
+   - Intégration du sélecteur segmenté dual-pill `[ 👤 Perso ] [ 🏢 Pro ]` directement dans la barre de navigation inférieure mobile (`MobileNav.tsx`) et dans le menu burger.
+2. **Migration & Réhydratation Automatique Zustand (`useStore.ts`) :**
+   - Hook `onRehydrateStorage` avec fallback automatique `state.workspaceMode = 'personal'` si non défini ou corrompu.
+   - Normalisation stricte `workspaceMode: state.workspaceMode === 'business' ? 'business' : 'personal'` lors de la sérialisation/désérialisation `localStorage`.
+3. **Ergonomie & Fermeture du Profil :**
+   - Fermeture automatique du dropdown profil (`setIsProfileOpen(false)`) lors du basculement d'espace.
+
+### Phase 14 : Validation & Sécurisation de l'Accès GitHub (23 Août 2026) 🔑
+1. **Validation & Scopes du Token GitHub :**
+   - Authentification et contrôle de validité réussis pour le compte `moslihayoub` (Ayoub MOSLIH).
+   - Accès API et permissions d'écriture confirmés sur le dépôt distant `moslihayoub/Fluxo` (HTTP 200 OK).
+   - Scopes complets vérifiés : `repo`, `workflow`, `admin:org`, `project`, `user`, `gist`, etc.
+2. **Configuration Git Locale :**
+   - Mise à jour de l'URL distante dans `.git/config` avec le nouveau Personal Access Token.
+
+### Phase 15 : Intégration TestSprite CLI & Validation des Tests E2E Cloud (28 Août 2026) 🧪
+1. **Installation & Intégration de TestSprite :**
+   - Installation globale de `@testsprite/testsprite-cli` (v0.7.0).
+   - Configuration des identifiants TestSprite (`moslihayoub@gmail.com`) et activation des skills d'agent Antigravity (`testsprite-onboard`, `testsprite-verify`).
+2. **Résolution & Qualité TypeScript :**
+   - Correction des props de `ConfirmDialog` dans `BusinessStockView.tsx` (`description`, `confirmText`).
+   - Ajout du champ optionnel `productId` dans `OrderItem` (`types/index.ts`) et dans `OrderItemSchema` (`lib/schemas.ts`).
+   - Contrôle strict `npx tsc --noEmit` et `npm run lint` validés avec **0 erreur**.
+3. **Projet & Plans de Test Fluxo :**
+   - Création du projet TestSprite `Fluxo` (ID: `7a9fdf74-ad4f-4cf7-8c61-f4d4210c25dc`) relié à `https://fluxofinance.vercel.app/`.
+   - Batch de 5 plans de test rédigés et validés (`testsprite-plans/`) couvrant Dashboard Perso, Opérations, Basculement Pro, Clients Pro et Catalogue Produits.
+4. **Validation des Smoke Tests en Direct :**
+   - **Dashboard Perso (KPIs & Métriques)** : ✅ **PASSED** (1/1 étape).
+   - **Saisie d'une nouvelle opération** : ✅ **PASSED** (10/10 étapes validées avec succès).
+
+### Phase 16 : Intégration Supabase Cloud & Synchronisation Stock en Temps Réel (18 Septembre 2026) ⚡
+1. **Création & Provisioning Supabase Cloud :**
+   - Organisation `Fluxo` et projet `rjmujizjdamjgejagxax` créés dans la région `eu-west-3` (Paris).
+   - Intégration du CLI Supabase et configuration du serveur MCP Supabase (`~/.gemini/config/mcp_config.json`).
+   - Table PostgreSQL `business_materials` créée avec Row Level Security (RLS) et publication Realtime (`supabase_realtime`).
+2. **Architecture SDK & Synchronisation Supabase :**
+   - Installation de `@supabase/supabase-js` et initialisation robuste avec fallback SSG dans `src/lib/supabase.ts`.
+   - Store Zustand (`businessSlice.ts`) branché directement sur Supabase (`upsert`, `update`, `delete`).
+   - Création de `SupabaseSyncManager.tsx` pour l'écoute en temps réel multi-appareils (`postgres_changes`) et réconciliation au démarrage.
+3. **Harmonisation UI & Mobile :**
+   - `MaterialDialog.tsx` converti en tiroir latéral glissant droit standardisé (`sm:w-[50%] max-w-xl`, `rounded-l-3xl`, titre "Détail de l'article", fermeture desktop protégée).
+   - Intégration du Stock dans la navigation mobile (`MobileNav.tsx`) avec icône `Boxes`, et déduplication des imports `lucide-react`.
+   - Internationalisation bilingue FR/EN (`nav.stock`, `nav.suppliers`).
+   - Nettoyage des 12 scripts temporaires résiduels (`patch_*.js`).
+
 ---
 
-## 📌 Dernières actions (22 Août 2026 — Correction Écran Blanc & Initialisation Workspace)
+## 📌 Dernières actions (18 Septembre 2026 — Intégration Supabase & Sync Realtime Stock)
 
-### 1. Phase 12 : Élimination Définitive de l'Écran Blanc
+### 1. Phase 16 : Supabase Cloud (Free Tier) & Realtime Stock
+- **Infrastructure Cloud** : Projet `Fluxo` (`rjmujizjdamjgejagxax`) provisionné sur Supabase (région Paris `eu-west-3`).
+- **Base de Données** : Schéma PostgreSQL `business_materials` en place avec réplication Realtime.
+- **Client & Sync** : `SupabaseSyncManager` déployé, store Zustand connecté à Supabase en lecture/écriture temps réel.
+- **UI Standardisée** : `MaterialDialog` harmonisé en Drawer latéral droit, mobile nav synchronisée.
+- **Validation** : 0 erreur TypeScript, 0 warning ESLint, build Next.js 14 validé avec succès.
+
+---
+
+## 📌 Actions Précédentes (28 Août 2026 — Intégration TestSprite & Tests E2E Automatisés)
+
+### 1. Phase 15 : Automatisation des Tests avec TestSprite CLI
+- **Setup & Skills** : CLI installé, skills Antigravity `testsprite-onboard` et `testsprite-verify` déployés dans `.agents/skills/`.
+- **Typage & Intégrité** : Élimination des erreurs TypeScript sur le stock et les items de commande (`0 erreur` TypeScript / ESLint).
+- **Projet Cloud** : Création du projet Fluxo sur TestSprite (`7a9fdf74-ad4f-4cf7-8c61-f4d4210c25dc`).
+- **Tests Réussis** : 100% de réussite sur le Smoke Test Dashboard et le scénario complet d'ajout d'opération (10/10 étapes validées).
+
+---
+
+## 📌 Actions Précédentes (27 Août 2026 — Revue de Synchronisation & Audit Historique)
+
+### 1. Phase 14 : Validation & Configuration du Token GitHub (23 Août 2026)
+- **Contrôle d'accès** : Token GitHub vérifié auprès de l'API GitHub (`moslihayoub`), validation 200 OK sur le dépôt `moslihayoub/Fluxo`.
+- **Scopes complets** : `repo`, `workflow`, `admin:org`, `project`, `user`, etc.
+- **Config Git locale** : URL `remote.origin.url` mise à jour dans `.git/config`.
+
+---
+
+## 📌 Actions Précédentes (22 Août 2026 — Switcher Perso/Pro Inconditionnel & Résolution Page Blanche)
+
+### 1. Phase 13 : Switcher Perso/Pro Garanti & Navigation Mobile
+- **Header & MobileNav** : Switcher `[ 👤 Perso ] [ 🏢 Pro ]` rendu inconditionnellement visible sans dépendre de l'état asynchrone.
+- **Store Zustand & LocalStorage** : Auto-migration lors de la réhydratation pour garantir une valeur valide immédiate.
+
+### 2. Phase 12 : Élimination Définitive de l'Écran Blanc
 - **Initialisation Immédiate** : `workspaceMode` démarre directement en mode `'personal'`.
 - **Rendu Garanti** : Suppression du blocage `return null` dans `src/app/page.tsx`.
 - **Persistance Profil Cloud** : Préférences enregistrées en temps réel sur Firestore (`users/{uid}/profile/main`).
@@ -227,6 +309,8 @@
 | STATUT automatisé | ✅ |
 | Bundle Performance | ✅ 653KB → 280KB (-57%) via next/dynamic |
 | Tests E2E (Playwright) | ✅ 4/4 Tests Réussis (100%) |
+| Tests Cloud IA (TestSprite) | ✅ Opérationnel (Smoke Tests 100% Validés) |
+| Accès GitHub & Synchronisation | ✅ Validé & Configuré (`moslihayoub/Fluxo`) |
 
 🔄 Mise à jour automatique du statut via protocole de fin de tâche
 

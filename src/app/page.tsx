@@ -19,6 +19,7 @@ const BusinessFeesView = dynamic(() => import('@/components/business_fees/Busine
 const BusinessSettingsView = dynamic(() => import('@/components/business_settings/BusinessSettingsView'), { ssr: false });
 const BusinessProductsView = dynamic(() => import('@/components/business_products/BusinessProductsView'), { ssr: false });
 const BusinessSuppliersView = dynamic(() => import('@/components/business_suppliers/BusinessSuppliersView'), { ssr: false });
+const BusinessStockView = dynamic(() => import('@/components/business_stock/BusinessStockView'), { ssr: false });
 
 import { PageTransition } from '@/components/ui/Animation';
 import { AnimatePresence } from 'framer-motion';
@@ -51,6 +52,7 @@ export default function Home() {
           {activeView === 'business_clients' && <BusinessClientsView />}
           {activeView === 'business_suppliers' && <BusinessSuppliersView />}
           {activeView === 'business_products' && <BusinessProductsView />}
+          {activeView === 'business_stock' && <BusinessStockView />}
           {activeView === 'business_orders' && <BusinessOrdersView />}
           {activeView === 'business_fees' && <BusinessFeesView />}
           {(activeView === 'business_settings' || activeView === 'settings') && <BusinessSettingsView />}

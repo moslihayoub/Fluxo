@@ -37,6 +37,7 @@ const _useStore = create<StoreState>()(
       businessSuppliers: state.businessSuppliers,
       businessCategories: state.businessCategories,
       businessProducts: state.businessProducts,
+      businessMaterials: state.businessMaterials,
       businessOrders: state.businessOrders,
       businessFees: state.businessFees,
       businessSettings: state.businessSettings,

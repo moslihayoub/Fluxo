@@ -1,0 +1,29 @@
+{
+  "projectId": "7a9fdf74-ad4f-4cf7-8c61-f4d4210c25dc",
+  "type": "frontend",
+  "name": "Espace Pro — Gestion et création d'un client professionnel",
+  "description": "Vérifie l'accès à la vue Clients Pro, l'ouverture du tiroir avec le sélecteur 2 cartes et la création.",
+  "priority": "p1",
+  "planSteps": [
+    {
+      "type": "action",
+      "description": "Basculer vers l'espace Pro et naviguer vers la section Clients"
+    },
+    {
+      "type": "action",
+      "description": "Cliquer sur le bouton Nouveau Client"
+    },
+    {
+      "type": "assertion",
+      "description": "Le tiroir latéral Détail du client s'ouvre avec le sélecteur 2 cartes Particulier et Professionnel"
+    },
+    {
+      "type": "action",
+      "description": "Renseigner le nom du client Société Atlas et le numéro de téléphone 0600112233 puis sauvegarder"
+    },
+    {
+      "type": "assertion",
+      "description": "Le client Société Atlas apparaît dans la table des clients avec son badge de statut"
+    }
+  ]
+}

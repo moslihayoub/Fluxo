@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Package, Laptop, X, CheckCircle2, Building2, Plus, Loader2 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
-import type { BusinessProduct, BusinessSupplier } from '@/types';
+import type { BusinessProduct, BusinessSupplier, BOMItem } from '@/types';
+import { ChevronDown, ChevronUp, Beaker } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { CategorySelector } from '@/components/ui/CategorySelector';
 import { Input } from '@/components/ui/Input';
@@ -20,6 +21,7 @@ export default function ProductDialog({ product, onClose }: ProductDialogProps) 
   const addProduct = useStore((s) => s.addBusinessProduct);
   const updateProduct = useStore((s) => s.updateBusinessProduct);
   const suppliers = useStore((s) => s.businessSuppliers) || [];
+  const materials = useStore((s) => s.businessMaterials) || [];
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSupplierDialogOpen, setIsSupplierDialogOpen] = useState(false);
@@ -34,7 +36,15 @@ export default function ProductDialog({ product, onClose }: ProductDialogProps) 
     isActive: product !== undefined ? product.isActive : true,
     isFree: product?.isFree || false,
     discountRate: product?.discountRate?.toString() || '',
+    isManufactured: product?.isManufactured || false,
+    bom: product?.bom || [],
+    machinePower: product?.machinePower_W?.toString() || '',
+    productionTime: product?.productionTime_h?.toString() || '',
+    electricityPrice: '1.20',
   });
+  
+  const [showBom, setShowBom] = useState(product?.isManufactured || false);
+
 
   useEffect(() => {
     if (product) {
@@ -48,7 +58,13 @@ export default function ProductDialog({ product, onClose }: ProductDialogProps) 
         isActive: product.isActive,
         isFree: product.isFree || false,
         discountRate: product.discountRate?.toString() || '',
+        isManufactured: product.isManufactured || false,
+        bom: product.bom || [],
+        machinePower: product.machinePower_W?.toString() || '',
+        productionTime: product.productionTime_h?.toString() || '',
+        electricityPrice: '1.20',
       });
+      setShowBom(product.isManufactured || false);
     }
   }, [product]);
 
@@ -85,6 +101,11 @@ export default function ProductDialog({ product, onClose }: ProductDialogProps) 
         isActive: formData.isActive,
         isFree: formData.isFree,
         discountRate: formData.discountRate ? parseFloat(formData.discountRate) : undefined,
+        isManufactured: formData.isManufactured,
+        bom: formData.isManufactured ? formData.bom : undefined,
+        machinePower_W: formData.isManufactured && formData.machinePower ? parseFloat(formData.machinePower) : undefined,
+        productionTime_h: formData.isManufactured && formData.productionTime ? parseFloat(formData.productionTime) : undefined,
+        electricityCost_cents: formData.isManufactured ? toCents((parseFloat(formData.machinePower||'0')/1000) * parseFloat(formData.productionTime||'0') * parseFloat(formData.electricityPrice||'1.20')) : undefined,
       };
 
       if (product) {
@@ -101,6 +122,26 @@ export default function ProductDialog({ product, onClose }: ProductDialogProps) 
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  
+  const calculateEstimatedCost = () => {
+    let cost = 0;
+    formData.bom.forEach(b => {
+      const mat = materials.find(m => m.id === b.materialId);
+      if (mat) {
+        
+        const costPerConsumptionUnit = mat.hasConversion && mat.capacityPerUnit 
+          ? (mat.unitCostPrice_cents / 100) / mat.capacityPerUnit
+          : (mat.unitCostPrice_cents / 100);
+        cost += (costPerConsumptionUnit * (b.quantity || 0));
+
+      }
+    });
+    if (formData.machinePower && formData.productionTime) {
+      cost += ((parseFloat(formData.machinePower)/1000) * parseFloat(formData.productionTime) * parseFloat(formData.electricityPrice));
+    }
+    return cost.toFixed(2);
   };
 
   return (
@@ -145,6 +186,98 @@ export default function ProductDialog({ product, onClose }: ProductDialogProps) 
             <form id="product-form" onSubmit={handleSubmit} className="space-y-6">
               
               <div className="space-y-4">
+
+              {/* NOUVEAU: Section Fabrication & BOM */}
+              {formData.type === 'product' && (
+                <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden bg-zinc-50/50 dark:bg-zinc-900/50">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowBom(!showBom);
+                      setFormData({ ...formData, isManufactured: !showBom });
+                    }}
+                    className="w-full flex items-center justify-between p-4 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Beaker className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                      <span className="font-semibold text-sm">🧪 Produit fabriqué en atelier (BOM)</span>
+                    </div>
+                    {showBom ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                  </button>
+                  
+                  {showBom && (
+                    <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 space-y-4">
+                      {/* Matières premières */}
+                      <div>
+                        <label className="text-xs font-semibold text-zinc-500 uppercase block mb-2">Matières consommées</label>
+                        {formData.bom.map((b, idx) => {
+                          const mat = materials.find(m => m.id === b.materialId);
+                          return (
+                            <div key={idx} className="flex gap-2 mb-2">
+                              <Select value={b.materialId} onValueChange={(val) => {
+                                const newBom = [...formData.bom];
+                                newBom[idx].materialId = val;
+                                setFormData({...formData, bom: newBom});
+                              }}>
+                                <SelectTrigger className="flex-1">
+                                  <SelectValue placeholder="Matière...">
+                                    {mat ? `${mat.name} (${mat.hasConversion ? mat.consumptionUnit : mat.unit})` : "Matière..."}
+                                  </SelectValue>
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {materials.map(m => <SelectItem key={m.id} value={m.id}>{m.name} ({m.hasConversion ? m.consumptionUnit : m.unit})</SelectItem>)}
+                                </SelectContent>
+                              </Select>
+                              <Input 
+                                type="number" step="0.01" placeholder="Quantité" className="w-24"
+                                value={b.quantity || ''}
+                                onChange={e => {
+                                  const newBom = [...formData.bom];
+                                  newBom[idx].quantity = parseFloat(e.target.value) || 0;
+                                  setFormData({...formData, bom: newBom});
+                                }}
+                              />
+                              <button type="button" onClick={() => {
+                                const newBom = [...formData.bom];
+                                newBom.splice(idx, 1);
+                                setFormData({...formData, bom: newBom});
+                              }} className="px-2 text-red-500 hover:bg-red-50 rounded-lg">✕</button>
+                            </div>
+                          );
+                        })}
+                        <button type="button" onClick={() => setFormData({...formData, bom: [...formData.bom, {materialId: '', quantity: 0}]})} className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 mt-2">
+                          <Plus className="w-3 h-3" /> Ajouter une matière
+                        </button>
+                      </div>
+
+                      {/* Énergie & Machine */}
+                      <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800">
+                        <label className="text-xs font-semibold text-zinc-500 uppercase block mb-2">Énergie & Machine</label>
+                        <div className="grid grid-cols-3 gap-2">
+                          <div>
+                            <span className="text-[10px] text-zinc-500 block mb-1">Puissance (Watts)</span>
+                            <Input type="number" placeholder="Ex: 300" value={formData.machinePower} onChange={e => setFormData({...formData, machinePower: e.target.value})} />
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-zinc-500 block mb-1">Temps (h)</span>
+                            <Input type="number" step="0.01" placeholder="Ex: 5" value={formData.productionTime} onChange={e => setFormData({...formData, productionTime: e.target.value})} />
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-zinc-500 block mb-1">Prix kWh (MAD)</span>
+                            <Input type="number" step="0.01" value={formData.electricityPrice} onChange={e => setFormData({...formData, electricityPrice: e.target.value})} />
+                          </div>
+                        </div>
+                        {formData.machinePower && formData.productionTime && (
+                          <div className="mt-2 text-xs font-medium text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 p-2 rounded-lg">
+                            Coût énergie estimé : {((parseFloat(formData.machinePower)/1000) * parseFloat(formData.productionTime) * parseFloat(formData.electricityPrice)).toFixed(2)} DH
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
                 <div>
                   <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">
                     {formData.type === 'service' ? 'Nom du service / prestation *' : 'Nom du produit *'}
@@ -229,18 +362,24 @@ export default function ProductDialog({ product, onClose }: ProductDialogProps) 
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">
-                      Prix revendeur (Achat)
+                      {formData.isManufactured ? 'Coût de revient (BOM)' : 'Prix d\'achat (Revendeur)'}
                     </label>
-                    <Input
-                      type="number"
-                      min="0"
-                      step="any"
-                      value={formData.resellerPrice}
-                      onChange={(e) => setFormData({ ...formData, resellerPrice: e.target.value })}
-                      placeholder="0.00"
-                      iconRight={<span className="text-zinc-400 text-sm font-medium pr-2">MAD</span>}
-                      data-testid="product-reseller-price-input"
-                    />
+                    {formData.isManufactured ? (
+                      <div className="flex items-center h-11 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 font-medium">
+                        {calculateEstimatedCost()} MAD
+                      </div>
+                    ) : (
+                      <Input
+                        type="number"
+                        min="0"
+                        step="any"
+                        value={formData.resellerPrice}
+                        onChange={(e) => setFormData({ ...formData, resellerPrice: e.target.value })}
+                        placeholder="0.00"
+                        iconRight={<span className="text-zinc-400 text-sm font-medium pr-2">MAD</span>}
+                        data-testid="product-reseller-price-input"
+                      />
+                    )}
                   </div>
                 </div>
 

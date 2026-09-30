@@ -1,0 +1,21 @@
+{
+  "projectId": "7a9fdf74-ad4f-4cf7-8c61-f4d4210c25dc",
+  "type": "frontend",
+  "name": "Dashboard Perso — Visualisation des KPIs et métriques financières",
+  "description": "Vérifie l'affichage initial du Dashboard personnel, des cartes de KPIs (Encaissements, Décaissements, Solde) et de la barre de métriques inférieure.",
+  "priority": "p0",
+  "planSteps": [
+    {
+      "type": "action",
+      "description": "Accéder à l'application Fluxo sur la page d'accueil"
+    },
+    {
+      "type": "assertion",
+      "description": "La page d'accueil affiche le titre du tableau de bord ainsi que les cartes d'indicateurs Encaissements, Décaissements et Solde"
+    },
+    {
+      "type": "assertion",
+      "description": "La barre inférieure fixe MetricsBar affiche les totaux monétaires en MAD"
+    }
+  ]
+}

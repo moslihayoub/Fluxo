@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, X, Calendar, BarChart2, Tag, TrendingUp, Sun, Moon, Monitor, LogIn, LogOut, Globe, ShoppingBag, Users, Receipt, Briefcase, User, Settings } from 'lucide-react';
+import { Menu, X, Calendar, BarChart2, Tag, TrendingUp, Sun, Moon, Monitor, LogIn, LogOut, Globe, ShoppingBag, Users, Receipt, Briefcase, User, Settings, Package, Boxes, Search, Truck } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/components/auth/AuthProvider';
@@ -10,7 +10,6 @@ import { signInWithPopup, signOut } from 'firebase/auth';
 import toast from 'react-hot-toast';
 import type { ActiveView } from '@/types';
 import { getTranslation } from '@/lib/i18n';
-import { Package, Search, Truck } from 'lucide-react';
 
 export default function MobileNav() {
   const [isOpen, setIsOpen] = useState(false);
@@ -33,7 +32,8 @@ export default function MobileNav() {
     { id: 'business_orders', label: t('nav.sales'), icon: ShoppingBag },
     { id: 'business_clients', label: t('nav.clients'), icon: Users },
     { id: 'business_products', label: t('nav.products'), icon: Package },
-    { id: 'business_suppliers', label: 'Fournisseurs', icon: Truck },
+    { id: 'business_stock', label: t('nav.stock'), icon: Boxes },
+    { id: 'business_suppliers', label: t('nav.suppliers'), icon: Truck },
     { id: 'business_fees', label: t('nav.fees'), icon: Receipt },
   ] : [
     { id: 'dashboard', label: t('nav.dashboard'), icon: TrendingUp },

@@ -11,6 +11,7 @@ export const emptyStore = {
   businessClients: [],
   businessCategories: [],
   businessProducts: [],
+  businessMaterials: [],
   businessOrders: [],
   businessFees: [],
   businessSettings: {

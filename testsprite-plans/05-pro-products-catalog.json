@@ -1,0 +1,25 @@
+{
+  "projectId": "7a9fdf74-ad4f-4cf7-8c61-f4d4210c25dc",
+  "type": "frontend",
+  "name": "Espace Pro — Ajout d'un produit au catalogue",
+  "description": "Vérifie la création d'un produit physique ou service dans le catalogue Pro.",
+  "priority": "p1",
+  "planSteps": [
+    {
+      "type": "action",
+      "description": "Accéder à l'espace Pro et ouvrir la section Produits"
+    },
+    {
+      "type": "action",
+      "description": "Cliquer sur Nouveau Produit, renseigner le nom Service Conseil et le prix unitaire"
+    },
+    {
+      "type": "action",
+      "description": "Valider l'enregistrement du produit"
+    },
+    {
+      "type": "assertion",
+      "description": "Le produit est enregistré et figure dans la liste des produits avec son prix et son statut actif"
+    }
+  ]
+}

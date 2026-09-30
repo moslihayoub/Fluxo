@@ -129,6 +129,7 @@ export const BusinessClientSchema = z.object({
 
 export const OrderItemSchema = z.object({
   id: z.string().min(1),
+  productId: z.string().optional(),
   productName: z.string().min(1),
   quantity: z.number(),
   unitCostPrice_cents: z.number().int(),

@@ -10,6 +10,7 @@ import { useStore } from '@/store/useStore';
 import { getTranslation } from '@/lib/i18n';
 
 import SyncManager from './SyncManager';
+import SupabaseSyncManager from './SupabaseSyncManager';
 
 export default function AuthWrapper({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -26,5 +27,11 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
     }
   }, []);
 
-  return <SyncManager>{children}</SyncManager>;
+  return (
+    <SyncManager>
+      <SupabaseSyncManager>
+        {children}
+      </SupabaseSyncManager>
+    </SyncManager>
+  );
 }

@@ -1,0 +1,25 @@
+{
+  "projectId": "7a9fdf74-ad4f-4cf7-8c61-f4d4210c25dc",
+  "type": "frontend",
+  "name": "Opérations Perso — Saisie d'une nouvelle opération",
+  "description": "Vérifie l'ouverture du tiroir d'ajout d'opération, la saisie d'un montant et la validation dans la liste.",
+  "priority": "p0",
+  "planSteps": [
+    {
+      "type": "action",
+      "description": "Cliquer sur le bouton d'ajout d'opération Nouvelle opération"
+    },
+    {
+      "type": "assertion",
+      "description": "Le tiroir latéral d'ajout d'opération s'ouvre avec les champs Type, Catégorie, Montant et Description"
+    },
+    {
+      "type": "action",
+      "description": "Saisir un montant de 1500 MAD, renseigner le formulaire et enregistrer"
+    },
+    {
+      "type": "assertion",
+      "description": "La nouvelle opération est ajoutée avec succès et apparaît dans l'historique des opérations"
+    }
+  ]
+}

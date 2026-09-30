@@ -1,0 +1,21 @@
+{
+  "projectId": "7a9fdf74-ad4f-4cf7-8c61-f4d4210c25dc",
+  "type": "frontend",
+  "name": "Workspace — Basculement vers l'espace Professionnel",
+  "description": "Vérifie le sélecteur d'espace dual-pill dans le Header et le passage en mode Pro avec la thématique violette et les KPIs Pro.",
+  "priority": "p1",
+  "planSteps": [
+    {
+      "type": "action",
+      "description": "Cliquer sur le sélecteur d'espace Pro dans la barre de navigation"
+    },
+    {
+      "type": "assertion",
+      "description": "L'interface bascule en mode Professionnel avec le tableau de bord Pro affichant le Chiffre d'Affaires et le Bénéfice"
+    },
+    {
+      "type": "assertion",
+      "description": "Le menu de navigation présente les onglets Pro Ventes, Clients, Fournisseurs, Produits, Stock et Dépenses"
+    }
+  ]
+}

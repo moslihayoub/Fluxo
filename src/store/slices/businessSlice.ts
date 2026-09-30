@@ -1,8 +1,9 @@
 import { StateCreator } from 'zustand';
 import type { StoreState } from '../useStore';
-import type { BusinessClient, BusinessSupplier, BusinessCategory, BusinessProduct, BusinessOrder, BusinessFee, BusinessSettings } from '@/types';
+import type { BusinessClient, BusinessSupplier, BusinessCategory, BusinessProduct, BusinessMaterial, BusinessOrder, BusinessFee, BusinessSettings } from '@/types';
 import { generateId, cleanForFirebase } from '@/lib/utils';
 import { db, auth } from '@/lib/firebase';
+import { supabase, toSupabaseMaterial } from '@/lib/supabase';
 import { doc, setDoc, deleteDoc } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 import { 
@@ -21,6 +22,12 @@ export interface BusinessSlice {
   businessSuppliers: BusinessSupplier[];
   businessCategories: BusinessCategory[];
   businessProducts: BusinessProduct[];
+  businessMaterials: BusinessMaterial[];
+  addBusinessMaterial: (material: Omit<BusinessMaterial, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => BusinessMaterial | undefined;
+  updateBusinessMaterial: (id: string, updates: Partial<BusinessMaterial>) => void;
+  deleteBusinessMaterial: (id: string) => void;
+  updateMaterialStock: (id: string, quantityChange: number) => void;
+
   businessOrders: BusinessOrder[];
   businessFees: BusinessFee[];
   businessSettings: BusinessSettings;
@@ -62,6 +69,7 @@ export const createBusinessSlice: StateCreator<
   businessSuppliers: [],
   businessCategories: [],
   businessProducts: [],
+  businessMaterials: [],
   businessOrders: [],
   businessFees: [],
   businessSettings: {
@@ -206,6 +214,80 @@ export const createBusinessSlice: StateCreator<
     if (uid) deleteDoc(doc(db, 'users', uid, 'businessCategories', id)).catch(console.error);
   },
 
+
+  // ── Business Materials (Stock via Supabase) ─────────────
+  addBusinessMaterial: (materialData) => {
+    const uid = getUid();
+    const newMaterial: BusinessMaterial = {
+      ...materialData,
+      id: generateId(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      userId: uid || 'local-user',
+    };
+    set((state) => ({ businessMaterials: [...state.businessMaterials, newMaterial] }));
+    
+    // Sync directly to Supabase
+    supabase
+      .from('business_materials')
+      .upsert(toSupabaseMaterial(newMaterial))
+      .then(({ error }) => {
+        if (error) console.error('Supabase addBusinessMaterial error:', error);
+      });
+
+    return newMaterial;
+  },
+  updateBusinessMaterial: (id, updates) => {
+    const updatedMaterial = { ...updates, updatedAt: new Date().toISOString() };
+    set((state) => ({
+      businessMaterials: state.businessMaterials.map((m) =>
+        m.id === id ? { ...m, ...updatedMaterial } : m
+      ),
+    }));
+
+    // Sync directly to Supabase
+    supabase
+      .from('business_materials')
+      .update(toSupabaseMaterial(updatedMaterial))
+      .eq('id', id)
+      .then(({ error }) => {
+        if (error) console.error('Supabase updateBusinessMaterial error:', error);
+      });
+  },
+  deleteBusinessMaterial: (id) => {
+    set((state) => ({ businessMaterials: state.businessMaterials.filter((m) => m.id !== id) }));
+
+    // Sync directly to Supabase
+    supabase
+      .from('business_materials')
+      .delete()
+      .eq('id', id)
+      .then(({ error }) => {
+        if (error) console.error('Supabase deleteBusinessMaterial error:', error);
+      });
+  },
+  updateMaterialStock: (id, quantityChange) => {
+    let updatedQty = 0;
+    set((state) => ({
+      businessMaterials: state.businessMaterials.map((m) => {
+        if (m.id === id) {
+          updatedQty = Math.max(0, m.stockQuantity + quantityChange);
+          return { ...m, stockQuantity: updatedQty, updatedAt: new Date().toISOString() };
+        }
+        return m;
+      }),
+    }));
+
+    // Sync directly to Supabase
+    supabase
+      .from('business_materials')
+      .update({ stock_quantity: updatedQty, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .then(({ error }) => {
+        if (error) console.error('Supabase updateMaterialStock error:', error);
+      });
+  },
+
   // ── Business Products ────────────────────────────────────
   addBusinessProduct: (productData) => {
     const uid = getUid();
@@ -257,10 +339,37 @@ export const createBusinessSlice: StateCreator<
     };
     const parsed = BusinessOrderSchema.safeParse(newOrder);
     if (!parsed.success) {
-      console.error(parsed.error);
-      toast.error('Commande invalide');
+      console.error('Validation error addBusinessOrder:', parsed.error);
+      toast.error('Erreur validation commande');
       return;
     }
+    
+    // NOUVEAU : Déstockage automatique
+    const products = get().businessProducts;
+    newOrder.items.forEach(item => {
+      const product = products.find(p => p.name === item.productName || p.id === item.productId);
+      if (product) {
+        // Déduction stock matière (BOM) si produit fabriqué
+        if (product.isManufactured && product.bom) {
+          product.bom.forEach(bomItem => {
+            const mat = get().businessMaterials.find(m => m.id === bomItem.materialId);
+            if (mat) {
+              let deductQty = bomItem.quantity;
+              if (mat.hasConversion && mat.capacityPerUnit) {
+                deductQty = bomItem.quantity / mat.capacityPerUnit;
+              }
+              get().updateMaterialStock(bomItem.materialId, -(deductQty * item.quantity));
+            }
+          });
+        }
+        // Déduction stock produit fini si géré (pour la cohérence si c'est un produit revendu)
+        if (typeof product.stockQuantity === 'number') {
+           get().updateBusinessProduct(product.id, {
+             stockQuantity: Math.max(0, product.stockQuantity - item.quantity)
+           });
+        }
+      }
+    });
     set((state) => ({ businessOrders: [...state.businessOrders, parsed.data] }));
     if (uid) setDoc(doc(db, 'users', uid, 'businessOrders', parsed.data.id), cleanForFirebase(parsed.data)).catch(console.error);
   },

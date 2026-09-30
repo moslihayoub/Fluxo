@@ -1,6 +1,6 @@
 'use client';
 
-import { Sun, Moon, TrendingUp, BarChart2, Calendar, Tag, Globe, LogIn, LogOut, Monitor, ShoppingBag, Users, Receipt, Briefcase, User, Settings, Package, Search, Truck, Building2 } from 'lucide-react';
+import { Sun, Moon, TrendingUp, BarChart2, Calendar, Tag, Globe, LogIn, LogOut, Monitor, ShoppingBag, Users, Receipt, Briefcase, User, Settings, Package, Boxes, Search, Truck, Building2 } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { useStore } from '@/store/useStore';
 import { useAuth } from '@/components/auth/AuthProvider';
@@ -44,8 +44,10 @@ export default function Header() {
     { id: 'dashboard', label: t('nav.dashboard'), icon: TrendingUp },
     { id: 'business_orders', label: t('nav.sales'), icon: ShoppingBag },
     { id: 'business_clients', label: t('nav.clients'), icon: Users },
+    
     { id: 'business_products', label: t('nav.products'), icon: Package },
-    { id: 'business_suppliers', label: 'Fournisseurs', icon: Truck },
+    { id: 'business_stock', label: t('nav.stock'), icon: Boxes },
+    { id: 'business_suppliers', label: t('nav.suppliers'), icon: Truck },
     { id: 'business_fees', label: t('nav.fees'), icon: Receipt },
   ] : [
     { id: 'dashboard', label: t('nav.dashboard'), icon: TrendingUp },

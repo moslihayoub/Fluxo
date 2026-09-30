@@ -250,62 +250,89 @@ export default function OperationDialog({ operation, monthId, onClose }: Operati
                 {t('common.category')}
               </span>
             </label>
-            <Select
-              value={isNewType ? '__new__' : operationTypeId}
-              onValueChange={(val) => { handleTypeSelect(val); setError(''); }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="— Choisir une catégorie —">
-                  {isNewType ? `+ ${t('cat.new')}` : (operationTypeLabel || undefined)}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {/* Option spéciale Bénéfice Pro pour les entrées */}
-                {kind === 'encaissement' && (
-                  <SelectItem 
-                    value="__pro_profit__" 
-                    className="text-violet-600 dark:text-violet-400 font-semibold bg-violet-50/60 dark:bg-violet-950/30 focus:bg-violet-100 dark:focus:bg-violet-900/40 focus:text-violet-700 dark:focus:text-violet-300"
-                  >
-                    Bénéfice Pro
-                  </SelectItem>
-                )}
-                {operationTypes.map((ot) => (
-                  <SelectItem key={ot.id} value={ot.id}>{ot.label}</SelectItem>
-                ))}
-                {operationTypeId && !isNewType && operationTypeId !== '__pro_profit__' && !operationTypes.some(ot => ot.id === operationTypeId) && (
-                  <SelectItem value={operationTypeId}>{operationTypeLabel || operationTypeId}</SelectItem>
-                )}
-                <SelectItem value="__new__">+ {t('cat.new')}</SelectItem>
-              </SelectContent>
-            </Select>
 
-            {isNewType && (
-              <div className="mt-2 space-y-2">
-                <div className="flex gap-2">
+            {/* Trigger + bouton Ajouter côte à côte */}
+            <div className="flex items-center gap-2">
+              {isNewType ? (
+                /* Mode saisie inline : input + actions */
+                <div className="flex items-center gap-2 flex-1 animate-in fade-in duration-150">
                   <div className="relative flex-1">
                     <Plus className="absolute left-2.5 top-2.5 w-3.5 h-3.5 text-zinc-400" />
                     <input
+                      autoFocus
                       type="text"
                       value={newTypeLabel}
-                      onChange={(e) => setNewTypeLabel(e.target.value)}
+                      onChange={(e) => { setNewTypeLabel(e.target.value); setError(''); }}
                       placeholder={t('cat.label')}
-                      className="w-full pl-8 pr-3 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white text-sm placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white transition-shadow"
+                      className="w-full pl-8 pr-3 py-2 h-10 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white text-sm placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white transition-shadow"
                     />
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => { setIsNewType(false); setNewTypeLabel(''); }}
+                    className="h-10 px-3 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-sm transition-colors shrink-0"
+                  >
+                    ✕
+                  </button>
                 </div>
-                <label className="flex items-center justify-between p-3 mt-2 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-200 dark:border-zinc-700/50 cursor-pointer transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800">
-                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Ajouter à la liste des catégories</span>
-                  <div className="relative inline-flex items-center">
-                    <input
-                      type="checkbox"
-                      className="sr-only peer"
-                      checked={addToList}
-                      onChange={(e) => setAddToList(e.target.checked)}
-                    />
-                    <div className="relative w-11 h-6 bg-zinc-300 peer-focus:outline-none rounded-full peer dark:bg-zinc-600 peer-checked:after:translate-x-full peer-checked:after:border-zinc-900 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-zinc-900 after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-zinc-900 dark:peer-checked:bg-white dark:peer-checked:after:border-white"></div>
-                  </div>
-                </label>
-              </div>
+              ) : (
+                /* Mode select normal */
+                <Select
+                  value={operationTypeId}
+                  onValueChange={(val) => { handleTypeSelect(val); setError(''); }}
+                >
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="— Choisir une catégorie —">
+                      {operationTypeLabel || undefined}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {kind === 'encaissement' && (
+                      <SelectItem
+                        value="__pro_profit__"
+                        className="text-violet-600 dark:text-violet-400 font-semibold bg-violet-50/60 dark:bg-violet-950/30 focus:bg-violet-100 dark:focus:bg-violet-900/40 focus:text-violet-700 dark:focus:text-violet-300"
+                      >
+                        Bénéfice Pro
+                      </SelectItem>
+                    )}
+                    {operationTypes.map((ot) => (
+                      <SelectItem key={ot.id} value={ot.id}>{ot.label}</SelectItem>
+                    ))}
+                    {operationTypeId && operationTypeId !== '__pro_profit__' && !operationTypes.some(ot => ot.id === operationTypeId) && (
+                      <SelectItem value={operationTypeId}>{operationTypeLabel || operationTypeId}</SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+              )}
+
+              {/* Bouton + Ajouter toujours visible à droite */}
+              {!isNewType && (
+                <button
+                  type="button"
+                  onClick={() => { setIsNewType(true); setIsProProfitSync(false); setOperationTypeId(''); setOperationTypeLabel(''); setError(''); }}
+                  className="h-10 px-4 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-900 text-sm font-semibold flex items-center gap-1.5 transition-all shrink-0 shadow-sm"
+                  title="Ajouter une nouvelle catégorie"
+                >
+                  <Plus className="w-4 h-4" />
+                  Ajouter
+                </button>
+              )}
+            </div>
+
+            {/* Toggle "Ajouter à la liste" si mode saisie */}
+            {isNewType && (
+              <label className="flex items-center justify-between p-3 mt-2 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-200 dark:border-zinc-700/50 cursor-pointer transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800">
+                <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Ajouter à la liste des catégories</span>
+                <div className="relative inline-flex items-center">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={addToList}
+                    onChange={(e) => setAddToList(e.target.checked)}
+                  />
+                  <div className="relative w-11 h-6 bg-zinc-300 peer-focus:outline-none rounded-full peer dark:bg-zinc-600 peer-checked:after:translate-x-full peer-checked:after:border-zinc-900 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-zinc-900 after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-zinc-900 dark:peer-checked:bg-white dark:peer-checked:after:border-white"></div>
+                </div>
+              </label>
             )}
           </div>
 
